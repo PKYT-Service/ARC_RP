@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- E-CDE Account & Security Soft -->
+    <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+    <title>S&AS - Validation</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace'],
+                    },
+                    colors: {
+                        neutral: { 850: '#1a1a1a', 900: '#111111', 950: '#070707' },
+                        ha: { red: '#e11d48', darkred: '#9f1239', glow: 'rgba(225, 29, 72, 0.5)' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: transparent; }
+        
+        .glass-card {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            border-color: rgba(225, 29, 72, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .dark-scrollbar::-webkit-scrollbar { width: 6px; }
+        .dark-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .dark-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 0.1em;
+            border: 1px solid transparent;
+        }
+
+        .input-glass {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            transition: all 0.2s;
+        }
+        .input-glass:focus {
+            border-color: #e11d48;
+            outline: none;
+            box-shadow: 0 0 10px rgba(225, 29, 72, 0.2);
+        }
+    </style>
+</head>
+
+<body class="text-white selection:bg-ha-red h-screen overflow-y-auto dark-scrollbar">
+    <div id="session/howard"></div>
+    <script src="/HA-EE/src/javascript/menu.js"></script>
+    <div id="menu" class="hidden"></div>
+
+    <main id="content" class="w-full h-full p-4 lg:p-8">
+        <div perms.pages="2;rh;page.as_1;page.as_ad" class="max-w-5xl mx-auto">
+            
+            <!-- CONTROLS HEADER -->
+            <div class="glass-card p-6 md:p-8 rounded-3xl shadow-2xl mb-8 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-8 opacity-5 text-8xl text-ha-red transform translate-x-4 -translate-y-4 pointer-events-none">
+                    <i class="fas fa-check-double"></i>
+                </div>
+                
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-display font-black text-white tracking-tighter uppercase">
+                            Terminal <span class="text-ha-red">Superviseur</span>
+                        </h1>
+                        <p class="text-neutral-400 font-mono text-[10px] uppercase mt-2 tracking-widest">
+                            <i class="fa-solid fa-server text-ha-red mr-2"></i>Contrôle des flux d'Assurance Santé
+                        </p>
+                    </div>
+                    
+                    <div class="flex gap-2 bg-black/40 p-1.5 rounded-xl border border-white/5">
+                        <button onclick="window.filtrerStatut('en_attente')" id="btn-attente"
+                            class="filter-btn px-4 py-2 rounded-lg text-[10px] font-bold bg-yellow-500 text-black border border-yellow-500 transition-all font-mono uppercase tracking-wider">
+                            ATTENTE
+                        </button>
+                        <button onclick="window.filtrerStatut('valide')" id="btn-valide"
+                            class="filter-btn px-4 py-2 rounded-lg text-[10px] font-bold text-neutral-400 hover:text-white hover:bg-white/10 transition-all border border-transparent font-mono uppercase tracking-wider">
+                            VALIDÉS
+                        </button>
+                        <button onclick="window.filtrerStatut('all')" id="btn-all"
+                            class="filter-btn px-4 py-2 rounded-lg text-[10px] font-bold text-neutral-400 hover:text-white hover:bg-white/10 transition-all border border-transparent font-mono uppercase tracking-wider">
+                            TOUT
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mt-8 pt-4 border-t border-white/10 flex justify-between items-center text-[10px] font-mono text-neutral-500 uppercase tracking-widest relative z-10">
+                    <span id="status-github"><i class="fas fa-sync-alt fa-spin text-ha-red mr-2"></i> Connexion Grille...</span>
+                    <span id="count-display" class="bg-black/50 px-3 py-1 rounded border border-white/5">0 dossier(s)</span>
+                </div>
+            </div>
+
+            <!-- DYNAMIC LIST -->
+            <div id="admin-as-list" class="space-y-6 pb-20">
+                <!-- Javascript will populate this -->
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase, fromAgence, insertAgence, withAgence } from '/HA-EE/src/javascript/sp.js';
+
+        const GITHUB_TOKEN = "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";
+        const REPO_PATH = "https://api.github.com/repos/PKYT-Service/database_dev/contents/NEW*DRIVE/howard/HA - Portail Public/Information/1. Salaire & Emploi.md";
+
+        let filtreActuel = 'en_attente';
+        let grilleTarifaire = {};
+
+        // --- UTILITAIRES ---
+        const cleanStr = (str) => str ? str.toString().toLowerCase().replace(/\*/g, '').trim() : '';
+
+        function toRoman(num) {
+            if (!num || num == "0") return "";
+            const map = { "1": "I", "2": "II", "3": "III", "4": "IV", "5": "V" };
+            return map[num.toString()] || num.toString();
+        }
+
+        // --- CHARGEMENT GRILLE GITHUB (AMÉLIORÉ) ---
+        async function getGrilleTarifaire() {
+            try {
+                const response = await fetch(REPO_PATH, { headers: { "Authorization": `token ${GITHUB_TOKEN}` } });
+                const data = await response.json();
+                const content = atob(data.content);
+                const grille = {};
+
+                let idxAS = 5;
+                let idxFixe = 4;
+                let headersFound = false;
+
+                const lines = content.split('\n');
+
+                lines.forEach(line => {
+                    if (!line.includes('|')) return;
+                    const cells = line.split('|').map(c => cleanStr(c));
+
+                    if (!headersFound && (line.toLowerCase().includes('grade') || line.toLowerCase().includes('poste'))) {
+                        const rawCells = line.split('|').map(c => c.toLowerCase().trim());
+                        let tempAs = rawCells.findIndex(c => c.includes('santé') || c.includes('as') || c.includes('soin'));
+                        if (tempAs > -1) idxAS = tempAs;
+                        let tempFixe = rawCells.findIndex(c => c.includes('fixe'));
+                        if (tempFixe > -1) idxFixe = tempFixe;
+                        headersFound = true;
+                        return;
+                    }
+
+                    if (cells.length > Math.max(idxAS, idxFixe) && !line.includes('---')) {
+                        const nomGrade = cells[2];
+                        const prixAS = parseFloat(cells[idxAS]?.replace(',', '.') || 0);
+                        const prixFixe = parseFloat(cells[idxFixe]?.replace(',', '.') || 0);
+
+                        if (nomGrade) {
+                            grille[nomGrade] = {
+                                as: !isNaN(prixAS) ? prixAS : 0,
+                                fixe: !isNaN(prixFixe) ? prixFixe : 0
+                            };
+                        }
+                    }
+                });
+
+                document.getElementById('status-github').innerHTML = `<i class="fas fa-check-circle text-green-500 mr-2 shadow-[0_0_8px_rgba(34,197,94,0.5)] rounded-full"></i> GRILLE SYNC OK (${Object.keys(grille).length})`;
+                return grille;
+            } catch (err) {
+                console.error(err);
+                document.getElementById('status-github').innerHTML = `<i class="fas fa-exclamation-triangle text-ha-red mr-2"></i> ERREUR DE SYNCHRONISATION`;
+                return {};
+            }
+        }
+
+        function analyserTemps(horaires) {
+            let totalMinutes = 0;
+            try {
+                const slots = typeof horaires === 'string' ? JSON.parse(horaires) : horaires;
+                slots.forEach(slot => {
+                    const [hD, mD] = slot.de.split(':').map(Number);
+                    let [hA, mA] = slot.a.split(':').map(Number);
+                    let debut = hD * 60 + mD; let fin = hA * 60 + mA;
+                    if (fin < debut) fin += 1440;
+                    totalMinutes += (fin - debut);
+                });
+                return {
+                    tranches: Math.floor(totalMinutes / 15),
+                    formatted: `${Math.floor(totalMinutes / 60)}h${(totalMinutes % 60).toString().padStart(2, '0')}`,
+                    slots: slots
+                };
+            } catch (e) { return { tranches: 0, formatted: "Erreur", slots: [] }; }
+        }
+
+        function trouverTarifs(employe, grille) {
+            if (!employe) return { as: 0, fixe: 0, method: "Inconnu" };
+            const posteDB = cleanStr(employe.poste);
+            const echRomain = cleanStr(toRoman(employe.echelon));
+            const essai = `${posteDB} ${echRomain}`;
+            if (grille[essai]) return { ...grille[essai], method: "Grade Exact" };
+            if (grille[posteDB]) return { ...grille[posteDB], method: "Poste Seul" };
+            return { as: 0, fixe: 0, method: "Non trouvé" };
+        }
+
+        window.filtrerStatut = (statut) => {
+            filtreActuel = statut;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-yellow-500', 'bg-green-500', 'bg-ha-red', 'text-black', 'text-white', 'border-yellow-500', 'border-green-500', 'border-ha-red');
+                btn.classList.add('text-neutral-400', 'border-transparent', 'hover:bg-white/10', 'hover:text-white');
+            });
+            const activeBtn = document.getElementById(`btn-${statut === 'en_attente' ? 'attente' : statut}`);
+            
+            // Adjust active state colors based on selection
+            if (statut === 'valide') {
+                activeBtn.classList.remove('text-neutral-400', 'border-transparent', 'hover:bg-white/10', 'hover:text-white');
+                activeBtn.classList.add('bg-green-500', 'text-black', 'border-green-500');
+            } else if (statut === 'refuse') {
+                activeBtn.classList.remove('text-neutral-400', 'border-transparent', 'hover:bg-white/10', 'hover:text-white');
+                activeBtn.classList.add('bg-ha-red', 'text-white', 'border-ha-red');
+            } else {
+                activeBtn.classList.remove('text-neutral-400', 'border-transparent', 'hover:bg-white/10', 'hover:text-white');
+                activeBtn.classList.add('bg-yellow-500', 'text-black', 'border-yellow-500');
+            }
+            chargerDemandes();
+        };
+
+        window.updateManualPrice = function (email, val) {
+            localStorage.setItem(`as_price_${email}`, val);
+            chargerDemandes();
+        };
+
+        async function chargerDemandes() {
+            if (Object.keys(grilleTarifaire).length === 0) grilleTarifaire = await getGrilleTarifaire();
+
+            let query = fromAgence('assurance_sante').select(`*, employes(*)`).order('date_service', { ascending: false });
+            if (filtreActuel !== 'all') query = query.eq('statut', filtreActuel);
+
+            const { data: demandes, error } = await query;
+            const container = document.getElementById('admin-as-list');
+            
+            let displayCount = demandes ? demandes.length : 0;
+            if(filtreActuel === 'all') document.getElementById('count-display').innerText = `${displayCount} DOSSIERS TOTAUX`;
+            else document.getElementById('count-display').innerText = `${displayCount} DOSSIERS FILTRÉS`;
+            
+            container.innerHTML = "";
+
+            if (!demandes || demandes.length === 0) {
+                container.innerHTML = `<div class="text-center font-mono text-neutral-600 py-20 border border-dashed border-white/10 rounded-2xl bg-black/20 uppercase tracking-widest"><i class="fa-solid fa-ghost block text-3xl mb-3 opacity-50"></i>Aucun dossier trouvé</div>`;
+                return;
+            }
+
+            demandes.forEach(dem => {
+                const emp = dem.employes || { nom: "Inconnu", prenom: "N/A", email: dem.email, poste: "N/A", echelon: "0" };
+                const info = analyserTemps(dem.horaires);
+                const tariffs = trouverTarifs(emp, grilleTarifaire);
+                const savedPrice = localStorage.getItem(`as_price_${emp.email}`);
+
+                const isValide = dem.statut === 'valide';
+                const gradeFull = isValide && dem.grade_historique ? dem.grade_historique : `${emp.poste} (Ech. ${toRoman(emp.echelon)})`;
+                const tarifAS_Unit = isValide ? dem.archive_tarif_as : (savedPrice ? parseFloat(savedPrice) : tariffs.as);
+                const tarifFixe_Unit = isValide ? dem.archive_salaire_fixe : tariffs.fixe;
+                const totalAS = isValide ? dem.total_as : (info.tranches * tarifAS_Unit);
+
+                let badgeClass = '';
+                if (isValide) badgeClass = 'bg-green-500/10 text-green-500 border-green-500/30';
+                else if (dem.statut === 'refuse') badgeClass = 'bg-ha-red/10 text-ha-red border-ha-red/30';
+                else badgeClass = 'bg-yellow-500/10 text-yellow-500 border-yellow-500/30';
+
+                const card = document.createElement('div');
+                card.className = "glass-card rounded-2xl overflow-hidden";
+                card.innerHTML = `
+                    <div class="p-5 flex justify-between items-center border-b border-white/5 bg-gradient-to-r from-black/60 to-transparent">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-neutral-900 border border-white/10 rounded-xl flex items-center justify-center font-display font-black text-xl text-white shadow-inner">${emp.nom[0]}</div>
+                            <div>
+                                <h4 class="text-sm font-display font-bold uppercase text-white tracking-wide">${emp.nom} ${emp.prenom}</h4>
+                                <p class="text-[10px] text-neutral-400 font-mono uppercase bg-black/40 px-1.5 py-0.5 rounded inline-block mt-1 border border-white/5">${gradeFull}</p>
+                            </div>
+                        </div>
+                        <div class="text-right flex flex-col items-end gap-1">
+                            <span class="block text-[10px] text-neutral-500 font-mono font-bold">OP: ${new Date(dem.date_service).toLocaleDateString()}</span>
+                            <span class="status-badge ${badgeClass}">${dem.statut}</span>
+                        </div>
+                    </div>
+
+                    <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+                        <!-- Divider Line Desktop -->
+                        <div class="hidden md:block absolute left-1/2 top-4 bottom-4 w-px bg-white/5"></div>
+                        
+                        <div class="space-y-2">
+                            <p class="text-[10px] text-neutral-500 font-display font-bold uppercase tracking-widest mb-3">Relevé Horaires</p>
+                            ${info.slots.map(s => `
+                                <div class="text-xs font-mono text-neutral-300 bg-black/40 p-2 rounded-lg border border-white/5 flex justify-between items-center group hover:border-white/20 transition-colors">
+                                    <span class="bg-neutral-900 px-2 py-0.5 rounded">${s.de}</span> 
+                                    <i class="fas fa-arrow-right text-neutral-600 group-hover:text-ha-red transition-colors"></i> 
+                                    <span class="bg-neutral-900 px-2 py-0.5 rounded">${s.a}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="bg-black/30 p-4 rounded-xl border border-white/5 relative flex flex-col justify-center">
+                            <div class="flex justify-between items-center text-xs font-mono text-neutral-400 mb-3">
+                                <span><i class="fa-solid fa-briefcase-medical text-ha-red mr-2"></i>AS Base / 15m</span>
+                                ${isValide ? `<span class="font-bold text-white bg-white/5 px-2 py-1 rounded">${tarifAS_Unit} $</span>` :
+                                        `<input type="number" value="${tarifAS_Unit}" onchange="window.updateManualPrice('${emp.email}', this.value)" class="input-glass w-20 rounded text-center py-1">`}
+                            </div>
+                            <div class="flex justify-between items-center text-xs font-mono text-neutral-500 mb-4">
+                                <span><i class="fa-solid fa-money-bill-wave text-green-500 mr-2 opacity-50"></i>Fixe Base / 15m</span>
+                                <span class="font-bold text-neutral-300">${tarifFixe_Unit} $</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-end border-t border-white/10 pt-4 mt-auto">
+                                <span class="text-[10px] text-neutral-500 font-mono uppercase border border-white/5 bg-black/50 px-2 py-1 rounded">Total: ${info.tranches} Tranches</span>
+                                <span class="text-3xl font-display font-black text-white glow-text">${totalAS.toFixed(0)} <span class="text-lg text-green-500">$</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-black/60 border-t border-white/5 flex justify-end gap-3">
+                        ${!isValide ? `
+                            <button onclick="window.processAS(${dem.id}, 'refuse', 0, 0, 0, '')" class="text-[10px] font-bold text-neutral-400 hover:text-white bg-neutral-900 hover:bg-ha-red border border-white/5 hover:border-ha-red px-5 py-2 rounded-lg transition-all uppercase tracking-wider">Refuser</button>
+                            <button onclick="window.processAS(${dem.id}, 'valide', ${totalAS}, ${tarifFixe_Unit}, ${tarifAS_Unit}, '${gradeFull}')" class="bg-white hover:bg-neutral-200 text-black text-[10px] font-black px-6 py-2 rounded-lg shadow-lg shadow-white/10 transition-all uppercase tracking-wider">Valider & Archiver</button>
+                        ` : `
+                            <button onclick="window.processAS(${dem.id}, 'en_attente', 0, 0, 0, '')" class="text-[10px] font-bold text-yellow-500 hover:text-black border border-yellow-500/50 hover:bg-yellow-500 bg-yellow-500/5 px-5 py-2 rounded-lg transition-all uppercase tracking-wider"><i class="fa-solid fa-unlock text-[10px] mr-2"></i>Rééditer (Débloquer)</button>
+                        `}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.processAS = async (id, newStatut, total, fixe, tarifAs, grade) => {
+            const isReset = newStatut === 'en_attente';
+            const confirmMsg = isReset ? "Remettre ce dossier en attente ? (Supprime les archives)" : `Confirmer la validation (${total}$) ?`;
+
+            if (!confirm(confirmMsg)) return;
+
+            const updateData = {
+                statut: newStatut,
+                total_as: total,
+                grade_historique: isReset ? null : grade,
+                archive_salaire_fixe: isReset ? 0 : fixe,
+                archive_tarif_as: isReset ? 0 : tarifAs
+            };
+
+            const { error } = await fromAgence('assurance_sante').update(updateData).eq('id', id);
+
+            if (!error) {
+                Swal.fire({ 
+                    icon: 'success', 
+                    title: isReset ? 'Dossier réouvert' : 'Validé et Archivé', 
+                    background: '#111', 
+                    color: '#fff', 
+                    timer: 1500, 
+                    showConfirmButton: false,
+                    customClass: { popup: 'border border-white/10 font-sans' }
+                });
+                chargerDemandes();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: error.message,
+                    background: '#111', color: '#fff',
+                    customClass: { popup: 'border border-ha-red font-sans' }
+                });
+            }
+        };
+
+        document.addEventListener("DOMContentLoaded", chargerDemandes);
+    </script>
+</body>
+</html>
+

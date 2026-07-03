@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Howard Armory - Secure Standby</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace'],
+                    },
+                    colors: {
+                        neutral: {
+                            850: '#1a1a1a',
+                            900: '#111111',
+                            950: '#070707',
+                        },
+                        ha: {
+                            red: '#e11d48',
+                            darkred: '#9f1239',
+                            glow: 'rgba(225, 29, 72, 0.5)',
+                        }
+                    },
+                    animation: {
+                        'spin-slow': 'spin 15s linear infinite',
+                        'spin-slow-reverse': 'spin 20s linear infinite reverse',
+                        'scan': 'scan 3s ease-in-out infinite alternate',
+                        'flicker': 'flicker 4s infinite random',
+                        'breathe': 'breathe 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        scan: {
+                            '0%': { width: '0%', opacity: 0 },
+                            '10%': { opacity: 1 },
+                            '90%': { opacity: 1 },
+                            '100%': { width: '100%', opacity: 0 },
+                        },
+                        breathe: {
+                            '0%, 100%': { opacity: 0.6, transform: 'scale(0.98)' },
+                            '50%': { opacity: 1, transform: 'scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: transparent; }
+        
+        /* Grid overlay */
+        .cyber-grid {
+            background-size: 30px 30px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        }
+
+        .glass-panel {
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+        }
+
+        .hologram-effect {
+            text-shadow: 0 0 10px rgba(225, 29, 72, 0.8), 0 0 20px rgba(225, 29, 72, 0.4);
+        }
+        
+        .typewriter-text {
+            overflow: hidden;
+            border-right: 2px solid transparent; /* The typwriter cursor */
+            white-space: nowrap;
+            margin: 0;
+            animation: typing 2.5s steps(30, end) forwards, blink-caret .75s step-end infinite;
+        }
+
+        /* Typewriter Delays */
+        .delay-1 { animation-delay: 0.5s; opacity: 0; animation-fill-mode: forwards; }
+        .delay-2 { animation-delay: 1.2s; opacity: 0; animation-fill-mode: forwards; }
+        .delay-3 { animation-delay: 2.0s; opacity: 0; animation-fill-mode: forwards; }
+
+        @keyframes typing {
+            from { width: 0; opacity: 1; border-color: rgba(225, 29, 72, 0.8); }
+            to { width: 100%; opacity: 1; border-color: transparent; }
+        }
+        
+        @keyframes fadeInLine {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .line-fade {
+            opacity: 0;
+            animation: fadeInLine 0.5s forwards ease-out;
+        }
+        .lf-1 { animation-delay: 0.5s; }
+        .lf-2 { animation-delay: 1.5s; }
+        .lf-3 { animation-delay: 2.5s; }
+        .lf-4 { animation-delay: 3.5s; }
+    </style>
+</head>
+
+<body class="text-white h-screen overflow-hidden flex flex-col relative selection:bg-ha-red cursor-wait">
+
+    <!-- Ambient Grid -->
+    <div class="absolute inset-0 cyber-grid pointer-events-none z-0"></div>
+
+    <!-- Center Rotating Emblem -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] pointer-events-none z-0 opacity-10 flex items-center justify-center">
+        <div class="absolute inset-0 border-[1px] border-ha-red/20 rounded-full animate-spin-slow"></div>
+        <div class="absolute inset-8 border-[1px] border-dashed border-white/20 rounded-full animate-spin-slow-reverse"></div>
+    </div>
+
+    <!-- Nav info -->
+    <nav class="relative z-10 w-full p-6 flex justify-between items-start opacity-70">
+        <div class="text-xs font-mono tracking-widest text-neutral-500 uppercase">
+            <span class="text-ha-red">SYSID:</span> HWD-NXL-2026<br>
+            <span class="text-white">ENV:</span> LOCAL_AUTH
+        </div>
+        <div class="border border-green-500/30 px-3 py-1 rounded bg-green-500/5 flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+            <span class="text-[10px] font-mono tracking-widest text-green-500 uppercase">Secure Link</span>
+        </div>
+    </nav>
+
+    <!-- Main Content Focus -->
+    <main class="flex-grow flex flex-col items-center justify-center relative z-10 w-full max-w-2xl mx-auto p-4">
+        
+        <!-- Animated Core Element -->
+        <div class="mb-10 relative">
+            <div class="w-24 h-24 rounded-2xl bg-black/50 border border-ha-red/40 flex items-center justify-center shadow-[0_0_30px_rgba(225,29,72,0.2)] animate-breathe backdrop-blur-md">
+                <i class="fa-solid fa-layer-group text-4xl text-ha-red filter drop-shadow-[0_0_8px_rgba(225,29,72,0.8)]"></i>
+            </div>
+            
+            <div class="absolute -inset-4 border-l-2 border-r-2 border-t border-b border-transparent border-t-white/10 border-b-white/10 border-l-ha-red/30 border-r-ha-red/30 rounded-3xl animate-spin-slow-reverse"></div>
+        </div>
+
+        <!-- Typography -->
+        <div class="text-center mb-10 flex flex-col items-center">
+            <h1 class="text-5xl md:text-7xl font-display font-black tracking-tight mb-2 text-white uppercase drop-shadow-2xl">
+                Howard <span class="text-ha-red font-light opacity-90">Armory</span>
+            </h1>
+            <div class="flex items-center gap-4 mt-2 mb-4">
+                <div class="h-px w-10 bg-gradient-to-r from-transparent to-ha-red"></div>
+                <h2 class="text-xs font-mono tracking-[0.4em] uppercase text-neutral-400">Terminal Standby</h2>
+                <div class="h-px w-10 bg-gradient-to-l from-transparent to-ha-red"></div>
+            </div>
+        </div>
+
+        <!-- System Logs Box -->
+        <div class="glass-panel w-full rounded-2xl overflow-hidden shadow-2xl relative">
+            <div class="bg-black/60 px-4 py-2 flex items-center justify-between border-b border-white/5">
+                <div class="flex gap-2">
+                    <div class="w-2.5 h-2.5 rounded-full bg-ha-red/80"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-green-500/80"></div>
+                </div>
+                <span class="text-[9px] font-mono text-neutral-500 uppercase tracking-widest">BOOT SEQUENCE</span>
+            </div>
+            
+            <div class="p-6 font-mono text-xs space-y-3">
+                <div class="flex items-center gap-3 line-fade lf-1">
+                    <span class="text-neutral-600">>></span>
+                    <span class="text-neutral-400">Handshake sécurisé...</span>
+                    <div class="flex-1 border-b border-dashed border-neutral-800 mx-2"></div>
+                    <span class="text-green-500 font-bold">ACK</span>
+                </div>
+                
+                <div class="flex items-center gap-3 line-fade lf-2">
+                    <span class="text-neutral-600">>></span>
+                    <span class="text-neutral-400">Déchiffrement empreinte employée...</span>
+                    <div class="flex-1 border-b border-dashed border-neutral-800 mx-2"></div>
+                    <span class="text-green-500 font-bold">OK</span>
+                </div>
+                
+                <div class="flex items-center gap-3 line-fade lf-3">
+                    <span class="text-neutral-600">>></span>
+                    <span class="text-neutral-400">Chargement modules intranet...</span>
+                    <div class="flex-1 border-b border-dashed border-neutral-800 mx-2"></div>
+                    <span class="text-green-500 font-bold">100%</span>
+                </div>
+                
+                <div class="pt-5 mt-5 border-t border-white/5 text-center line-fade lf-4">
+                    <span class="inline-block px-4 py-1.5 rounded bg-ha-red/10 border border-ha-red/30 text-ha-red font-bold animate-pulse">
+                        SÉLECTIONNEZ UN MODULE DANS LE MENU
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Bottom scanline -->
+            <div class="absolute bottom-0 left-0 h-[2px] bg-ha-red/80 shadow-[0_0_10px_rgba(225,29,72,0.8)] animate-scan"></div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 w-full p-4 text-center opacity-50 flex flex-col items-center">
+        <span class="text-[9px] font-mono tracking-[0.3em] text-neutral-500">HA-OS // RESTRICTED ACCESS AREA</span>
+        <span class="text-[8px] font-mono text-neutral-700 mt-1 uppercase">Monitor Active • Unauthorized access will execute lockout protocols.</span>
+    </footer>
+
+</body>
+</html>
+

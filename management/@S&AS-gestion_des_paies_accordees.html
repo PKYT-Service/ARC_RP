@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- E-CDE Account & Security Soft - LOCAL REDIRECT -->
+    <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+    <title>S&AS - Historique & Veto</title>
+
+    <link rel="shortcut icon" href="https://howardarmory.vercel.app/data/img/favicon.png">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace'],
+                    },
+                    colors: {
+                        neutral: { 850: '#1a1a1a', 900: '#111111', 950: '#070707' },
+                        ha: { red: '#e11d48', darkred: '#9f1239' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: transparent; }
+        
+        .glass-card {
+            background: rgba(17, 17, 17, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .input-glass {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            transition: all 0.2s;
+        }
+        .input-red-focus:focus {
+            border-color: #e11d48 !important;
+            box-shadow: 0 0 10px rgba(225, 29, 72, 0.3) !important;
+            outline: none;
+        }
+
+        .dark-scrollbar::-webkit-scrollbar { width: 6px; }
+        .dark-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .dark-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+    </style>
+</head>
+
+<body class="text-white selection:bg-ha-red selection:text-white h-screen overflow-y-auto dark-scrollbar">
+    <div id="session/howard"></div>
+    <script src="/HA-EE/src/javascript/menu.js"></script>
+    <div id="menu" class="hidden"></div>
+
+    <main id="content" class="w-full h-full p-4 lg:p-8">
+        <div perms.pages="2;rh;page.as_2;page.as_ad" class="max-w-5xl mx-auto space-y-8 pb-20">
+
+            <section id="veto-control-panel" class="mt-4 glass-card border-l-2 border-ha-red rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-96 h-96 bg-ha-red/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+
+                <div class="flex flex-col md:flex-row items-start md:items-center gap-6 mb-8 border-b border-white/5 pb-8 relative z-10">
+                    <div class="bg-ha-red/10 border border-ha-red/30 text-ha-red p-5 rounded-2xl shadow-inner">
+                        <i class="fas fa-gavel text-3xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-4xl font-display font-black uppercase text-white tracking-tight drop-shadow-md">Panel de <span class="text-ha-red">Veto</span> Molderson</h2>
+                        <p class="text-neutral-500 text-[10px] font-mono mt-2 uppercase tracking-widest"><i class="fa-solid fa-lock text-ha-red/70 mr-1"></i> Contrôle Administratif & Override Paie Actif</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
+                    
+                    <!-- Left: Targeting & Dates -->
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-[10px] font-display font-bold uppercase text-ha-red mb-3 tracking-widest">1. Cible du paramétrage</label>
+                            <div class="relative">
+                                <input type="text" id="veto-emp-name" list="veto-employees-list" placeholder="NOM/MATRICULE AGENT..." 
+                                       onchange="fetchAgentHistory()"
+                                       class="w-full input-glass input-red-focus p-4 rounded-xl text-sm font-bold uppercase transition-all shadow-inner">
+                                <i class="fas fa-crosshairs absolute right-5 top-1/2 -translate-y-1/2 text-ha-red/50"></i>
+                            </div>
+                            <datalist id="veto-employees-list"></datalist>
+                        </div>
+                        
+                        <div id="agent-confirm" class="hidden bg-black/50 p-4 rounded-xl border border-ha-red/30 transition-all shadow-inner">
+                            <p class="text-neutral-500 text-[9px] uppercase font-mono tracking-widest mb-1">Dossier ciblé pour sanction</p>
+                            <p id="confirm-name" class="text-white font-display font-black uppercase text-lg leading-tight truncate"></p>
+                            <p id="confirm-poste" class="text-ha-red text-[10px] uppercase font-mono tracking-wider truncate mb-1"></p>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-display font-bold uppercase text-ha-red mb-3 tracking-widest">2. Cibler la vacation (Date)</label>
+                            <select id="veto-date-select" onchange="showDayStats()" 
+                                    class="w-full input-glass input-red-focus p-4 rounded-xl font-mono text-xs uppercase cursor-pointer">
+                                <option value="">-- En l'attente d'une cible --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Middle: Visual Recap of the selected day -->
+                    <div id="inspection-results" class="bg-black/40 border border-white/5 rounded-2xl p-6 flex flex-col justify-center items-center text-center opacity-30 transition-opacity duration-300 shadow-inner">
+                        <div class="bg-neutral-900 border border-white/10 rounded-full w-14 h-14 flex items-center justify-center mb-4 shadow-inner">
+                            <i class="fas fa-search-dollar text-neutral-500 text-xl"></i>
+                        </div>
+                        <p class="text-neutral-500 text-[10px] uppercase font-display font-bold mb-6 tracking-widest">Montants projetés initiaux</p>
+                        
+                        <div id="veto-stats" class="space-y-4 w-full">
+                            <div class="bg-black/60 p-4 rounded-xl border border-white/5 shadow-inner">
+                                <div class="text-[9px] font-mono text-neutral-500 uppercase tracking-widest mb-1">Salariat Fixe</div>
+                                <div class="text-3xl font-mono font-black text-white" id="veto-preview-wage">0.00 $</div>
+                            </div>
+                            
+                            <div class="bg-black/60 p-4 rounded-xl border border-white/5 shadow-inner">
+                                <div class="text-[9px] font-mono text-neutral-500 uppercase tracking-widest mb-1">Cagnotte Assurance</div>
+                                <div class="text-lg font-mono font-bold text-green-500" id="veto-preview-as">+ 0.00 $</div>
+                            </div>
+
+                            <div class="pt-4 border-t border-white/5">
+                                <div class="text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-widest bg-neutral-900 border border-white/5 inline-block px-3 py-1 rounded-md shadow-inner" id="veto-preview-time">0 Tranches calculées</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Policy Controls -->
+                    <div class="bg-black/60 border border-white/5 rounded-2xl p-6 space-y-6 flex flex-col justify-between">
+                        <div class="text-center">
+                            <h4 class="text-ha-red font-display font-black uppercase text-xs tracking-widest"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Action de Commandement (Veto)</h4>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between bg-neutral-900 hover:bg-neutral-800 p-4 rounded-xl border border-white/5 transition-colors cursor-pointer" onclick="document.getElementById('check-pay-fixe').click()">
+                                <span class="text-[10px] font-display font-bold text-white uppercase tracking-wider">Accepter Versement Fixe</span>
+                                <label class="relative inline-flex items-center cursor-pointer pointer-events-none">
+                                    <input type="checkbox" id="check-pay-fixe" checked class="sr-only peer">
+                                    <div class="w-9 h-5 bg-neutral-800 border border-white/10 rounded-full peer peer-focus:outline-none peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500 shadow-inner"></div>
+                                </label>
+                            </div>
+
+                            <div class="flex items-center justify-between bg-neutral-900 hover:bg-neutral-800 p-4 rounded-xl border border-white/5 transition-colors cursor-pointer" onclick="document.getElementById('check-pay-as').click()">
+                                <span class="text-[10px] font-display font-bold text-white uppercase tracking-wider">Accepter Apport A.S.</span>
+                                <label class="relative inline-flex items-center cursor-pointer pointer-events-none">
+                                    <input type="checkbox" id="check-pay-as" checked class="sr-only peer">
+                                    <div class="w-9 h-5 bg-neutral-800 border border-white/10 rounded-full peer peer-focus:outline-none peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500 shadow-inner"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-[9px] uppercase font-bold text-neutral-500 tracking-widest font-mono">Motif du refus (Obligatoire si décoché)</label>
+                            <input type="text" id="veto-reason" placeholder="Ex: Absence au poste, Insubordination..." class="w-full input-glass input-red-focus p-4 rounded-xl text-xs text-white outline-none font-sans">
+                        </div>
+
+                        <button onclick="applyVeto()" class="w-full bg-ha-red/10 border border-ha-red/30 text-ha-red font-display font-black py-4 rounded-xl uppercase hover:bg-ha-red hover:text-white transition-all active:scale-95 flex justify-center items-center gap-3 text-xs tracking-widest shadow-[0_0_15px_rgba(225,29,72,0.1)] hover:shadow-[0_0_20px_rgba(225,29,72,0.4)]">
+                            <i class="fas fa-hammer text-lg"></i>
+                            <span>Exécuter la Sanction</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script type="module">
+        // LOCAL REDIRECT
+        import { supabase, fromAgence, insertAgence, withAgence } from '/HA-EE/src/javascript/sp.js';
+
+        let localEmployees = [];
+        let dailyData = {};
+        let selectedAgent = null;
+
+        async function initVetoSystem() {
+            const { data, error } = await fromAgence('employes').select('nom, prenom, email, poste');
+            if (data) {
+                localEmployees = data;
+                const datalist = document.getElementById('veto-employees-list');
+                datalist.innerHTML = data.map(e => `<option value="${e.nom} ${e.prenom}">${e.poste}</option>`).join('');
+            }
+        }
+        initVetoSystem();
+
+        window.fetchAgentHistory = async () => {
+            const input = document.getElementById('veto-emp-name').value.trim();
+            selectedAgent = localEmployees.find(e => `${e.nom} ${e.prenom}`.toLowerCase() === input.toLowerCase());
+
+            if (!selectedAgent) {
+                document.getElementById('agent-confirm').classList.add('hidden');
+                dailyData = {};
+                showDayStats(); // Reset ui
+                return;
+            }
+
+            document.getElementById('agent-confirm').classList.remove('hidden');
+            document.getElementById('confirm-name').innerText = `${selectedAgent.prenom} ${selectedAgent.nom}`;
+            document.getElementById('confirm-poste').innerText = selectedAgent.poste;
+
+            const { data: services } = await fromAgence('assurance_sante')
+                .select('*')
+                .eq('email', selectedAgent.email)
+                .eq('statut', 'valide')
+                .order('date_service', { ascending: false });
+
+            if (services) aggregateServices(services);
+        };
+
+        function aggregateServices(services) {
+            dailyData = {};
+            const select = document.getElementById('veto-date-select');
+            select.innerHTML = '<option value="">-- Choisir une date --</option>';
+
+            services.forEach(s => {
+                const date = s.date_service;
+                if (!dailyData[date]) {
+                    dailyData[date] = { tranches: 0, totalAS: 0, totalFixe: 0 };
+                }
+
+                let tranchesLocales = 0;
+                try {
+                    const slots = typeof s.horaires === 'string' ? JSON.parse(s.horaires) : s.horaires;
+                    slots.forEach(v => {
+                        const [hD, mD] = v.de.split(':').map(Number);
+                        let [hA, mA] = v.a.split(':').map(Number);
+                        let diff = (hA * 60 + mA) - (hD * 60 + mD);
+                        if (diff < 0) diff += 1440;
+                        tranchesLocales += Math.floor(diff / 15);
+                    });
+                } catch (e) { }
+
+                dailyData[date].tranches += tranchesLocales;
+                dailyData[date].totalAS += parseFloat(s.total_as || 0);
+                dailyData[date].totalFixe += (tranchesLocales * parseFloat(s.archive_salaire_fixe || 0));
+            });
+
+            Object.keys(dailyData).forEach(date => {
+                const opt = document.createElement('option');
+                opt.value = date;
+                opt.innerText = new Date(date).toLocaleDateString() + ` (${dailyData[date].tranches} tranches calculées)`;
+                select.appendChild(opt);
+            });
+        }
+
+        window.showDayStats = () => {
+            const date = document.getElementById('veto-date-select').value;
+            const container = document.getElementById('inspection-results');
+
+            if (!date || !dailyData[date]) {
+                container.classList.add('opacity-30');
+                document.getElementById('veto-preview-wage').innerText = `0.00 $`;
+                document.getElementById('veto-preview-as').innerText = `+ 0.00 $`;
+                document.getElementById('veto-preview-time').innerText = `0 TRANCHES`;
+                return;
+            }
+
+            const stats = dailyData[date];
+            container.classList.remove('opacity-30');
+            document.getElementById('veto-preview-wage').innerText = `${stats.totalFixe.toFixed(2)} $`;
+            document.getElementById('veto-preview-as').innerText = `+ ${stats.totalAS.toFixed(2)} $ (AS)`;
+            document.getElementById('veto-preview-time').innerText = `${stats.tranches} TRANCHES / ${(stats.tranches * 15 / 60).toFixed(1)}H`;
+        };
+
+        window.applyVeto = async () => {
+            const date = document.getElementById('veto-date-select').value;
+            const payFixe = document.getElementById('check-pay-fixe').checked;
+            const payAS = document.getElementById('check-pay-as').checked;
+            const reason = document.getElementById('veto-reason').value;
+
+            if (!selectedAgent || !selectedAgent.email || !date) {
+                return Swal.fire({title:"Dossier incomplet", text:"Sélectionnez une cible et une date.", icon:"warning", background:'#111', color:'#fff'});
+            }
+
+            if ((!payFixe || !payAS) && (!reason || reason.trim().length === 0)) {
+                return Swal.fire({title:"Motif exigé", text:"Une sanction nécessite de justifier le litige.", icon:"warning", background:'#111', color:'#fff'});
+            }
+
+            const payload = {
+                email: selectedAgent.email,
+                date_ref: date,
+                pay_fixe: Boolean(payFixe),
+                pay_as: Boolean(payAS),
+                motif: reason || "Veto Administratif Standard"
+            };
+
+            const { data, error } = await supabase
+                .from('payroll_calendar_rules')
+                .upsert(payload, {
+                    onConflict: 'email, date_ref'
+                });
+
+            if (error) {
+                Swal.fire({
+                    title: "Erreur Base Données " + error.code,
+                    text: error.message || "Requête rejetée.",
+                    icon: "error",
+                    background: '#111',
+                    color: '#fff'
+                });
+            } else {
+                Swal.fire({
+                    title: "Règle Appliquée",
+                    text: `La paie du ${new Date(date).toLocaleDateString()} a été traitée.`,
+                    icon: "success",
+                    background: '#111',
+                    color: '#fff',
+                    customClass: { popup: 'border border-ha-red font-sans' }
+                });
+            }
+        };
+    </script>
+</body>
+</html>
+

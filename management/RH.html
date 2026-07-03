@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+    <title>Howard Armory — RH Command Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Outfit', 'sans-serif'], mono: ['Share Tech Mono', 'monospace'] },
+                    colors: { neutral: { 850: '#1a1a1a', 900: '#111111', 950: '#070707' }, ha: { red: '#E63946', gold: '#D4AF37' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #070707;
+            color: #fff;
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Background grid */
+        #app {
+            background-image: radial-gradient(circle at 20% 50%, rgba(230, 57, 70, 0.04) 0%, transparent 60%), radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.03) 0%, transparent 50%);
+        }
+
+        /* Sidebar */
+        #sidebar {
+            background: rgba(10, 10, 10, 0.95);
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        /* Agent cards */
+        .agent-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border-left: 2px solid transparent;
+        }
+
+        .agent-card:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-left-color: rgba(230, 57, 70, 0.4);
+        }
+
+        .agent-card.active {
+            background: rgba(230, 57, 70, 0.07);
+            border-left-color: #E63946;
+        }
+
+        /* Tabs */
+        .tab-btn {
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: #D4AF37;
+            border-bottom-color: #D4AF37;
+        }
+
+        /* Status badges */
+        .badge-pending {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+        }
+
+        .badge-valid {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+        }
+
+        .badge-refuse {
+            background: rgba(230, 57, 70, 0.1);
+            border: 1px solid rgba(230, 57, 70, 0.3);
+            color: #E63946;
+        }
+
+        .badge-hired {
+            background: rgba(34, 197, 94, 0.08);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+
+        .badge-trial {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+        }
+
+        /* Input */
+        .inp {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            color: #d4d4d4;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .inp:focus {
+            border-color: #E63946;
+            box-shadow: 0 0 0 2px rgba(230, 57, 70, 0.15);
+        }
+
+        select.inp option {
+            background: #111;
+        }
+
+        /* Buttons */
+        .btn-red {
+            background: rgba(230, 57, 70, 0.1);
+            border: 1px solid rgba(230, 57, 70, 0.4);
+            color: #E63946;
+            padding: 0.35rem 0.85rem;
+            border-radius: 0.5rem;
+            font-size: 0.65rem;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-red:hover {
+            background: #E63946;
+            color: #fff;
+        }
+
+        .btn-gold {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            color: #D4AF37;
+            padding: 0.35rem 0.85rem;
+            border-radius: 0.5rem;
+            font-size: 0.65rem;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-gold:hover {
+            background: #D4AF37;
+            color: #000;
+        }
+
+        .btn-ghost-sm {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #737373;
+            padding: 0.35rem 0.85rem;
+            border-radius: 0.5rem;
+            font-size: 0.65rem;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-ghost-sm:hover {
+            border-color: rgba(255, 255, 255, 0.25);
+            color: #fff;
+        }
+
+        .btn-blue {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            color: #60a5fa;
+            padding: 0.35rem 0.85rem;
+            border-radius: 0.5rem;
+            font-size: 0.65rem;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-blue:hover {
+            background: #3b82f6;
+            color: #fff;
+        }
+
+        /* Panel */
+        .glass {
+            background: rgba(15, 15, 15, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 1rem;
+        }
+
+        /* Section headers */
+        .section-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #525252;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Popup */
+        .popup-bg {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(16px);
+        }
+
+        .popup-card {
+            background: rgba(12, 12, 12, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1.25rem;
+        }
+
+        /* Data rows */
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.625rem;
+            gap: 0.5rem;
+        }
+
+        /* Animated loading dot */
+        @keyframes pulse-opacity {
+
+            0%,
+            100% {
+                opacity: .4
+            }
+
+            50% {
+                opacity: 1
+            }
+        }
+
+        .loading-pulse {
+            animation: pulse-opacity 1.5s infinite;
+        }
+
+        /* Sidebar section nav */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.45rem 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 0.7rem;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #525252;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: #a3a3a3;
+        }
+
+        .nav-item.active-nav {
+            background: rgba(230, 57, 70, 0.1);
+            color: #E63946;
+        }
+
+        .nav-item .nav-icon {
+            width: 1rem;
+            text-align: center;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: rgba(230, 57, 70, 0.2);
+            color: #E63946;
+            border-radius: 9999px;
+            padding: 0 0.4rem;
+            font-size: 0.55rem;
+            min-width: 1.1rem;
+            text-align: center;
+            border: 1px solid rgba(230, 57, 70, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="session/howard"></div>
+    <script src="/HA-EE/src/javascript/menu.js"></script>
+    <div id="menu" class="hidden"></div>
+
+    <!-- FULL SCREEN APP -->
+    <div id="app" class="flex h-screen w-screen overflow-hidden" perms.pages="2;50;rh;page.employers">
+
+        <!-- ===== LEFT SIDEBAR ===== -->
+        <div id="sidebar" class="w-72 shrink-0 flex flex-col h-full overflow-hidden">
+
+            <!-- Header -->
+            <div class="p-4 border-b border-white/5 shrink-0">
+                <div class="flex items-center gap-3 mb-4">
+                    <div
+                        class="w-9 h-9 bg-ha-red/10 border border-ha-red/30 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-shield-halved text-ha-red text-sm"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-display font-black uppercase tracking-tight text-white">Howard Armory
+                        </div>
+                        <div class="text-[9px] font-mono text-neutral-500 uppercase tracking-widest">RH Command Center
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search -->
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600 text-[10px]"></i>
+                    <input id="search-agent" type="text" placeholder="Rechercher un agent..."
+                        class="w-full bg-black/50 border border-white/8 rounded-lg pl-8 pr-3 py-2 text-[11px] font-mono text-neutral-300 outline-none focus:border-ha-red/50 transition-colors placeholder-neutral-600">
+                </div>
+            </div>
+
+            <!-- Nav global actions -->
+            <div class="px-3 pt-3 pb-1 shrink-0">
+                <div class="section-label">Actions Globales</div>
+                <div id="nav-rapports" class="nav-item active-nav" onclick="switchGlobalView('rapports')">
+                    <span class="nav-icon"><i class="fas fa-exclamation-triangle text-ha-red"></i></span>
+                    Registre Rapports
+                    <span class="nav-badge" id="badge-rapports">0</span>
+                </div>
+                <div id="nav-docs" class="nav-item" onclick="switchGlobalView('docs')">
+                    <span class="nav-icon"><i class="fas fa-folder-open text-blue-500"></i></span>
+                    Documents Partagés
+                    <span class="nav-badge" id="badge-docs"
+                        style="background:rgba(59,130,246,0.2);color:#60a5fa;border-color:rgba(59,130,246,0.3)">0</span>
+                </div>
+                <div id="nav-nouvel" class="nav-item" onclick="switchGlobalView('nouvel')">
+                    <span class="nav-icon"><i class="fas fa-user-plus text-ha-gold"></i></span>
+                    Nouvel Agent
+                </div>
+            </div>
+
+            <div class="px-3 pt-2 pb-1 shrink-0 border-t border-white/5 mt-1">
+                <div class="section-label">Agents — Registre</div>
+            </div>
+
+            <!-- Agent list -->
+            <div id="agent-list" class="flex-1 overflow-y-auto px-2 pb-4 space-y-0.5">
+                <div
+                    class="loading-pulse text-[10px] font-mono text-neutral-600 uppercase tracking-widest text-center py-8">
+                    Chargement...</div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-3 border-t border-white/5 shrink-0">
+                <div id="agent-count"
+                    class="text-[9px] font-mono text-neutral-600 uppercase tracking-widest text-center">— agents</div>
+            </div>
+        </div>
+
+        <!-- ===== MAIN CONTENT AREA ===== -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+
+            <!-- Top bar -->
+            <div class="h-12 border-b border-white/5 bg-black/30 flex items-center justify-between px-6 shrink-0">
+                <div id="main-header-info" class="flex items-center gap-3">
+                    <i class="fas fa-server text-ha-red text-xs"></i>
+                    <span class="text-[10px] font-mono text-neutral-500 uppercase tracking-widest">Registre des Rapports
+                        Administratifs</span>
+                </div>
+                <div id="main-header-actions" class="flex items-center gap-2">
+                    <button onclick="openRapportPopup()" class="btn-red"><i class="fas fa-plus mr-1"></i>Nouveau
+                        Rapport</button>
+                </div>
+            </div>
+
+            <!-- Main scrollable content -->
+            <div id="main-content" class="flex-1 overflow-y-auto p-6 space-y-6">
+                <!-- Populated by JS -->
+                <div
+                    class="loading-pulse text-[10px] font-mono text-neutral-600 uppercase tracking-widest text-center py-20">
+                    <i class="fas fa-circle-notch fa-spin text-2xl mb-4 block text-neutral-700"></i>
+                    Chargement des données...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== POPUPS ===================== -->
+
+    <!-- Document Viewer -->
+    <div id="doc-view-popup" class="fixed inset-0 popup-bg hidden z-[200] flex items-center justify-center p-4">
+        <div class="popup-card w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+            <div class="h-12 border-b border-white/8 flex items-center justify-between px-5 bg-black/40 shrink-0">
+                <h3 id="view-doc-title" class="text-xs font-display font-bold uppercase tracking-widest text-ha-gold">
+                    Document</h3>
+                <button onclick="document.getElementById('doc-view-popup').classList.add('hidden')"
+                    class="text-neutral-500 hover:text-white transition-colors w-7 h-7 flex items-center justify-center rounded hover:bg-white/5"><i
+                        class="fas fa-times"></i></button>
+            </div>
+            <div id="view-doc-content" class="flex-1 overflow-y-auto p-6 text-sm text-neutral-200"></div>
+        </div>
+    </div>
+
+    <!-- Horaire Popup -->
+    <div id="horaire-popup" class="fixed inset-0 popup-bg hidden z-[150] flex items-center justify-center p-4">
+        <div class="popup-card p-6 w-full max-w-md">
+            <h3 id="popup-title" class="text-sm font-display font-bold text-ha-gold mb-4">Ajouter Horaire</h3>
+            <div class="space-y-3">
+                <div>
+                    <div class="section-label">Date</div><input type="date" id="popup-date" class="inp">
+                </div>
+                <div>
+                    <div class="section-label">Plage horaire (HH:MM-HH:MM)</div><input type="text" id="popup-range"
+                        placeholder="14:00-15:00" class="inp">
+                </div>
+                <div id="extra-ranges" class="space-y-2"></div>
+                <button id="add-range" class="btn-ghost-sm"><i class="fas fa-plus mr-1"></i>Ajouter plage</button>
+            </div>
+            <div class="flex gap-2 mt-5">
+                <button id="save-popup" class="btn-gold"><i class="fas fa-check mr-1"></i>Enregistrer</button>
+                <button id="cancel-popup" class="btn-ghost-sm">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contract Popup -->
+    <div id="contract-popup" class="fixed inset-0 popup-bg hidden z-[150] flex items-center justify-center p-4">
+        <div class="popup-card p-6 w-full max-w-2xl">
+            <h3 class="text-sm font-display font-bold mb-1">Émettre un Contrat</h3>
+            <p class="text-[10px] text-neutral-500 mb-4 font-mono">Publié directement avec le statut «Validé».</p>
+            <input type="hidden" id="contract-emp-id">
+            <div class="space-y-3 mb-4">
+                <div>
+                    <div class="section-label">Importer Fichier (.md, .html, Images)</div><input type="file"
+                        id="contract-file" accept=".md,.html,.png,.jpg,.jpeg,.webp"
+                        class="w-full text-xs text-neutral-400 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-[10px] file:font-bold file:font-mono file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer">
+                </div>
+                <div class="text-center text-[10px] text-neutral-600 font-mono">— OU CONTENU BRUT —</div>
+                <div><textarea id="contract-content" rows="6" placeholder="# Titre du Contrat..." class="inp"
+                        style="resize:vertical"></textarea></div>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button onclick="document.getElementById('contract-popup').classList.add('hidden')"
+                    class="btn-ghost-sm">Annuler</button>
+                <button onclick="submitContract()" id="contract-submit-btn" class="btn-gold">Soumettre</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rapport Popup -->
+    <div id="rapport-popup" class="fixed inset-0 popup-bg hidden z-[150] flex items-center justify-center p-4">
+        <div class="popup-card p-6 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <h3 class="text-sm font-display font-bold text-red-400 mb-1 shrink-0">Rapport d'Incident</h3>
+            <input type="hidden" id="rapport-id">
+            <div class="flex-1 overflow-y-auto space-y-3 pr-1 mb-4">
+                <div>
+                    <div class="section-label">Titre du Rapport</div><input type="text" id="rapport-titre"
+                        placeholder="Accident de tir..." class="inp focus:border-red-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <div class="section-label">Rédacteur</div><select id="rapport-redacteur" class="inp"></select>
+                    </div>
+                    <div></div>
+                    <div>
+                        <div class="section-label">Responsable(s) (Ctrl+Clic)</div><select id="rapport-responsables"
+                            multiple class="inp h-20"></select>
+                    </div>
+                    <div>
+                        <div class="section-label">Témoin(s)</div><select id="rapport-temoins" multiple
+                            class="inp h-20"></select>
+                    </div>
+                </div>
+                <div>
+                    <div class="section-label">Importer Fichier (optionnel)</div><input type="file" id="rapport-file"
+                        accept=".md,.html,.png,.jpg,.jpeg,.webp"
+                        class="w-full text-xs text-neutral-400 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-[10px] file:font-mono file:bg-red-500/20 file:text-red-400 hover:file:bg-red-500/30 cursor-pointer">
+                </div>
+                <div class="text-center text-[10px] text-neutral-600 font-mono">— OU CONTENU BRUT —</div>
+                <div><textarea id="rapport-content" rows="5" placeholder="Description des faits..." class="inp"
+                        style="resize:vertical"></textarea></div>
+            </div>
+            <div class="flex justify-end gap-2 border-t border-white/5 pt-3 shrink-0">
+                <button onclick="closeRapportPopup()" class="btn-ghost-sm">Annuler</button>
+                <button onclick="submitRapport()" id="rapport-submit-btn" class="btn-red">Forcer / Publier</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="doc-advanced-popup" class="fixed inset-0 popup-bg hidden z-[150] flex items-center justify-center p-4">
+        <div class="popup-card p-6 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <h3 class="text-sm font-display font-bold text-blue-400 mb-1 shrink-0">Document Avancé (Création RH)</h3>
+            <input type="hidden" id="advdoc-id">
+            <div class="flex-1 overflow-y-auto space-y-3 pr-1 mb-4">
+                <div>
+                    <div class="section-label">Titre</div><input type="text" id="advdoc-titre" placeholder="Titre..."
+                        class="inp focus:border-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <div class="section-label">Visibilité</div>
+                        <select id="advdoc-visibilite" class="inp"
+                            onchange="document.getElementById('advdoc-acces-container').className = this.value === 'specifique' ? 'block mt-2' : 'hidden'">
+                            <option value="prive">Privé (Créateur/RH)</option>
+                            <option value="specifique">Sélectif</option>
+                            <option value="public">Public (Tous)</option>
+                        </select>
+                        <div id="advdoc-acces-container" class="hidden mt-2">
+                            <div class="section-label">Employés Autorisés (Ctrl+Clic)</div>
+                            <select id="advdoc-acces" multiple class="inp h-20"></select>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="section-label">Signature RH</div>
+                            <label
+                                class="flex items-center gap-2 cursor-pointer text-[10px] font-mono text-neutral-400 hover:text-white mt-1">
+                                <input type="checkbox" id="advdoc-rh-sign" class="accent-blue-500 w-3.5 h-3.5">
+                                Validation RH requise
+                            </label>
+                        </div>
+                        <div>
+                            <div class="section-label">Signatures Employés (Ctrl+Clic)</div>
+                            <select id="advdoc-signatures" multiple class="inp h-20"></select>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="section-label">Contenu (.md, .html, Images)</div><input type="file" id="advdoc-file"
+                        accept=".md,.html,.png,.jpg,.jpeg,.webp"
+                        class="w-full text-xs text-neutral-400 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-[10px] file:font-mono file:bg-blue-500/20 file:text-blue-400 hover:file:bg-blue-500/30 cursor-pointer">
+                </div>
+                <div class="text-center text-[10px] text-neutral-600 font-mono">— OU SAISIE BRUTE —</div>
+                <div><textarea id="advdoc-content" rows="5" placeholder="Contenu..." class="inp"
+                        style="resize:vertical"></textarea></div>
+            </div>
+            <div class="flex justify-end gap-2 border-t border-white/5 pt-3 shrink-0">
+                <button onclick="closeDocAdvancedPopup()" class="btn-ghost-sm">Annuler</button>
+                <button onclick="submitDocAdvanced()" id="advdoc-submit-btn" class="btn-blue">Diffuser le
+                    Document</button>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+    <!-- SIGNATURE PAD POPUP -->
+    <div id="signature-popup" class="fixed inset-0 popup-bg hidden z-[200] flex items-center justify-center p-4">
+        <div class="popup-card p-6 w-full max-w-md flex flex-col items-center">
+            <h3 class="text-sm font-display font-bold text-ha-gold mb-4 text-center w-full border-b border-white/10 pb-2"
+                id="signature-title"><i class="fas fa-pen-nib mr-2"></i>Apposer votre signature</h3>
+            <div class="bg-white rounded-xl overflow-hidden shadow-inner border-[3px] border-neutral-300 w-full mb-4">
+                <canvas id="signature-pad" class="w-full h-48 cursor-crosshair touch-none"
+                    style="touch-action: none;"></canvas>
+            </div>
+            <div class="flex justify-between w-full h-10 items-center">
+                <button onclick="clearSignature()"
+                    class="text-xs font-mono text-neutral-400 hover:text-red-400 transition-colors uppercase tracking-widest"><i
+                        class="fas fa-eraser mr-1"></i>Effacer</button>
+                <div class="flex gap-2">
+                    <button onclick="closeSignaturePopup()" class="btn-ghost-sm">Annuler</button>
+                    <button onclick="submitSignature()" class="btn-gold">Valider</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/HA-EE/src/javascript/footer.js" perms.pages="2;50;rh;page.employers"></script>
+    <div id="footer" class="hidden"></div>
+
+    <script type="module">
+        import { supabase, fromAgence, insertAgence, withAgence } from '/HA-EE/src/javascript/sp.js';
+
+        // ====================================================
+        // STATE
+        // ====================================================
+        let allEmployees = [];
+        let globalEmployeesDict = {};
+        let globalRapportsArray = [];
+        let globalAdvDocsArray = [];
+        let currentAgent = null;
+        let lastRhData = [];
+        let currentView = 'rapports'; // rapports | docs | nouvel | agent
+
+        // Expose dict on window so inline onclick handlers in dynamic HTML can access it
+        window.globalEmployeesDict = globalEmployeesDict;
+
+        // ====================================================
+        // INIT
+        // ====================================================
+        async function init() {
+            await loadEmployees();
+            await loadGlobalData();
+            switchGlobalView('rapports');
+        }
+
+        async function loadGlobalData() {
+            const { data: emps } = await fromAgence('employes').select('*').order('nom');
+            allEmployees = emps || [];
+            allEmployees.forEach(e => globalEmployeesDict[e.id_compte] = e);
+            populateAgentList(allEmployees);
+            updateBadges();
+        }
+
+        // ====================================================
+        // AGENTS SIDEBAR
+        // ====================================================
+        async function loadEmployees() {
+            const { data } = await fromAgence('employes').select('*').order('nom');
+            allEmployees = data || [];
+            allEmployees.forEach(e => globalEmployeesDict[e.id_compte] = e);
+            populateAgentList(allEmployees);
+            document.getElementById('agent-count').textContent = `${allEmployees.length} agent(s) enregistré(s)`;
+        }
+
+        function populateAgentList(list) {
+            const container = document.getElementById('agent-list');
+            if (!list.length) {
+                container.innerHTML = '<div class="text-[10px] font-mono text-neutral-600 uppercase tracking-widest text-center py-8">Aucun agent.</div>';
+                return;
+            }
+            container.innerHTML = list.map(emp => `
+                <div class="agent-card rounded-lg px-3 py-2.5 ${currentAgent?.id_compte === emp.id_compte ? 'active' : ''}" onclick="selectAgent(${emp.id_compte})">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-neutral-900 border border-white/8 flex items-center justify-center text-[11px] font-display font-black text-ha-red shrink-0">${(emp.nom || '?')[0]}</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-[11px] font-display font-bold text-white truncate">${emp.nom} ${emp.prenom}</div>
+                            <div class="text-[9px] font-mono text-neutral-500 truncate uppercase tracking-tight">${emp.poste || '—'}</div>
+                        </div>
+                        <span class="text-[8px] font-mono px-1.5 py-0.5 rounded shrink-0 ${emp.presence ? 'badge-hired' : 'badge-trial'}">${emp.presence ? 'ON' : 'TEST'}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Search
+        document.getElementById('search-agent').addEventListener('input', e => {
+            const q = e.target.value.toLowerCase();
+            populateAgentList(allEmployees.filter(emp =>
+                `${emp.nom} ${emp.prenom} ${emp.poste || ''} ${emp.email || ''}`.toLowerCase().includes(q)
+            ));
+        });
+
+        // ====================================================
+        // VIEW SWITCH
+        // ====================================================
+        window.switchGlobalView = (view) => {
+            currentView = view;
+            currentAgent = null;
+
+            // Update nav
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active-nav'));
+            const navEl = document.getElementById(`nav-${view}`);
+            if (navEl) navEl.classList.add('active-nav');
+
+            // Deselect agents
+            document.querySelectorAll('.agent-card').forEach(el => el.classList.remove('active'));
+
+            if (view === 'rapports') renderGlobalRapports();
+            else if (view === 'docs') renderGlobalDocs();
+            else if (view === 'nouvel') renderNewAgentForm();
+        };
+
+        window.selectAgent = (id) => {
+            currentAgent = globalEmployeesDict[id];
+            currentView = 'agent';
+
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active-nav'));
+            document.querySelectorAll('.agent-card').forEach(el => el.classList.remove('active'));
+            const cardEl = document.querySelector(`[onclick="selectAgent(${id})"]`);
+            if (cardEl) cardEl.classList.add('active');
+
+            renderAgentDossier(currentAgent);
+        };
+
+        // ====================================================
+        // GLOBAL RAPPORTS VIEW
+        // ====================================================
+        async function renderGlobalRapports() {
+            setHeader('<i class="fas fa-exclamation-triangle text-ha-red mr-2"></i>Registre Global des Rapports', `<button onclick="openRapportPopup()" class="btn-red"><i class="fas fa-plus mr-1"></i>Nouveau Rapport</button>`);
+            setLoading();
+
+            const { data } = await fromAgence('inf_rh_rapports').select('*').order('cree_le', { ascending: false });
+            globalRapportsArray = data || [];
+            updateBadges();
+
+            const pending = globalRapportsArray.filter(r => r.statut === 'en_attente');
+            const archived = globalRapportsArray.filter(r => r.statut !== 'en_attente');
+
+            const getNames = ids => (ids || []).map(id => { const u = globalEmployeesDict[id]; return u ? `${u.nom} ${u.prenom}` : `#${id}`; }).join(', ');
+
+            const renderRapCard = (rap) => {
+                const dateStr = new Date(rap.cree_le).toLocaleDateString('fr-FR');
+                let badgeCls = rap.statut === 'valide' ? 'badge-valid' : rap.statut === 'refuse' ? 'badge-refuse' : 'badge-pending';
+                let acts = '';
+                if (rap.statut === 'en_attente') {
+                    acts = `
+                        <button onclick="setRapportStatus('${rap.id_rapport}', 'valide')" class="btn-blue" style="padding:0.25rem 0.6rem"><i class="fas fa-check mr-1"></i>Valider</button>
+                        <button onclick="setRapportStatus('${rap.id_rapport}', 'refuse')" class="btn-red" style="padding:0.25rem 0.6rem"><i class="fas fa-times mr-1"></i>Refuser</button>
+                    `;
+                }
+                acts += `<button onclick="openRapportPopup('${rap.id_rapport}')" class="btn-ghost-sm" style="padding:0.25rem 0.5rem"><i class="fas fa-edit"></i></button>`;
+                acts += `<button onclick="viewRapport('${rap.id_rapport}')" class="btn-ghost-sm" style="padding:0.25rem 0.5rem"><i class="fas fa-eye"></i></button>`;
+                acts += `<button onclick="delRapport('${rap.id_rapport}')" class="btn-ghost-sm" style="padding:0.25rem 0.5rem;color:#E63946;border-color:rgba(230,57,70,0.3)"><i class="fas fa-trash"></i></button>`;
+                return `
+                    <div class="glass p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                <button onclick="viewRapport('${rap.id_rapport}')" class="text-sm font-display font-bold text-white hover:text-ha-gold transition-colors text-left">${rap.titre}</button>
+                                <span class="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded ${badgeCls}">${rap.statut.replace('_', ' ')}</span>
+                            </div>
+                            <div class="text-[10px] font-mono text-neutral-500 flex flex-wrap gap-x-4 gap-y-0.5">
+                                <span><i class="fas fa-pen-nib mr-1 text-blue-500/50"></i>${getNames([rap.id_redacteur]) || '—'}</span>
+                                <span><i class="fas fa-user-tag mr-1 text-ha-red/50"></i>${getNames(rap.responsables) || 'Aucun responsable'}</span>
+                                <span class="text-neutral-600">${dateStr}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">${acts}</div>
+                    </div>`;
+            };
+
+            let html = '';
+            if (pending.length) {
+                html += `<div class="flex items-center gap-3 mb-3"><div class="text-[9px] font-mono uppercase tracking-widest text-amber-500"><i class="fas fa-clock mr-1"></i>En Attente (${pending.length})</div><div class="flex-1 h-px bg-amber-500/20"></div></div>`;
+                html += `<div class="space-y-2 mb-6">${pending.map(renderRapCard).join('')}</div>`;
+            }
+            if (archived.length) {
+                html += `<div class="flex items-center gap-3 mb-3"><div class="text-[9px] font-mono uppercase tracking-widest text-neutral-500"><i class="fas fa-archive mr-1"></i>Archives (${archived.length})</div><div class="flex-1 h-px bg-white/5"></div></div>`;
+                html += `<div class="space-y-2">${archived.map(renderRapCard).join('')}</div>`;
+            }
+            if (!globalRapportsArray.length) html = '<div class="text-center py-20 text-neutral-600 font-mono text-xs uppercase tracking-widest"><i class="fas fa-ghost text-2xl block mb-3 opacity-40"></i>Aucun rapport enregistré.</div>';
+
+            document.getElementById('main-content').innerHTML = html;
+        }
+
+        // ====================================================
+        // GLOBAL DOCS VIEW
+        // ====================================================
+        async function renderGlobalDocs() {
+            setHeader('<i class="fas fa-folder-open text-blue-400 mr-2"></i>Documents Partagés & Multi-Signatures', `<button onclick="openDocAdvancedPopup()" class="btn-blue"><i class="fas fa-plus mr-1"></i>Nouveau Document</button>`);
+            setLoading();
+
+            const { data } = await fromAgence('inf_documents').select('*').order('cree_le', { ascending: false });
+            globalAdvDocsArray = data || [];
+            updateBadges();
+
+            const getNames = ids => (ids || []).map(id => { const u = globalEmployeesDict[id]; return u ? `${u.nom} ${u.prenom}` : `#${id}`; }).join(', ');
+
+            const html = globalAdvDocsArray.length ? globalAdvDocsArray.map(doc => {
+                const dateStr = new Date(doc.cree_le).toLocaleDateString('fr-FR');
+                let reqSigs = doc.signatures_requises || [];
+                let doneSigs = (doc.signatures_effectuees || []).map(s => s.id_compte);
+                let rhDone = !!doc.rh_signataire_id;
+                let total = reqSigs.length + (doc.rh_signature_requise ? 1 : 0);
+                let done = doneSigs.length + (rhDone ? 1 : 0);
+                let progress = total > 0 ? `${done}/${total} Sign.` : 'Lecture';
+                let progressCls = (total > 0 && done >= total) ? 'badge-valid' : total > 0 ? 'badge-pending' : 'text-blue-400 bg-blue-500/10 border border-blue-500/20';
+
+                let acts = `<button onclick="viewAdvDocHR('${doc.id_doc}')" class="btn-blue" style="padding:0.25rem 0.6rem"><i class="fas fa-eye mr-1"></i>Ouvrir</button>`;
+                if (doc.rh_signature_requise && !rhDone) {
+                    acts += `<button onclick="signAdvDocHR('${doc.id_doc}')" class="btn-gold" style="padding:0.25rem 0.6rem"><i class="fas fa-pen-nib mr-1"></i>Signer RH</button>`;
+                }
+                acts += `<button onclick="openDocAdvancedPopup('${doc.id_doc}')" class="btn-ghost-sm" style="padding:0.25rem 0.5rem"><i class="fas fa-edit"></i></button>`;
+                acts += `<button onclick="delAdvDoc('${doc.id_doc}')" class="btn-ghost-sm" style="padding:0.25rem 0.5rem;color:#E63946;border-color:rgba(230,57,70,0.3)"><i class="fas fa-trash"></i></button>`;
+
+                return `
+                    <div class="glass p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                <button onclick="viewAdvDocHR('${doc.id_doc}')" class="text-sm font-display font-bold text-white hover:text-blue-400 transition-colors text-left truncate max-w-md">${doc.titre}</button>
+                                <span class="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded ${progressCls}">${progress}</span>
+                            </div>
+                            <div class="text-[10px] font-mono text-neutral-500 flex flex-wrap gap-x-4 gap-y-0.5">
+                                <span><i class="fas fa-user mr-1 text-blue-500/40"></i>${getNames([doc.id_createur]) || 'Direction RH'}</span>
+                                <span><i class="fas fa-eye mr-1 text-neutral-600"></i>${doc.visibilite_public ? 'PUBLIC' : 'SÉLECTIF'}</span>
+                                <span class="text-neutral-600">${dateStr}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">${acts}</div>
+                    </div>`;
+            }).join('<div class="space-y-2">') : '<div class="text-center py-20 text-neutral-600 font-mono text-xs uppercase tracking-widest"><i class="fas fa-folder-open text-2xl block mb-3 opacity-40"></i>Aucun document partagé.</div>';
+
+            document.getElementById('main-content').innerHTML = `<div class="space-y-2">${html}</div>`;
+        }
+
+        // ====================================================
+        // NEW AGENT FORM
+        // ====================================================
+        window.renderNewAgentForm = function renderNewAgentForm(empToEdit = null) {
+            if (!empToEdit) setHeader('<i class="fas fa-user-plus text-ha-gold mr-2"></i>Nouvel Agent', '');
+            else setHeader(`<i class="fas fa-pen text-ha-gold mr-2"></i>Modifier — ${empToEdit.nom} ${empToEdit.prenom}`, '');
+
+            const emp = empToEdit || {};
+            document.getElementById('main-content').innerHTML = `
+                <div class="glass p-6 max-w-2xl">
+                    <div class="text-[9px] font-mono uppercase tracking-widest text-neutral-500 mb-5"><i class="fas fa-id-card text-ha-red mr-2"></i>Fiche Employé</div>
+                    <form id="agent-form" class="space-y-4">
+                        <input type="hidden" id="ed-id" value="${emp.id_compte || ''}">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div><div class="section-label">Email</div><input id="ed-email" type="email" required class="inp" value="${emp.email || ''}" placeholder="agent@howard.rp"></div>
+                            <div><div class="section-label">Nom</div><input id="ed-nom" type="text" required class="inp" value="${emp.nom || ''}" placeholder="HOWARD"></div>
+                            <div><div class="section-label">Prénom</div><input id="ed-prenom" type="text" required class="inp" value="${emp.prenom || ''}" placeholder="Aidan"></div>
+                            <div><div class="section-label">Date de naissance</div><input id="ed-dob" type="date" class="inp" value="${emp.date_naissance || ''}"></div>
+                            <div><div class="section-label">Poste</div><input id="ed-poste" type="text" class="inp" value="${emp.poste || ''}" placeholder="Vendeur Armes"></div>
+                            <div><div class="section-label">Échelon</div><input id="ed-echelon" type="text" class="inp" value="${emp.echelon || ''}" placeholder="E5"></div>
+                        </div>
+                        <label class="flex items-center gap-2 cursor-pointer text-[10px] font-mono text-neutral-400 hover:text-white">
+                            <input id="ed-presence" type="checkbox" class="w-3.5 h-3.5 accent-red-500" ${emp.presence !== false ? 'checked' : ''}> Embauché officiel (décoché = phase de test)
+                        </label>
+                        <div class="flex gap-2 pt-2">
+                            <button type="submit" class="btn-gold"><i class="fas fa-save mr-1"></i>Enregistrer</button>
+                            ${emp.id_compte ? `<button type="button" onclick="selectAgent(${emp.id_compte})" class="btn-ghost-sm">Annuler</button>` : `<button type="button" onclick="switchGlobalView('rapports')" class="btn-ghost-sm">Annuler</button>`}
+                            <span id="form-msg" class="text-[10px] font-mono text-neutral-500 self-center ml-2"></span>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+            document.getElementById('agent-form').addEventListener('submit', async e => {
+                e.preventDefault();
+                const msg = document.getElementById('form-msg');
+                const id = document.getElementById('ed-id').value;
+                const payload = {
+                    email: document.getElementById('ed-email').value.trim(),
+                    nom: document.getElementById('ed-nom').value.trim(),
+                    prenom: document.getElementById('ed-prenom').value.trim(),
+                    date_naissance: document.getElementById('ed-dob').value || null,
+                    poste: document.getElementById('ed-poste').value.trim() || null,
+                    echelon: document.getElementById('ed-echelon').value.trim() || null,
+                    presence: document.getElementById('ed-presence').checked
+                };
+                msg.textContent = 'En cours...';
+                let err;
+                if (id) { const res = await fromAgence('employes').update(payload).eq('id_compte', id); err = res.error; }
+                else { const res = await insertAgence('employes', [payload]); err = res.error; }
+                if (err) { msg.textContent = 'Erreur : ' + err.message; return; }
+                msg.textContent = 'Enregistré !';
+                await loadGlobalData();
+                setTimeout(() => {
+                    if (id) selectAgent(id);
+                    else switchGlobalView('rapports');
+                }, 800);
+            });
+        };
+        // Keep local alias for internal calls
+        function renderNewAgentForm(empToEdit = null) { window.renderNewAgentForm(empToEdit); }
+
+        // ====================================================
+        // AGENT DOSSIER VIEW
+        // ====================================================
+        async function renderAgentDossier(emp) {
+            setHeader(
+                `<div class="w-8 h-8 bg-ha-red/10 border border-ha-red/30 rounded-lg flex items-center justify-center font-display font-black text-ha-red mr-3">${(emp.nom || '?')[0]}</div>
+                <div>
+                    <span class="font-display font-black">${emp.nom} ${emp.prenom}</span>
+                    <span class="text-[10px] font-mono text-neutral-500 ml-3 uppercase tracking-widest">${emp.poste || '—'}</span>
+                </div>`,
+                `<button onclick="renderNewAgentForm(globalEmployeesDict['${emp.id_compte}'])" class="btn-ghost-sm"><i class="fas fa-pen mr-1"></i>Modifier</button>
+                 <button onclick="confirmDelete('${emp.id_compte}')" class="btn-red"><i class="fas fa-trash mr-1"></i>Supprimer</button>`
+            );
+
+            document.getElementById('main-content').innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    <!-- Col 1: Info + Horaires -->
+                    <div class="space-y-4">
+                        <!-- Info card -->
+                        <div class="glass p-4">
+                            <div class="section-label mb-3"><i class="fas fa-id-card text-ha-red mr-1"></i>Informations</div>
+                            <div class="space-y-2">
+                                <div class="data-row"><span class="text-neutral-500">Email</span><span class="text-white truncate max-w-[140px]">${emp.email || '—'}</span></div>
+                                <div class="data-row"><span class="text-neutral-500">DDN</span><span class="text-white">${emp.date_naissance || '—'}</span></div>
+                                <div class="data-row"><span class="text-neutral-500">Poste</span><span class="text-white">${emp.poste || '—'}</span></div>
+                                <div class="data-row"><span class="text-neutral-500">Échelon</span><span class="text-white">${emp.echelon || '—'}</span></div>
+                                <div class="data-row"><span class="text-neutral-500">Statut</span><span class="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded ${emp.presence ? 'badge-hired' : 'badge-trial'}">${emp.presence ? 'Embauché' : 'Phase test'}</span></div>
+                            </div>
+                        </div>
+                        <!-- Horaires -->
+                        <div class="glass p-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="section-label"><i class="fas fa-clock text-ha-gold mr-1"></i>Horaires</div>
+                                <button onclick="showPopup_add_${emp.id_compte}()" class="btn-gold" style="padding:0.2rem 0.6rem;font-size:0.6rem"><i class="fas fa-plus mr-1"></i>Ajouter</button>
+                            </div>
+                            <div id="hdp-${emp.id_compte}" class="space-y-1.5">
+                                <div class="loading-pulse text-[10px] text-neutral-600 font-mono">Chargement...</div>
+                            </div>
+                        </div>
+                        <!-- Contrat -->
+                        <div class="glass p-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="section-label"><i class="fas fa-file-signature text-ha-gold mr-1"></i>Contrats</div>
+                                <button onclick="openContractPopup(${emp.id_compte})" class="btn-gold" style="padding:0.2rem 0.6rem;font-size:0.6rem"><i class="fas fa-plus mr-1"></i>Émettre</button>
+                            </div>
+                            <div id="contrats-${emp.id_compte}" class="space-y-1.5">
+                                <div class="loading-pulse text-[10px] text-neutral-600 font-mono">Chargement...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Col 2: RH dossier (armes, licences, docs...) -->
+                    <div class="space-y-4">
+                        <!-- Demandes Attente -->
+                        <div id="pending-section-${emp.id_compte}" class="glass p-4 border border-amber-500/10 hidden">
+                            <div class="section-label mb-2"><i class="fas fa-bell text-amber-500 mr-1"></i>Demandes en Attente</div>
+                            <div id="pending-${emp.id_compte}" class="space-y-2"></div>
+                        </div>
+                        <!-- Armes -->
+                        <div class="glass p-4">
+                            <div class="section-label mb-2"><i class="fas fa-gun text-blue-400 mr-1"></i>Armement Déclaré</div>
+                            <div id="armes-${emp.id_compte}" class="space-y-1.5"><div class="loading-pulse text-[10px] text-neutral-600 font-mono">Chargement...</div></div>
+                        </div>
+                        <!-- Licences -->
+                        <div class="glass p-4">
+                            <div class="section-label mb-2"><i class="fas fa-id-card text-purple-400 mr-1"></i>Licences & Permis</div>
+                            <div id="licences-${emp.id_compte}" class="space-y-1.5"><div class="loading-pulse text-[10px] text-neutral-600 font-mono">Chargement...</div></div>
+                        </div>
+                        <!-- Docs simples -->
+                        <div class="glass p-4">
+                            <div class="section-label mb-2"><i class="fas fa-folder text-neutral-500 mr-1"></i>Documents Basiques</div>
+                            <div id="docs-${emp.id_compte}" class="space-y-1.5"><div class="loading-pulse text-[10px] text-neutral-600 font-mono">Chargement...</div></div>
+                        </div>
+                    </div>
+
+                    <!-- Col 3: Rapports, docs partagés, AS -->
+                    <div class="space-y-4">
+                        <!-- Rapports liés -->
+                        <div class="glass p-4">
+                            <div class="section-label mb-2"><i class="fas fa-exclamation-triangle text-ha-red mr-1"></i>Rapports Impliqués</div>
+                            <div id="raps-${emp.id_compte}" class="space-y-1.5"><div class="loading-pulse text-[10px] text-neutral-600 font-mono">Chargement...</div></div>
+                        </div>
+                        <!-- Docs partagés -->
+                        <div class="glass p-4">
+                            <div class="section-label mb-2"><i class="fas fa-folder-open text-blue-500 mr-1"></i>Documents Partagés</div>
+                            <div id="advdocs-${emp.id_compte}" class="space-y-1.5"><div class="loading-pulse text-[10px] text-neutral-600 font-mono">Chargement...</div></div>
+                        </div>
+                        <!-- AS / Paie -->
+                        <div class="glass p-4">
+                            <div class="section-label mb-2"><i class="fas fa-money-check-alt text-green-500 mr-1"></i>Déclarations AS / Paie</div>
+                            <div id="as-${emp.id_compte}" class="space-y-1.5"><div class="loading-pulse text-[10px] text-neutral-600 font-mono">Chargement...</div></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Load sub-data in parallel
+            window[`showPopup_add_${emp.id_compte}`] = () => showHorairePopup(emp);
+            window[`openContractPopup_${emp.id_compte}`] = () => openContractPopup(emp.id_compte);
+
+            await Promise.all([
+                loadHoraires(emp),
+                loadRhDossier(emp)
+            ]);
+        }
+
+        async function loadHoraires(emp) {
+            const c = document.getElementById(`hdp-${emp.id_compte}`);
+            if (!c) return;
+            const { data } = await fromAgence('hdp').select('*').eq('id_employes', emp.id_compte).order('id_hdp');
+            c.innerHTML = '';
+            if (!data?.length) { c.innerHTML = '<div class="text-[10px] text-neutral-600 font-mono">Aucun horaire.</div>'; return; }
+            data.forEach(hdp => {
+                const row = document.createElement('div');
+                row.className = 'data-row';
+                row.innerHTML = `<span class="flex-1 truncate">${hdp.horaires}</span><div class="flex gap-1"><button onclick="showHorairePopup_edit(${emp.id_compte}, ${hdp.id_hdp})" class="btn-ghost-sm" style="padding:0.15rem 0.4rem"><i class="fas fa-pen text-[9px]"></i></button><button onclick="delHdp(${hdp.id_hdp}, ${emp.id_compte})" class="btn-ghost-sm" style="padding:0.15rem 0.4rem;color:#E63946"><i class="fas fa-times text-[9px]"></i></button></div>`;
+                c.appendChild(row);
+            });
+        }
+
+        async function loadRhDossier(emp) {
+            const { data } = await fromAgence('inf_rh').select('*').eq('id_employe', emp.id_compte).order('cree_le', { ascending: false });
+            lastRhData = data || [];
+
+            const pending = lastRhData.filter(d => d.statut === 'en_attente' || d.statut === 'demande_suppression');
+            const contrats = lastRhData.filter(d => d.type_doc === 'contrat');
+            const armes = lastRhData.filter(d => d.type_doc === 'declaration_armes' && !['en_attente', 'demande_suppression'].includes(d.statut));
+            const licences = lastRhData.filter(d => d.type_doc === 'declaration_licence' && !['en_attente', 'demande_suppression'].includes(d.statut));
+            const docs = lastRhData.filter(d => ['cv', 'lettre_motivation', 'rapport'].includes(d.type_doc) && !['en_attente', 'demande_suppression'].includes(d.statut));
+
+            // Contrats
+            const contractEl = document.getElementById(`contrats-${emp.id_compte}`);
+            if (contractEl) contractEl.innerHTML = contrats.length ? contrats.map(c => {
+                const sign = c.signature_employe ? '<span class="text-green-500">Signé</span>' : '<span class="text-amber-500">Non signé</span>';
+                return `<div class="data-row"><span class="flex-1"><button onclick="viewRhDoc('${c.id_rh}')" class="hover:text-ha-gold transition-colors"><i class="fas fa-file-contract mr-1 text-ha-gold/50"></i>${new Date(c.cree_le).toLocaleDateString()}</button></span><span>${sign} <button onclick="delRhDoc('${c.id_rh}', ${emp.id_compte})" class="text-ha-red/40 hover:text-ha-red ml-1"><i class="fas fa-trash text-[9px]"></i></button></span></div>`;
+            }).join('') : '<div class="text-[10px] text-neutral-600 font-mono">Aucun contrat.</div>';
+
+            // Pending
+            const psEl = document.getElementById(`pending-section-${emp.id_compte}`);
+            const pEl = document.getElementById(`pending-${emp.id_compte}`);
+            if (pending.length && psEl && pEl) {
+                psEl.classList.remove('hidden');
+                pEl.innerHTML = pending.map(d => {
+                    if (d.type_doc === 'date_naissance') {
+                        return `<div class="data-row flex-col items-start gap-2"><div class="flex justify-between w-full"><span class="text-neutral-400">Date Naissance :</span> <span class="text-white font-bold">${d.valeur}</span></div><div class="flex gap-1"><button onclick="acceptDob('${d.id_rh}', ${emp.id_compte}, '${d.valeur}')" class="btn-blue" style="padding:0.2rem 0.5rem">Accepter</button><button onclick="setRhStatus('${d.id_rh}','refuse',${emp.id_compte})" class="btn-red" style="padding:0.2rem 0.5rem">Refuser</button></div></div>`;
+                    }
+                    if (d.type_doc === 'declaration_armes') {
+                        let w = {}; try { w = JSON.parse(d.valeur); } catch (e) { }
+                        const isDel = d.statut === 'demande_suppression';
+                        const label = isDel ? '<span class="text-red-400 font-bold"><i class="fas fa-trash mr-1"></i>SUPPRESSION ARME</span>' : '<span class="text-blue-400 font-bold"><i class="fas fa-gun mr-1"></i>DÉCLARATION ARME</span>';
+                        const acts = isDel ? `<button onclick="delRhDoc('${d.id_rh}',${emp.id_compte})" class="btn-red" style="padding:0.2rem 0.5rem">Confirmer destruction</button><button onclick="setRhStatus('${d.id_rh}','valide',${emp.id_compte})" class="btn-ghost-sm" style="padding:0.2rem 0.5rem">Refuser révocation</button>`
+                            : `<button onclick="setRhStatus('${d.id_rh}','valide',${emp.id_compte})" class="btn-blue" style="padding:0.2rem 0.5rem">Accepter</button><button onclick="setRhStatus('${d.id_rh}','refuse',${emp.id_compte})" class="btn-red" style="padding:0.2rem 0.5rem">Refuser</button>`;
+                        return `<div class="data-row flex-col items-start gap-2"><div>${label}<div class="text-neutral-300 pl-2 border-l border-blue-500/30 mt-1">${w.nom || '?'} <span class="text-neutral-500">SN: ${w.sn || '?'} | ${w.mode || '?'}</span>${w.residence ? ` <span class="text-neutral-600">| <i class="fas fa-map-marker-alt mr-1"></i>${w.residence}</span>` : ''}</div></div><div class="flex gap-1">${acts}</div></div>`;
+                    }
+                    if (d.type_doc === 'declaration_licence') {
+                        let l = {}; try { l = JSON.parse(d.valeur); } catch (e) { }
+                        const isDel = d.statut === 'demande_suppression';
+                        const nomL = l.type === 'Autre' ? (l.nomAutre || '?') : (l.type || '?');
+                        const label = isDel ? '<span class="text-red-400 font-bold"><i class="fas fa-times-circle mr-1"></i>RÉVOCATION LICENCE</span>' : '<span class="text-purple-400 font-bold"><i class="fas fa-id-card mr-1"></i>DÉCLARATION LICENCE</span>';
+                        const acts = isDel ? `<button onclick="delRhDoc('${d.id_rh}',${emp.id_compte})" class="btn-red" style="padding:0.2rem 0.5rem">Confirmer révocation</button><button onclick="setRhStatus('${d.id_rh}','valide',${emp.id_compte})" class="btn-ghost-sm" style="padding:0.2rem 0.5rem">Refuser</button>`
+                            : `<button onclick="setRhStatus('${d.id_rh}','valide',${emp.id_compte})" class="btn-blue" style="padding:0.2rem 0.5rem">Accepter</button><button onclick="setRhStatus('${d.id_rh}','refuse',${emp.id_compte})" class="btn-red" style="padding:0.2rem 0.5rem">Refuser</button>`;
+                        return `<div class="data-row flex-col items-start gap-2"><div>${label}<div class="text-neutral-300 pl-2 border-l border-purple-500/30 mt-1 font-bold">${nomL}</div></div><div class="flex gap-1">${acts}</div></div>`;
+                    }
+                    return `<div class="data-row flex-col items-start gap-2"><div class="flex justify-between w-full"><span class="text-neutral-400 uppercase">${d.type_doc.replace('_', ' ')}</span><button onclick="viewRhDoc('${d.id_rh}')" class="text-white hover:underline">Ouvrir</button></div><div class="flex gap-1"><button onclick="setRhStatus('${d.id_rh}','valide',${emp.id_compte})" class="btn-blue" style="padding:0.2rem 0.5rem">Accepter</button><button onclick="setRhStatus('${d.id_rh}','refuse',${emp.id_compte})" class="btn-red" style="padding:0.2rem 0.5rem">Refuser</button></div></div>`;
+                }).join('');
+            } else if (psEl) psEl.classList.add('hidden');
+
+            // Armes
+            const armesEl = document.getElementById(`armes-${emp.id_compte}`);
+            if (armesEl) armesEl.innerHTML = armes.length ? armes.map(d => {
+                let w = {}; try { w = JSON.parse(d.valeur); } catch (e) { }
+                const sc = d.statut === 'valide' ? 'text-green-500' : 'text-red-500';
+                return `<div class="data-row"><div class="flex-1 min-w-0"><span class="text-white font-bold">${w.nom || '?'}</span><span class="text-neutral-500 ml-2 border-l border-white/5 pl-2">SN: ${w.sn || '?'}</span><span class="text-neutral-500 ml-2 border-l border-white/5 pl-2">${w.mode || '?'}</span>${w.residence ? `<span class="text-neutral-600 ml-2 border-l border-white/5 pl-2"><i class="fas fa-map-marker-alt mr-1"></i>${w.residence}</span>` : ''}</div><span class="${sc} font-bold mr-2">${d.statut}</span><button onclick="delRhDoc('${d.id_rh}',${emp.id_compte})" class="text-ha-red/40 hover:text-ha-red"><i class="fas fa-trash text-[9px]"></i></button></div>`;
+            }).join('') : '<div class="text-[10px] text-neutral-600 font-mono">Aucune arme associée.</div>';
+
+            // Licences
+            const licEl = document.getElementById(`licences-${emp.id_compte}`);
+            if (licEl) licEl.innerHTML = licences.length ? licences.map(d => {
+                let l = {}; try { l = JSON.parse(d.valeur); } catch (e) { }
+                const nomL = l.type === 'Autre' ? (l.nomAutre || '?') : (l.type || '?');
+                const dateA = l.date_acquis ? `<span class="text-green-500"><i class="fas fa-check mr-1"></i>${new Date(l.date_acquis).toLocaleDateString()}</span>` : '<span class="text-amber-500 italic">En cours</span>';
+                const sc = d.statut === 'valide' ? 'text-green-500' : 'text-red-500';
+                return `<div class="data-row flex-col items-start gap-1"><div class="flex justify-between w-full"><span class="text-white font-bold">${nomL}</span><span class="${sc} font-bold text-[9px]">${d.statut}</span></div><div class="flex flex-wrap items-center gap-3 text-[9px] text-neutral-500">${dateA}${l.residence ? ` <span><i class="fas fa-map-marker-alt mr-1"></i>${l.residence}</span>` : ''} <button onclick="delRhDoc('${d.id_rh}',${emp.id_compte})" class="text-ha-red/40 hover:text-ha-red ml-auto"><i class="fas fa-trash"></i></button></div></div>`;
+            }).join('') : '<div class="text-[10px] text-neutral-600 font-mono">Aucune licence associée.</div>';
+
+            // Docs basiques
+            const docsEl = document.getElementById(`docs-${emp.id_compte}`);
+            if (docsEl) docsEl.innerHTML = docs.length ? docs.map(d => {
+                const sc = d.statut === 'valide' ? 'text-green-500' : 'text-red-500';
+                return `<div class="data-row"><span class="flex-1 uppercase text-neutral-300">${d.type_doc.replace('_', ' ')} <button onclick="viewRhDoc('${d.id_rh}')" class="text-neutral-500 hover:text-white ml-1"><i class="fas fa-eye text-[9px]"></i></button></span><span class="${sc} font-bold"><button onclick="delRhDoc('${d.id_rh}',${emp.id_compte})" class="text-ha-red/40 hover:text-ha-red ml-1"><i class="fas fa-trash text-[9px]"></i></button></span></div>`;
+            }).join('') : '<div class="text-[10px] text-neutral-600 font-mono">Aucun document.</div>';
+
+            // Async sections
+            loadAgentRapports(emp);
+            loadAgentAdvDocs(emp);
+            loadAgentAS(emp);
+        }
+
+        async function loadAgentRapports(emp) {
+            const el = document.getElementById(`raps-${emp.id_compte}`);
+            if (!el) return;
+            const { data: raps } = await fromAgence('inf_rh_rapports').select('*').order('cree_le', { ascending: false });
+            const mine = (raps || []).filter(r => r.id_redacteur === emp.id_compte || (r.responsables || []).includes(emp.id_compte) || (r.temoins || []).includes(emp.id_compte));
+            el.innerHTML = mine.length ? mine.map(r => {
+                let role = r.id_redacteur === emp.id_compte ? '<span class="text-blue-400">[Réd.]</span>' : (r.temoins || []).includes(emp.id_compte) ? '<span class="text-neutral-400">[Tém.]</span>' : '<span class="text-red-400">[Resp.]</span>';
+                let badge = r.statut === 'valide' ? '<span class="text-green-500">✓</span>' : '<span class="text-amber-500">⏳</span>';
+                return `<div class="data-row"><span class="flex-1 truncate">${role} ${r.titre}</span>${badge}</div>`;
+            }).join('') : '<div class="text-[10px] text-neutral-600 font-mono">Aucun rapport lié.</div>';
+        }
+
+        async function loadAgentAdvDocs(emp) {
+            const el = document.getElementById(`advdocs-${emp.id_compte}`);
+            if (!el) return;
+            const { data } = await fromAgence('inf_documents').select('*').order('cree_le', { ascending: false });
+            const mine = (data || []).filter(d => d.id_createur === emp.id_compte || (d.acces_specifique || []).includes(emp.id_compte) || (d.signatures_requises || []).includes(emp.id_compte));
+            el.innerHTML = mine.length ? mine.map(d => {
+                const sig = (d.signatures_effectuees || []).find(s => s.id_compte === emp.id_compte);
+                const needSig = (d.signatures_requises || []).includes(emp.id_compte) && !sig;
+                let tag = d.id_createur === emp.id_compte ? '<span class="text-blue-400">[Créateur]</span>' : needSig ? '<span class="text-amber-500">[Sign. Req.]</span>' : sig ? '<span class="text-green-500">[Signé]</span>' : '<span class="text-neutral-500">[Lecteur]</span>';
+                return `<div class="data-row"><span class="flex-1 truncate">${tag} ${d.titre}</span><span class="text-neutral-600 text-[9px]">${new Date(d.cree_le).toLocaleDateString()}</span></div>`;
+            }).join('') : '<div class="text-[10px] text-neutral-600 font-mono">Aucun document partagé.</div>';
+        }
+
+        async function loadAgentAS(emp) {
+            const el = document.getElementById(`as-${emp.id_compte}`);
+            if (!el) return;
+            const { data: asData } = await fromAgence('assurance_sante').select('*').eq('email', emp.email).order('date_service', { ascending: false });
+            if (!asData?.length) { el.innerHTML = '<div class="text-[10px] text-neutral-600 font-mono">Aucune déclaration.</div>'; return; }
+
+            let totalAS = 0, totalSL = 0, count = 0;
+            const rows = asData.map(dem => {
+                let tranches = 0;
+                try { const slots = typeof dem.horaires === 'string' ? JSON.parse(dem.horaires) : dem.horaires; slots.forEach(s => { const [hD, mD] = s.de.split(':').map(Number); let [hA, mA] = s.a.split(':').map(Number); let d = hD * 60 + mD, f = hA * 60 + mA; if (f < d) f += 1440; tranches += Math.floor((f - d) / 15); }); } catch (e) { }
+                const isV = dem.statut === 'valide'; const asA = parseFloat(dem.total_as || 0); const slA = tranches * parseFloat(dem.archive_salaire_fixe || 0);
+                if (isV) { totalAS += asA; totalSL += slA; count++; }
+                const badge = isV ? '<span class="text-green-500">✓</span>' : dem.statut === 'refuse' ? '<span class="text-red-500">✗</span>' : '<span class="text-amber-500">⏳</span>';
+                return `<div class="data-row flex-col items-start gap-0.5"><div class="flex justify-between w-full"><span class="font-bold text-white">${new Date(dem.date_service).toLocaleDateString()}</span>${badge}</div><div class="flex justify-between w-full text-neutral-500"><span>${tranches} tranches</span>${isV ? `<span>AS <span class="text-green-400">+${asA.toFixed(0)}$</span> SL <span class="text-neutral-300">${slA.toFixed(0)}$</span></span>` : '<span class="italic">En attente</span>'}</div></div>`;
+            }).join('');
+
+            el.innerHTML = `
+                <div class="data-row bg-gradient-to-r from-green-500/10 to-transparent border-green-500/20 mb-2">
+                    <span class="text-neutral-400">Bilan (${count} validés)</span>
+                    <span>AS <span class="text-green-400 font-bold">${totalAS.toFixed(0)}$</span> / SL <span class="font-bold">${totalSL.toFixed(0)}$</span></span>
+                </div>
+                ${rows}`;
+        }
+
+        // ====================================================
+        // HELPERS & ACTIONS
+        // ====================================================
+        function setHeader(infoHtml, actionsHtml) {
+            document.getElementById('main-header-info').innerHTML = infoHtml;
+            document.getElementById('main-header-actions').innerHTML = actionsHtml;
+        }
+        function setLoading() {
+            document.getElementById('main-content').innerHTML = '<div class="loading-pulse text-[10px] font-mono text-neutral-600 uppercase tracking-widest text-center py-20"><i class="fas fa-circle-notch fa-spin text-2xl block mb-4 text-neutral-700"></i>Chargement...</div>';
+        }
+
+        async function updateBadges() {
+            const { data: raps } = await fromAgence('inf_rh_rapports').select('statut').eq('statut', 'en_attente');
+            const { data: docs } = await fromAgence('inf_documents').select('id_doc');
+            document.getElementById('badge-rapports').textContent = (raps || []).length;
+            document.getElementById('badge-docs').textContent = (docs || []).length;
+        }
+
+        window.openContractPopup = (id) => {
+            document.getElementById('contract-emp-id').value = id;
+            document.getElementById('contract-popup').classList.remove('hidden');
+            document.getElementById('contract-file').value = '';
+            document.getElementById('contract-content').value = '';
+        };
+
+        window.viewRhDoc = (id) => {
+            const doc = lastRhData.find(d => d.id_rh === id);
+            if (!doc) return;
+            document.getElementById('view-doc-title').textContent = doc.type_doc.replace('_', ' ').toUpperCase();
+            const val = doc.valeur.trim();
+            let content = val.startsWith('data:image/') || (val.startsWith('http') && val.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i))
+                ? `<img src="${val}" style="max-width:100%;margin:auto;display:block;border-radius:8px;">`
+                : `<div class="prose prose-invert max-w-none prose-sm">${!val.startsWith('<') ? customMarkdownRender(val) : val}</div>`;
+            document.getElementById('view-doc-content').innerHTML = content;
+            document.getElementById('doc-view-popup').classList.remove('hidden');
+        };
+
+        window.setRhStatus = async (id_rh, statut, id_compte) => {
+            await fromAgence('inf_rh').update({ statut }).eq('id_rh', id_rh);
+            if (currentAgent?.id_compte == id_compte) await loadRhDossier(currentAgent);
+        };
+
+        window.acceptDob = async (id_rh, id_compte, value) => {
+            await fromAgence('employes').update({ date_naissance: value }).eq('id_compte', id_compte);
+            await fromAgence('inf_rh').update({ statut: 'valide' }).eq('id_rh', id_rh);
+            await loadGlobalData();
+            if (currentAgent?.id_compte == id_compte) await renderAgentDossier(currentAgent);
+        };
+
+        window.delRhDoc = async (id_rh, id_compte) => {
+            if (!confirm('Supprimer ce document ?')) return;
+            await fromAgence('inf_rh').delete().eq('id_rh', id_rh);
+            if (currentAgent?.id_compte == id_compte) await loadRhDossier(currentAgent);
+        };
+
+        window.confirmDelete = async (id) => {
+            const r = await Swal.fire({ title: 'Supprimer cet agent ?', text: 'Action irréversible. Toutes ses données associées seront perdues.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Supprimer', confirmButtonColor: '#E63946', background: '#111', color: '#fff', cancelButtonText: 'Annuler', customClass: { popup: 'border border-white/10 font-sans' } });
+            if (!r.isConfirmed) return;
+            await fromAgence('hdp').delete().eq('id_employes', id);
+            await fromAgence('employes').delete().eq('id_compte', id);
+            currentAgent = null;
+            await loadGlobalData();
+            switchGlobalView('rapports');
+        };
+
+        window.submitContract = async () => {
+            const id = document.getElementById('contract-emp-id').value;
+            const fi = document.getElementById('contract-file');
+            let content = document.getElementById('contract-content').value;
+            if (fi.files.length) { try { content = await readFileContent(fi.files[0]); } catch (e) { return alert('Erreur lecture fichier.'); } }
+            if (!content.trim()) return alert('Contenu requis.');
+            await insertAgence('inf_rh', [{ id_employe: id, type_doc: 'contrat', valeur: content, statut: 'valide' }]);
+            document.getElementById('contract-popup').classList.add('hidden');
+            if (currentAgent?.id_compte == id) await loadRhDossier(currentAgent);
+        };
+
+        // Horaire popup
+        let horaireCtx = { emp: null, hdp: null };
+        const hp = document.getElementById('horaire-popup');
+        window.showHorairePopup = (emp) => { horaireCtx = { emp, hdp: null }; document.getElementById('popup-title').textContent = 'Ajouter Horaire'; document.getElementById('popup-date').value = ''; document.getElementById('popup-range').value = ''; document.getElementById('extra-ranges').innerHTML = ''; hp.classList.remove('hidden'); };
+        window.showHorairePopup_edit = async (empId, hdpId) => {
+            const { data } = await fromAgence('hdp').select('*').eq('id_hdp', hdpId).single();
+            if (!data) return;
+            horaireCtx = { emp: globalEmployeesDict[empId], hdp: data };
+            document.getElementById('popup-title').textContent = 'Modifier Horaire';
+            const parts = data.horaires.split(' - ');
+            document.getElementById('popup-date').value = parts[0];
+            const plages = (parts[1] || '').split(', ');
+            document.getElementById('popup-range').value = plages[0] || '';
+            const er = document.getElementById('extra-ranges'); er.innerHTML = '';
+            plages.slice(1).forEach(p => { const i = document.createElement('input'); i.type = 'text'; i.value = p; i.className = 'inp mt-1'; er.appendChild(i); });
+            hp.classList.remove('hidden');
+        };
+        document.getElementById('add-range').onclick = () => { const i = document.createElement('input'); i.type = 'text'; i.placeholder = '18:00-20:00'; i.className = 'inp mt-1'; document.getElementById('extra-ranges').appendChild(i); };
+        document.getElementById('cancel-popup').onclick = () => hp.classList.add('hidden');
+        document.getElementById('save-popup').onclick = async () => {
+            const date = document.getElementById('popup-date').value;
+            let ranges = [document.getElementById('popup-range').value];
+            document.getElementById('extra-ranges').querySelectorAll('input').forEach(i => { if (i.value) ranges.push(i.value); });
+            const horaires = date + ' - ' + ranges.join(', ');
+            if (horaireCtx.hdp) await fromAgence('hdp').update({ horaires }).eq('id_hdp', horaireCtx.hdp.id_hdp);
+            else await insertAgence('hdp', [{ id_employes: horaireCtx.emp.id_compte, nom: horaireCtx.emp.nom, prenom: horaireCtx.emp.prenom, postes: horaireCtx.emp.poste || null, echelon: horaireCtx.emp.echelon || null, horaires }]);
+            hp.classList.add('hidden');
+            await loadHoraires(horaireCtx.emp);
+        };
+        window.delHdp = async (id, empId) => {
+            if (!confirm('Supprimer ?')) return;
+            await fromAgence('hdp').delete().eq('id_hdp', id);
+            await loadHoraires(globalEmployeesDict[empId]);
+        };
+
+        // ====================================================
+        // GLOBAL VIEWS ACTIONS
+        // ====================================================
+        window.setRapportStatus = async (id_rapport, statut) => {
+            await fromAgence('inf_rh_rapports').update({ statut }).eq('id_rapport', id_rapport);
+            renderGlobalRapports();
+        };
+        window.delRapport = async (id) => {
+            if (!confirm('Supprimer ce rapport ? Action irréversible.')) return;
+            await fromAgence('inf_rh_rapports').delete().eq('id_rapport', id);
+            renderGlobalRapports();
+        };
+        window.viewRapport = (id) => {
+            const rap = globalRapportsArray.find(r => r.id_rapport === id);
+            if (!rap) return;
+            const getN = ids => (ids || []).map(id => { const u = globalEmployeesDict[id]; return u ? `${u.nom} ${u.prenom}` : `#${id}`; }).join(', ');
+            document.getElementById('view-doc-title').textContent = 'RAPPORT : ' + rap.titre;
+            const val = rap.contenu.trim();
+            const body = val.startsWith('data:image/') || (val.startsWith('http') && val.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i))
+                ? `<img src="${val}" style="max-width:100%;margin:auto;display:block;border-radius:8px;">`
+                : `<div class="prose prose-invert max-w-none prose-sm">${!val.startsWith('<') ? customMarkdownRender(val) : val}</div>`;
+            document.getElementById('view-doc-content').innerHTML = `
+                <div class="bg-black/40 border border-white/10 rounded-lg p-4 mb-5 font-mono text-[10px] space-y-2">
+                    <div class="flex justify-between border-b border-white/5 pb-2"><span class="text-neutral-500">RÉDACTEUR:</span><span class="text-blue-400 font-bold">${getN([rap.id_redacteur])}</span></div>
+                    <div class="flex justify-between"><span class="text-neutral-500">RESPONSABLE(S):</span><span class="text-red-400">${getN(rap.responsables) || 'Aucun'}</span></div>
+                    <div class="flex justify-between"><span class="text-neutral-500">TÉMOIN(S):</span><span class="text-neutral-300">${getN(rap.temoins) || 'Aucun'}</span></div>
+                    ${rap.validateurs?.length ? `<div class="flex justify-between border-t border-white/5 pt-2"><span class="text-neutral-500">VALIDÉ PAR:</span><span class="text-green-500">${getN(rap.validateurs)}</span></div>` : ''}
+                </div>
+                ${body}`;
+            document.getElementById('doc-view-popup').classList.remove('hidden');
+        };
+        window.viewAdvDocHR = (id) => {
+            const doc = globalAdvDocsArray.find(d => d.id_doc === id);
+            if (!doc) return;
+            const getN = ids => (ids || []).map(id => { const u = globalEmployeesDict[id]; return u ? `${u.nom} ${u.prenom}` : `#${id}`; }).join(', ');
+            const val = doc.contenu.trim();
+            const body = val.startsWith('data:image/') || (val.startsWith('http') && val.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i))
+                ? `<img src="${val}" style="max-width:100%;margin:auto;display:block;border-radius:8px;">`
+                : `<div class="prose prose-invert max-w-none prose-sm">${!val.startsWith('<') ? customMarkdownRender(val) : val}</div>`;
+            const rhSig = doc.rh_signature_requise ? (doc.rh_signataire_id ? (doc.rh_signature_physique ? `<div class="flex items-center gap-2"><span class="text-green-400">Validé (${new Date(doc.rh_signature_date).toLocaleDateString()})</span><img src="${doc.rh_signature_physique}" class="h-6 bg-white/90 rounded border border-white/50"></div>` : `<span class="text-green-400">Validé (${new Date(doc.rh_signature_date).toLocaleDateString()})</span>`) : '<span class="text-amber-500">Requise</span>') : '<span class="text-neutral-500">Non requise</span>';
+            const empSigs = (doc.signatures_requises || []).map(uid => {
+                const done = (doc.signatures_effectuees || []).find(s => s.id_compte === uid);
+                const n = getN([uid]);
+                if (done) {
+                    return done.signature_physique ? `<div class="flex items-center gap-2"><span class="text-green-400"><i class="fas fa-check mr-1"></i>${n}</span><img src="${done.signature_physique}" class="h-6 bg-white/90 rounded border border-white/50"></div>` : `<span class="text-green-400"><i class="fas fa-check mr-1"></i>${n}</span>`;
+                } else {
+                    return `<div class="flex items-center gap-2"><span class="text-amber-500"><i class="fas fa-clock mr-1"></i>${n}</span><button onclick="forceEmployeeSignature('${doc.id_doc}', ${uid})" class="bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500 hover:text-white px-2 py-0.5 rounded text-[9px] uppercase tracking-widest transition-colors"><i class="fas fa-pen-nib mr-1"></i>Faire Signer</button></div>`;
+                }
+            }).join(' | ') || '<span class="text-neutral-500">Aucune</span>';
+            document.getElementById('view-doc-title').textContent = 'DOCUMENT : ' + doc.titre;
+            document.getElementById('view-doc-content').innerHTML = `
+                <div class="bg-black/40 border border-white/10 rounded-lg p-4 mb-5 font-mono text-[10px] space-y-2">
+                    <div class="flex justify-between border-b border-white/5 pb-2"><span class="text-neutral-500">CRÉATEUR:</span><span class="text-blue-400 font-bold">${getN([doc.id_createur]) || 'Direction RH'}</span></div>
+                    <div class="flex justify-between"><span class="text-neutral-500">VISIBILITÉ:</span><span class="text-white">${doc.visibilite_public ? 'PUBLIC' : 'SÉLECTIF'}</span></div>
+                    <div class="flex justify-between"><span class="text-neutral-500">SIGNATURE RH:</span><span>${rhSig}</span></div>
+                    <div class="flex justify-between"><span class="text-neutral-500">SIGNATURES EMP.:</span><span>${empSigs}</span></div>
+                </div>
+                ${body}`;
+            document.getElementById('doc-view-popup').classList.remove('hidden');
+        };
+        window.delAdvDoc = async (id) => {
+            if (!confirm('Supprimer ce document partagé ?')) return;
+            await fromAgence('inf_documents').delete().eq('id_doc', id);
+            renderGlobalDocs();
+        };
+        window.signAdvDocHR = async (id) => {
+            const doc = globalAdvDocsArray.find(d => d.id_doc === id);
+            if (!doc) return;
+            const sigDataUrl = await window.openSignaturePopup("Signature de la Direction RH");
+            if (!sigDataUrl) return; // User cancelled
+
+            const rhUser = Object.values(globalEmployeesDict).find(e => e.email === sessionStorage.getItem('user_email'));
+            const rhID = rhUser?.id_compte || 0;
+            await fromAgence('inf_documents').update({ rh_signataire_id: rhID, rh_signature_date: new Date().toISOString(), rh_signature_physique: sigDataUrl }).eq('id_doc', id);
+            renderGlobalDocs();
+            viewAdvDocHR(id);
+        };
+
+        window.forceEmployeeSignature = async (id_doc, id_compte) => {
+            const doc = globalAdvDocsArray.find(d => d.id_doc === id_doc);
+            if (!doc) return;
+            const emp = globalEmployeesDict[id_compte];
+            const nom = emp ? `${emp.nom} ${emp.prenom}` : `Agent #${id_compte}`;
+
+            const sigDataUrl = await window.openSignaturePopup(`Signature physique de ${nom}`);
+            if (!sigDataUrl) return;
+
+            let currentSigs = doc.signatures_effectuees || [];
+            currentSigs.push({
+                id_compte: id_compte,
+                date: new Date().toISOString(),
+                signature_physique: sigDataUrl
+            });
+
+            await fromAgence('inf_documents').update({ signatures_effectuees: currentSigs }).eq('id_doc', id_doc);
+
+            renderGlobalDocs();
+            viewAdvDocHR(id_doc); // Refresh view
+        };
+
+        window.openDocAdvancedPopup = (idToEdit = null) => {
+            const acc = document.getElementById('advdoc-acces');
+            const sig = document.getElementById('advdoc-signatures');
+            const opts = Object.values(globalEmployeesDict).map(e => `<option value="${e.id_compte}">${e.nom} ${e.prenom}${e.poste ? ' (' + e.poste + ')' : ''}</option>`).join('');
+            acc.innerHTML = sig.innerHTML = opts;
+
+            const idInp = document.getElementById('advdoc-id');
+            const titInp = document.getElementById('advdoc-titre');
+            const conInp = document.getElementById('advdoc-content');
+            const visInp = document.getElementById('advdoc-visibilite');
+            const rhSInp = document.getElementById('advdoc-rh-sign');
+
+            if (idToEdit) {
+                const doc = globalAdvDocsArray.find(d => d.id_doc === idToEdit);
+                if (doc) {
+                    idInp.value = doc.id_doc;
+                    titInp.value = doc.titre;
+                    conInp.value = doc.contenu;
+                    visInp.value = doc.visibilite_public ? 'public' : (doc.acces_specifique?.length ? 'specifique' : 'prive');
+                    document.getElementById('advdoc-acces-container').className = visInp.value === 'specifique' ? 'block mt-2' : 'hidden';
+                    rhSInp.checked = doc.rh_signature_requise;
+                    Array.from(acc.options).forEach(o => o.selected = (doc.acces_specifique || []).includes(parseInt(o.value)));
+                    Array.from(sig.options).forEach(o => o.selected = (doc.signatures_requises || []).includes(parseInt(o.value)));
+                }
+            } else {
+                idInp.value = '';
+                titInp.value = '';
+                conInp.value = '';
+                document.getElementById('advdoc-file').value = '';
+                visInp.value = 'prive';
+                document.getElementById('advdoc-acces-container').className = 'hidden';
+                rhSInp.checked = false;
+                Array.from(acc.options).forEach(o => o.selected = false);
+                Array.from(sig.options).forEach(o => o.selected = false);
+            }
+            document.getElementById('doc-advanced-popup').classList.remove('hidden');
+        };
+        window.closeDocAdvancedPopup = () => document.getElementById('doc-advanced-popup').classList.add('hidden');
+
+        window.submitDocAdvanced = async () => {
+            const id = document.getElementById('advdoc-id').value;
+            const titre = document.getElementById('advdoc-titre').value;
+            let contenu = document.getElementById('advdoc-content').value;
+            const fi = document.getElementById('advdoc-file');
+            const vis = document.getElementById('advdoc-visibilite').value;
+            const isPublic = vis === 'public';
+            const acces = vis === 'specifique' ? Array.from(document.getElementById('advdoc-acces').selectedOptions).map(o => parseInt(o.value)) : [];
+            const rhSign = document.getElementById('advdoc-rh-sign').checked;
+            const sigs = Array.from(document.getElementById('advdoc-signatures').selectedOptions).map(o => parseInt(o.value));
+
+            if (!titre.trim()) return alert('Titre obligatoire.');
+            if (fi.files.length) { try { contenu = await readFileContent(fi.files[0]); } catch (e) { return alert('Erreur lecture fichier.'); } }
+            if (!contenu.trim()) return alert('Contenu obligatoire.');
+
+            const btn = document.getElementById('advdoc-submit-btn'); btn.textContent = '...';
+            const rhUser = Object.values(globalEmployeesDict).find(e => e.email === sessionStorage.getItem('user_email'));
+            const payload = {
+                titre,
+                contenu,
+                visibilite_public: isPublic,
+                acces_specifique: acces,
+                rh_signature_requise: rhSign,
+                signatures_requises: sigs
+            };
+            if (!id) payload.id_createur = rhUser?.id_compte || 0;
+
+            let err;
+            if (id) { const res = await fromAgence('inf_documents').update(payload).eq('id_doc', id); err = res.error; }
+            else { const res = await insertAgence('inf_documents', [payload]); err = res.error; }
+
+            if (err) alert('Erreur: ' + err.message);
+            else {
+                closeDocAdvancedPopup();
+                renderGlobalDocs();
+            }
+            btn.textContent = 'Diffuser le Document';
+        };
+
+        window.openRapportPopup = (idToEdit = null) => {
+            const rs = document.getElementById('rapport-redacteur');
+            const resp = document.getElementById('rapport-responsables');
+            const tem = document.getElementById('rapport-temoins');
+            const opts = Object.values(globalEmployeesDict).map(e => `<option value="${e.id_compte}">${e.nom} ${e.prenom}${e.poste ? ' (' + e.poste + ')' : ''}</option>`).join('');
+            rs.innerHTML = resp.innerHTML = tem.innerHTML = opts;
+            document.getElementById('rapport-id').value = '';
+            document.getElementById('rapport-titre').value = '';
+            document.getElementById('rapport-content').value = '';
+            document.getElementById('rapport-file').value = '';
+            Array.from(resp.options).forEach(o => o.selected = false);
+            Array.from(tem.options).forEach(o => o.selected = false);
+            if (idToEdit) {
+                const rap = globalRapportsArray.find(r => r.id_rapport === idToEdit);
+                if (rap) {
+                    document.getElementById('rapport-id').value = rap.id_rapport;
+                    document.getElementById('rapport-titre').value = rap.titre;
+                    document.getElementById('rapport-content').value = rap.contenu;
+                    rs.value = rap.id_redacteur;
+                    Array.from(resp.options).forEach(o => o.selected = (rap.responsables || []).includes(parseInt(o.value)));
+                    Array.from(tem.options).forEach(o => o.selected = (rap.temoins || []).includes(parseInt(o.value)));
+                }
+            }
+            document.getElementById('rapport-popup').classList.remove('hidden');
+        };
+        window.closeRapportPopup = () => document.getElementById('rapport-popup').classList.add('hidden');
+
+        window.submitRapport = async () => {
+            const rid = document.getElementById('rapport-id').value;
+            const titre = document.getElementById('rapport-titre').value;
+            let contenu = document.getElementById('rapport-content').value;
+            const fi = document.getElementById('rapport-file');
+            const redID = parseInt(document.getElementById('rapport-redacteur').value);
+            const resp = Array.from(document.getElementById('rapport-responsables').selectedOptions).map(o => parseInt(o.value));
+            const tem = Array.from(document.getElementById('rapport-temoins').selectedOptions).map(o => parseInt(o.value));
+            if (!titre.trim()) return alert('Titre obligatoire.');
+            if (fi.files.length) { try { contenu = await readFileContent(fi.files[0]); } catch (e) { return alert('Erreur lecture fichier.'); } }
+            if (!contenu.trim()) return alert('Contenu obligatoire.');
+            const btn = document.getElementById('rapport-submit-btn'); btn.textContent = '...';
+            const payload = { titre, contenu, responsables: resp, temoins: tem, statut: 'valide', id_redacteur: redID };
+            if (rid) await fromAgence('inf_rh_rapports').update(payload).eq('id_rapport', rid);
+            else await insertAgence('inf_rh_rapports', [payload]);
+            btn.textContent = 'Forcer / Publier';
+            closeRapportPopup();
+            renderGlobalRapports();
+        };
+
+        // ====================================================
+        // MARKDOWN RENDERER (compact version)
+        // ====================================================
+        function customMarkdownRender(md) {
+            if (!md) return '';
+            const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const inline = t => t
+                .replace(/`([^`\n]+)`/g, '<code class="bg-neutral-800 rounded px-1 font-mono text-xs text-white">$1</code>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold text-ha-gold">$1</strong>')
+                .replace(/\*(?!\*)(.+?)\*(?!\*)/g, '<em class="italic">$1</em>')
+                .replace(/~~(.+?)~~/g, '<s class="line-through text-neutral-500">$1</s>')
+                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="text-blue-400 underline hover:text-blue-300">$1</a>');
+            const lines = md.split(/\r?\n/);
+            let out = '', inCode = false, listBuf = [], listType = null;
+            const flush = () => { if (!listBuf.length) return; out += `<${listType} class="pl-6 mb-4 list-${listType === 'ul' ? 'disc' : 'decimal'} space-y-1 text-neutral-300">`; listBuf.forEach(i => out += `<li>${i}</li>`); out += `</${listType}>`; listBuf = []; listType = null; };
+            for (const line of lines) {
+                if (/^```/.test(line)) { if (!inCode) { flush(); inCode = true; out += '<pre class="bg-neutral-900 border border-white/10 text-neutral-300 p-4 rounded-xl mb-4 overflow-x-auto font-mono text-xs"><code>'; } else { inCode = false; out += '</code></pre>'; } continue; }
+                if (inCode) { out += esc(line) + '\n'; continue; }
+                const hm = line.match(/^(#{1,6})\s+(.*)/);
+                if (hm) { flush(); const sz = ['text-3xl', 'text-2xl', 'text-xl', 'text-lg', 'text-base', 'text-sm'][hm[1].length - 1]; out += `<h${hm[1].length} class="font-display font-bold ${sz} mt-6 mb-3 text-ha-gold uppercase tracking-widest border-b border-white/10 pb-1">${inline(hm[2])}</h${hm[1].length}>`; continue; }
+                if (/^(\*\s*){3,}$/.test(line) || /^(-\s*){3,}$/.test(line)) { flush(); out += '<hr class="my-5 border-white/10">'; continue; }
+                const ul = line.match(/^\s*([-*+])\s+(.*)/), ol = line.match(/^\s*(\d+)\.\s+(.*)/);
+                if (ul || ol) { const type = ul ? 'ul' : 'ol'; const content = inline((ul || ol)[2].trim()); if (listType !== type) { flush(); listType = type; } listBuf.push(content); continue; }
+                flush();
+                if (/^\s*$/.test(line)) { out += '<br>'; continue; }
+                out += `<p class="mb-3 leading-relaxed text-neutral-300">${inline(line.trim())}</p>`;
+            }
+            flush();
+            return out;
+        }
+
+        const readFileContent = file => new Promise((res, rej) => {
+            const r = new FileReader();
+            r.onload = e => res(e.target.result);
+            r.onerror = rej;
+            file.type.startsWith('image/') ? r.readAsDataURL(file) : r.readAsText(file);
+        });
+
+        // ==========================================
+        // SIGNATURE PAD LOGIC
+        // ==========================================
+        let sigCanvas = document.getElementById('signature-pad');
+        let sigCtx = sigCanvas ? sigCanvas.getContext('2d') : null;
+        let isDrawingMode = false;
+        let sigResolve = null;
+        let isSigPadInitialized = false;
+
+        window.clearSignature = () => {
+            if (!sigCtx) return;
+            sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+            sigCtx.beginPath();
+        };
+
+        window.openSignaturePopup = (title = "Apposer votre signature") => {
+            return new Promise((resolve) => {
+                document.getElementById('signature-title').innerHTML = `<i class="fas fa-pen-nib mr-2 text-ha-gold"></i>${title}`;
+                document.getElementById('signature-popup').classList.remove('hidden');
+
+                setTimeout(() => {
+                    sigCanvas.width = sigCanvas.offsetWidth;
+                    sigCanvas.height = sigCanvas.offsetHeight;
+                    sigCtx.lineWidth = 2.5;
+                    sigCtx.lineCap = 'round';
+                    sigCtx.strokeStyle = '#000000';
+                    if (!isSigPadInitialized) {
+                        const startPosition = (e) => { isDrawingMode = true; drawSignature(e); };
+                        const endPosition = () => { isDrawingMode = false; sigCtx.beginPath(); };
+                        const drawSignature = (e) => {
+                            if (!isDrawingMode) return;
+                            e.preventDefault();
+                            const rect = sigCanvas.getBoundingClientRect();
+                            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                            const scaleX = sigCanvas.width / rect.width;
+                            const scaleY = sigCanvas.height / rect.height;
+                            sigCtx.lineTo((clientX - rect.left) * scaleX, (clientY - rect.top) * scaleY);
+                            sigCtx.stroke();
+                            sigCtx.beginPath();
+                            sigCtx.moveTo((clientX - rect.left) * scaleX, (clientY - rect.top) * scaleY);
+                        };
+                        sigCanvas.addEventListener('mousedown', startPosition);
+                        sigCanvas.addEventListener('mouseup', endPosition);
+                        sigCanvas.addEventListener('mousemove', drawSignature);
+                        sigCanvas.addEventListener('touchstart', startPosition, { passive: false });
+                        sigCanvas.addEventListener('touchend', endPosition);
+                        sigCanvas.addEventListener('touchmove', drawSignature, { passive: false });
+                        isSigPadInitialized = true;
+                    }
+                    clearSignature();
+                }, 50);
+
+                sigResolve = resolve;
+            });
+        };
+
+        window.closeSignaturePopup = () => {
+            document.getElementById('signature-popup').classList.add('hidden');
+            if (sigResolve) sigResolve(null);
+            sigResolve = null;
+        };
+
+        window.submitSignature = () => {
+            const blank = document.createElement('canvas');
+            blank.width = sigCanvas.width;
+            blank.height = sigCanvas.height;
+            if (sigCanvas.toDataURL() === blank.toDataURL()) {
+                alert("Veuillez dessiner la signature avant de valider.");
+                return;
+            }
+            const dataUrl = sigCanvas.toDataURL('image/png');
+            document.getElementById('signature-popup').classList.add('hidden');
+            if (sigResolve) sigResolve(dataUrl);
+            sigResolve = null;
+        };
+
+        // ====================================================
+        // START
+        // ====================================================
+        init();
+    </script>
+</body>
+
+</html>

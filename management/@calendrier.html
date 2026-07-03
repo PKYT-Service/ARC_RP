@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+    <title>Howard Armory — Agenda Tactique</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode:'class',
+            theme:{ extend:{ fontFamily:{ sans:['Inter','sans-serif'], display:['Outfit','sans-serif'], mono:['Share Tech Mono','monospace'] }, colors:{ neutral:{ 850:'#1a1a1a', 900:'#111111', 950:'#070707' }, ha:{ red:'#E63946', gold:'#D4AF37' } } } }
+        }
+    </script>
+    <style>
+        body { font-family:'Inter',sans-serif; background-color:#070707; }
+        .glass-card { background:rgba(20,20,20,0.6); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.05); transition:all 0.3s ease; }
+        .glass-card:hover { border-color:rgba(230,57,70,0.2); }
+        .field { width:100%; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.08); border-radius:0.75rem; padding:0.65rem 0.9rem; color:#d4d4d4; font-size:0.8125rem; outline:none; transition:border-color 0.3s; }
+        .field:focus { border-color:#E63946; }
+        .field-label { font-size:0.625rem; font-family:'Share Tech Mono',monospace; text-transform:uppercase; letter-spacing:0.1em; color:#737373; display:block; margin-bottom:0.35rem; }
+        .btn-red { background:rgba(230,57,70,0.1); border:1px solid rgba(230,57,70,0.4); color:#E63946; padding:0.6rem 1.5rem; border-radius:0.75rem; font-size:0.75rem; font-family:'Share Tech Mono',monospace; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; transition:all 0.3s; display:inline-flex; align-items:center; gap:0.5rem; }
+        .btn-red:hover { background:#E63946; color:#fff; }
+        .btn-ghost { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#737373; padding:0.45rem 0.8rem; border-radius:0.6rem; font-size:0.7rem; cursor:pointer; transition:all 0.3s; }
+        .btn-ghost:hover { border-color:rgba(255,255,255,0.2); color:#fff; }
+        .dark-scrollbar::-webkit-scrollbar{width:6px;} .dark-scrollbar::-webkit-scrollbar-track{background:transparent;} .dark-scrollbar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:4px;}
+        .radio-tab { display:none; }
+        .radio-tab:checked+label { background:rgba(230,57,70,0.15); border-color:rgba(230,57,70,0.5); color:#E63946; }
+    </style>
+</head>
+<body class="text-white selection:bg-ha-red/30 overflow-y-auto dark-scrollbar min-h-screen" perms.pages="2;50;rh;page.calendrier">
+    <div id="session/howard"></div>
+    <script src="/HA-EE/src/javascript/menu.js"></script>
+    <div id="menu"></div>
+
+    <main class="max-w-5xl mx-auto p-4 lg:p-8 space-y-8 mt-4 pb-24">
+
+        <!-- HEADER -->
+        <div class="border-b border-white/10 pb-6">
+            <h1 class="text-3xl md:text-4xl font-display font-black uppercase tracking-tight">
+                Agenda <span class="text-ha-red">Tactique</span>
+            </h1>
+            <p class="text-xs font-mono text-neutral-500 mt-2 tracking-widest uppercase">
+                <span class="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse mr-2"></span>
+                Gestionnaire du Calendrier Opérationnel HA
+            </p>
+        </div>
+
+        <!-- FORM CREATION -->
+        <div class="glass-card rounded-2xl p-6 lg:p-8 relative overflow-hidden">
+            <i class="fas fa-shield-halved absolute -right-8 -bottom-8 text-9xl text-white/5"></i>
+            <h2 class="text-sm font-mono uppercase tracking-widest text-neutral-400 mb-6"><i class="fas fa-plus mr-2 text-ha-red"></i>Soumettre une opération</h2>
+            <form id="event-form" class="relative z-10 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <span class="field-label">Titre de l'événement</span>
+                            <input type="text" name="titre" required class="field" placeholder="Ex: Briefing de sécurité hebdomadaire">
+                        </div>
+                        <div>
+                            <span class="field-label">Description</span>
+                            <textarea name="description" rows="3" class="field resize-none" placeholder="Détails de l'opération..."></textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><span class="field-label">Début</span><input type="datetime-local" name="date_debut" required class="field"></div>
+                            <div><span class="field-label">Fin</span><input type="datetime-local" name="date_fin" required class="field"></div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-5 border-white/5 space-y-4">
+                        <p class="field-label text-neutral-400">Visibilité de l'opération</p>
+                        <div class="flex gap-2">
+                            <input type="radio" name="visibility" value="everyone" id="vis-all" checked onclick="toggleEmployeeSection(true)" class="radio-tab">
+                            <label for="vis-all" class="flex-1 text-center text-[10px] font-mono uppercase tracking-widest border border-white/10 rounded-lg px-3 py-2 cursor-pointer transition-all"><i class="fas fa-globe mr-1"></i>Public</label>
+                            <input type="radio" name="visibility" value="specific" id="vis-specific" onclick="toggleEmployeeSection(false)" class="radio-tab">
+                            <label for="vis-specific" class="flex-1 text-center text-[10px] font-mono uppercase tracking-widest border border-white/10 rounded-lg px-3 py-2 cursor-pointer transition-all"><i class="fas fa-user-lock mr-1"></i>Sélectif</label>
+                        </div>
+
+                        <div id="select-employees-section" class="hidden overflow-y-auto dark-scrollbar space-y-2 max-h-56">
+                            <p class="field-label text-neutral-500">Opérateurs assignés :</p>
+                            <div id="employees-list" class="space-y-2">
+                                <div class="animate-pulse text-neutral-600 font-mono text-xs">Chargement...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between pt-4 border-t border-white/10">
+                    <p class="text-[9px] font-mono text-neutral-600 uppercase tracking-widest max-w-xs">* L'enregistrement d'un événement est définitif et visible instantanément.</p>
+                    <button type="submit" class="btn-red"><i class="fas fa-plus-circle"></i><span id="submit-btn-text">Créer l'événement</span></button>
+                </div>
+            </form>
+        </div>
+
+        <!-- LISTE EVENEMENTS -->
+        <div>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-sm font-mono uppercase tracking-widest text-neutral-500"><i class="fas fa-list-check mr-2"></i>Opérations planifiées</h2>
+                <button onclick="loadEvents()" class="btn-ghost"><i class="fas fa-rotate-right mr-1"></i>Actualiser</button>
+            </div>
+            <div id="events-container" class="space-y-3">
+                <div class="text-center py-10 border border-dashed border-white/10 rounded-2xl text-neutral-600 font-mono text-xs uppercase tracking-widest animate-pulse">Initialisation du radar tactique...</div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/HA-EE/src/javascript/footer.js"></script>
+    <div id="footer"></div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        const supabase = createClient('https://buowykniuotmzhypurkx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1b3d5a25pdW90bXpoeXB1cmt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4NTcwODQsImV4cCI6MjA3MjQzMzA4NH0.b4C85MHgsEDzTvxojI4JGfWoGamYOPe6RLoA5lrj8qQ');
+
+        let employes = [];
+
+        async function loadEmployes() {
+            const { data, error } = await fromAgence('employes').select('id_compte,nom,prenom').eq('visible','true');
+            if (error) return console.error(error);
+            employes = data;
+            const container = document.getElementById('employees-list');
+            container.innerHTML = employes.map(emp => `
+                <label class="flex items-center gap-3 bg-black/40 border border-white/5 rounded-lg p-2.5 cursor-pointer hover:border-ha-red/30 transition-all">
+                    <input type="checkbox" name="emp-select" value="${emp.id_compte}" class="w-4 h-4 accent-red-600 rounded">
+                    <span class="text-sm font-display font-medium text-neutral-300">${emp.prenom} ${emp.nom}</span>
+                </label>
+            `).join('');
+        }
+
+        async function loadEvents() {
+            const { data: events, error } = await fromAgence('evenements').select(`*, evenement_participants(employe_id, employes(nom,prenom))`).order('date_debut',{ascending:true});
+            if (error) return console.error(error);
+            renderEvents(events);
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const btn = document.getElementById('submit-btn-text');
+            const editId = form.dataset.editId;
+            btn.textContent = 'Transmission...';
+            const formData = new FormData(form);
+            const isPublic = formData.get('visibility') === 'everyone';
+            const eventData = { titre:formData.get('titre'), description:formData.get('description'), date_debut:formData.get('date_debut'), date_fin:formData.get('date_fin'), est_public:isPublic, createur_id:8 };
+            let eventId = editId;
+            if (editId) { const {error}=await fromAgence('evenements').update(eventData).eq('id',editId); if(error)return alert(error.message); }
+            else { const{data:newEvt,error}=await insertAgence('evenements', [eventData]).select().single(); if(error)return alert(error.message); eventId=newEvt.id; }
+            await fromAgence('evenement_participants').delete().eq('evenement_id',eventId);
+            if (!isPublic) {
+                const ids=Array.from(document.querySelectorAll('input[name="emp-select"]:checked')).map(cb=>parseInt(cb.value));
+                if(ids.length>0) await fromAgence('evenement_participants').insert(ids.map(id=>({evenement_id:eventId,employe_id:id})));
+            }
+            resetForm(form); loadEvents();
+        }
+
+        async function deleteEvent(id) {
+            if (!confirm("Confirmer la suppression de cette opération ?")) return;
+            const{error}=await fromAgence('evenements').delete().eq('id',id);
+            if(error)alert(error.message); else loadEvents();
+        }
+
+        window.editEvent = async (id) => {
+            const{data:evt,error}=await fromAgence('evenements').select('*,evenement_participants(employe_id)').eq('id',id).single();
+            if(error)return;
+            const form=document.getElementById('event-form');
+            form.dataset.editId=id;
+            form.titre.value=evt.titre; form.description.value=evt.description;
+            form.date_debut.value=evt.date_debut.slice(0,16); form.date_fin.value=evt.date_fin.slice(0,16);
+            if(evt.est_public){ document.getElementById('vis-all').checked=true; toggleEmployeeSection(true); }
+            else { document.getElementById('vis-specific').checked=true; toggleEmployeeSection(false); const pIds=evt.evenement_participants.map(p=>p.employe_id); document.querySelectorAll('input[name="emp-select"]').forEach(cb=>{cb.checked=pIds.includes(parseInt(cb.value));}); }
+            document.getElementById('submit-btn-text').textContent='Mettre à jour';
+            form.scrollIntoView({behavior:'smooth'});
+        };
+
+        function resetForm(form) {
+            form.reset(); delete form.dataset.editId;
+            document.getElementById('submit-btn-text').textContent='Créer l\'événement';
+            toggleEmployeeSection(true);
+        }
+
+        function renderEvents(events) {
+            const container=document.getElementById('events-container');
+            if(!events||events.length===0){
+                container.innerHTML='<div class="text-center py-12 border border-dashed border-white/10 rounded-2xl text-neutral-600 font-mono text-sm uppercase tracking-widest"><i class="fas fa-ghost text-2xl mb-3 block opacity-40"></i>Aucun radar actif.</div>';
+                return;
+            }
+            container.innerHTML=events.map(evt=>{
+                const start=new Date(evt.date_debut).toLocaleString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+                const end=new Date(evt.date_fin).toLocaleString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+                const isPublic=evt.est_public;
+                const participants=evt.evenement_participants?.map(p=>`${p.employes.prenom} ${p.employes.nom}`).join(', ')||'';
+                return `
+                    <div class="glass-card rounded-xl p-5 group hover:border-ha-red/30">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-[9px] font-mono font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${isPublic?'bg-green-500/10 border border-green-500/30 text-green-400':'bg-blue-500/10 border border-blue-500/30 text-blue-400'}">
+                                ${isPublic?'● Public':'● Sélectif'}
+                            </span>
+                            <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onclick="editEvent('${evt.id}')" class="btn-ghost" style="padding:0.3rem 0.6rem"><i class="fas fa-pen text-xs"></i></button>
+                                <button onclick="window.deleteEventAction('${evt.id}')" class="text-ha-red border border-ha-red/30 hover:bg-ha-red hover:text-white rounded-lg px-2 py-1 text-xs transition-all cursor-pointer"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-ha-red/10 border border-ha-red/20 flex items-center justify-center shrink-0">
+                                <i class="fas fa-shield-halved text-ha-red text-sm"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-display font-bold uppercase tracking-tight text-white">${evt.titre}</h3>
+                                <p class="text-xs text-neutral-500 mt-1 line-clamp-2 font-mono">${evt.description||'Description confidentielle'}</p>
+                                <div class="flex flex-wrap gap-4 mt-3 pt-2 border-t border-white/5">
+                                    <span class="text-[9px] font-mono text-neutral-600 uppercase tracking-widest"><i class="fas fa-clock mr-1"></i>${start} → ${end}</span>
+                                    ${!isPublic&&participants?`<span class="text-[9px] font-mono text-blue-400 uppercase tracking-widest"><i class="fas fa-users mr-1"></i>${participants}</span>`:''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.toggleEmployeeSection = (isPublic) => {
+            const section=document.getElementById('select-employees-section');
+            if(isPublic) section.classList.add('hidden'); else section.classList.remove('hidden');
+        };
+        window.deleteEventAction = deleteEvent;
+        window.loadEvents = loadEvents;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadEmployes(); loadEvents();
+            document.getElementById('event-form').addEventListener('submit', handleSubmit);
+        });
+    </script>
+</body>
+</html>

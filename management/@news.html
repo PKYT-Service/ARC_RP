@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+    <title>Howard Armory — Éditeur des News</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode:'class', theme:{ extend:{ fontFamily:{ sans:['Inter','sans-serif'], display:['Outfit','sans-serif'], mono:['Share Tech Mono','monospace'] }, colors:{ neutral:{ 850:'#1a1a1a', 900:'#111111', 950:'#070707' }, ha:{ red:'#E63946', gold:'#D4AF37' } } } } }
+    </script>
+    <style>
+        body { font-family:'Inter',sans-serif; background-color:#070707; }
+        .glass-card { background:rgba(20,20,20,0.6); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.05); transition:all 0.3s ease; }
+        .glass-card:hover { border-color:rgba(230,57,70,0.2); }
+        .field { width:100%; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.08); border-radius:0.75rem; padding:0.65rem 0.9rem; color:#d4d4d4; font-family:'Share Tech Mono',monospace; font-size:0.8125rem; outline:none; transition:border-color 0.3s; }
+        .field:focus { border-color:#E63946; }
+        .btn-red { background:rgba(230,57,70,0.1); border:1px solid rgba(230,57,70,0.4); color:#E63946; padding:0.5rem 1.25rem; border-radius:0.75rem; font-size:0.7rem; font-family:'Share Tech Mono',monospace; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; transition:all 0.3s; display:inline-flex; align-items:center; gap:0.5rem; }
+        .btn-red:hover { background:#E63946; color:#fff; }
+        .btn-green { background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); color:#4ade80; padding:0.5rem 1.25rem; border-radius:0.75rem; font-size:0.7rem; font-family:'Share Tech Mono',monospace; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; transition:all 0.3s; display:inline-flex; align-items:center; gap:0.5rem; }
+        .btn-green:hover { background:#22c55e; color:#fff; }
+        .btn-ghost { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#737373; padding:0.4rem 0.9rem; border-radius:0.6rem; font-size:0.7rem; cursor:pointer; transition:all 0.3s; }
+        .btn-ghost:hover { color:#fff; border-color:rgba(255,255,255,0.2); }
+        .dark-scrollbar::-webkit-scrollbar{width:6px;} .dark-scrollbar::-webkit-scrollbar-track{background:transparent;} .dark-scrollbar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:4px;}
+    </style>
+</head>
+<body class="text-white selection:bg-ha-red/30 overflow-y-auto dark-scrollbar min-h-screen" perms.pages="2;50;rh;vendeur;page.news">
+    <div id="session/howard"></div>
+    <script src="/HA-EE/src/javascript/menu.js"></script>
+    <div id="menu"></div>
+
+    <main class="max-w-3xl mx-auto p-4 lg:p-8 space-y-6 mt-4 pb-24">
+        <!-- HEADER -->
+        <div class="border-b border-white/10 pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-display font-black uppercase tracking-tight">Éditeur <span class="text-ha-red">NEWS</span></h1>
+                <p class="text-xs font-mono text-neutral-500 mt-2 tracking-widest uppercase"><i class="fas fa-newspaper mr-2"></i>Gestion des articles du portail</p>
+            </div>
+            <div class="flex gap-2">
+                <button id="addNews" class="btn-red"><i class="fas fa-plus"></i>Nouvelle</button>
+                <button id="saveNewsChanges" class="btn-green"><i class="fas fa-save"></i>Sauvegarder</button>
+            </div>
+        </div>
+
+        <!-- NOTICE -->
+        <div class="glass-card rounded-xl p-4 border-ha-red/20 flex items-start gap-3">
+            <i class="fas fa-triangle-exclamation text-ha-red mt-0.5"></i>
+            <p class="text-xs font-mono text-neutral-400 leading-relaxed">Toutes les modifications seront sauvegardées via le bouton <span class="text-ha-red uppercase tracking-widest">Sauvegarder</span>. La description accepte du HTML.</p>
+        </div>
+
+        <!-- NEWS CONTAINER -->
+        <section id="news-container" class="space-y-4"></section>
+    </main>
+
+    <script src="/HA-EE/src/javascript/footer.js"></script>
+    <div id="footer"></div>
+
+    <script type="module">
+        import { supabase, fromAgence, insertAgence, withAgence } from '/HA-EE/src/javascript/sp.js';
+        const container = document.getElementById('news-container');
+        let newsData = [];
+
+        async function loadNews() {
+            container.innerHTML='<p class="text-neutral-600 font-mono text-xs uppercase tracking-widest text-center py-8 animate-pulse">Chargement des articles...</p>';
+            const{data,error}=await fromAgence('news').select('id,titre,date,auteur,description,created_at,updated_at').order('created_at',{ascending:false});
+            if(error){container.innerHTML=`<p class="text-ha-red font-mono text-sm">${error.message}</p>`;return;}
+            newsData=data||[];
+            renderNews(newsData);
+        }
+
+        function renderNews(items) {
+            container.innerHTML='';
+            if(!items.length){container.innerHTML='<div class="text-center py-12 border border-dashed border-white/10 rounded-2xl text-neutral-600 font-mono text-sm uppercase tracking-widest"><i class="fas fa-ghost text-2xl mb-3 block opacity-40"></i>Aucun article.</div>';return;}
+            items.forEach((item,idx)=>{
+                const card=document.createElement('article');
+                card.className='glass-card rounded-xl p-5 space-y-3 relative';
+                card.innerHTML=`
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[9px] font-mono uppercase tracking-widest text-neutral-600">Article #${item.id}</span>
+                        <button class="delete-btn text-ha-red/50 hover:text-ha-red text-xs border border-ha-red/20 hover:border-ha-red rounded-lg px-2 py-1 transition-all cursor-pointer"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-mono uppercase tracking-widest text-neutral-600 block mb-1">Titre</label>
+                        <input type="text" value="${(item.titre||'').replace(/"/g,'&quot;')}" placeholder="Titre de l'article" class="field titre-input">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[9px] font-mono uppercase tracking-widest text-neutral-600 block mb-1">Date</label>
+                            <input type="text" value="${item.date||''}" placeholder="jj.mm.aaaa - hh:mm" class="field date-input">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-mono uppercase tracking-widest text-neutral-600 block mb-1">Auteur</label>
+                            <input type="text" value="${(item.auteur||'').replace(/"/g,'&quot;')}" placeholder="Auteur" class="field auteur-input">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-mono uppercase tracking-widest text-neutral-600 block mb-1">Description <span class="text-neutral-700">(HTML autorisé)</span></label>
+                        <textarea rows="4" placeholder="Description..." class="field resize-y desc-input">${item.description||''}</textarea>
+                    </div>
+                `;
+                card.querySelector('.delete-btn').addEventListener('click',()=>deleteNews(item.id));
+                card.querySelector('.titre-input').addEventListener('input',e=>{item.titre=e.target.value;});
+                card.querySelector('.date-input').addEventListener('input',e=>{item.date=e.target.value;});
+                card.querySelector('.auteur-input').addEventListener('input',e=>{item.auteur=e.target.value;});
+                card.querySelector('.desc-input').addEventListener('input',e=>{item.description=e.target.value;});
+                container.appendChild(card);
+            });
+        }
+
+        async function addNews() {
+            const now=new Date();
+            const d=`${now.getDate().toString().padStart(2,'0')}.${(now.getMonth()+1).toString().padStart(2,'0')}.${now.getFullYear()} - ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+            const{data,error}=await insertAgence('news', [{titre:'Nouvel article',date:d,auteur:'Auteur',description:'Description (HTML autorisé)'}]).select();
+            if(error){alert('Erreur : '+error.message);return;}
+            newsData.unshift(data[0]); renderNews(newsData);
+        }
+
+        async function updateNewsAll() {
+            for(const item of newsData){
+                const{error}=await fromAgence('news').update({titre:item.titre,date:item.date,auteur:item.auteur,description:item.description}).eq('id',item.id);
+                if(error){alert('Erreur : '+error.message);return;}
+            }
+            alert('✅ Toutes les news ont été mises à jour !');
+            await loadNews();
+        }
+
+        async function deleteNews(id) {
+            if(!confirm('Confirmer la suppression ?'))return;
+            const{error}=await fromAgence('news').delete().eq('id',id);
+            if(error){alert('Erreur : '+error.message);return;}
+            newsData=newsData.filter(n=>n.id!==id); renderNews(newsData);
+        }
+
+        document.getElementById('addNews').addEventListener('click',addNews);
+        document.getElementById('saveNewsChanges').addEventListener('click',updateNewsAll);
+        loadNews();
+    </script>
+</body>
+</html>

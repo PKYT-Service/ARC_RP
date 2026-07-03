@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+    <title>Howard Armory — Admin HTML Includes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode:'class', theme:{ extend:{ fontFamily:{ sans:['Inter','sans-serif'], display:['Outfit','sans-serif'], mono:['Share Tech Mono','monospace'] }, colors:{ neutral:{ 850:'#1a1a1a', 900:'#111111', 950:'#070707' }, ha:{ red:'#E63946', gold:'#D4AF37' } } } } }
+    </script>
+    <style>
+        body { font-family:'Inter',sans-serif; background-color:#070707; }
+        .glass-card { background:rgba(20,20,20,0.6); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.05); transition:all 0.3s ease; }
+        .glass-card:hover { border-color:rgba(230,57,70,0.2); }
+        .field { width:100%; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.08); border-radius:0.75rem; padding:0.65rem 0.9rem; color:#d4d4d4; font-family:'Share Tech Mono',monospace; font-size:0.8125rem; outline:none; transition:border-color 0.3s; }
+        .field:focus { border-color:#E63946; }
+        .btn-red { background:rgba(230,57,70,0.1); border:1px solid rgba(230,57,70,0.4); color:#E63946; padding:0.5rem 1.25rem; border-radius:0.75rem; font-size:0.7rem; font-family:'Share Tech Mono',monospace; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; transition:all 0.3s; display:inline-flex; align-items:center; gap:0.5rem; }
+        .btn-red:hover { background:#E63946; color:#fff; }
+        .btn-ghost { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#737373; padding:0.4rem 0.9rem; border-radius:0.6rem; font-size:0.65rem; font-family:'Share Tech Mono',monospace; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; transition:all 0.3s; display:inline-flex; align-items:center; gap:0.4rem; }
+        .btn-ghost:hover { color:#fff; border-color:rgba(255,255,255,0.2); }
+        .dark-scrollbar::-webkit-scrollbar{width:6px;} .dark-scrollbar::-webkit-scrollbar-track{background:transparent;} .dark-scrollbar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:4px;}
+    </style>
+</head>
+<body class="text-white selection:bg-ha-red/30 overflow-y-auto dark-scrollbar min-h-screen" perms.pages="2;50;rh;page.includes">
+    <div id="session/howard"></div>
+    <script src="/HA-EE/src/javascript/menu.js"></script>
+    <div id="menu"></div>
+
+    <main class="max-w-5xl mx-auto p-4 lg:p-8 space-y-8 mt-4 pb-24">
+
+        <!-- HEADER -->
+        <div class="border-b border-white/10 pb-6">
+            <h1 class="text-3xl md:text-4xl font-display font-black uppercase tracking-tight">
+                HTML <span class="text-ha-red">Includes</span>
+            </h1>
+            <p class="text-xs font-mono text-neutral-500 mt-2 tracking-widest uppercase"><i class="fas fa-code mr-2"></i>Gestionnaire de blocs HTML administrables</p>
+        </div>
+
+        <!-- FORM -->
+        <div class="glass-card rounded-2xl p-6 relative overflow-hidden">
+            <i class="fas fa-code absolute -right-6 -bottom-6 text-8xl text-white/5 rotate-12"></i>
+            <h2 class="text-sm font-mono uppercase tracking-widest text-neutral-400 mb-5"><i class="fas fa-plus mr-2 text-ha-red"></i><span id="form-mode-label">Nouveau bloc</span></h2>
+            <div class="relative z-10 space-y-4">
+                <div>
+                    <label class="text-[9px] font-mono uppercase tracking-widest text-neutral-500 block mb-1.5">Titre du bloc</label>
+                    <input type="text" id="bloc-titre" placeholder="Bouton rouge d'alerte..." required class="field">
+                </div>
+                <div>
+                    <label class="text-[9px] font-mono uppercase tracking-widest text-neutral-500 block mb-1.5">Code HTML / JS</label>
+                    <textarea id="bloc-code" placeholder="<button class='...' onclick='...'>Clic</button>" rows="6" class="field resize-y font-mono"></textarea>
+                </div>
+                <div class="flex gap-3 items-center">
+                    <button id="add-bloc" class="btn-red"><i class="fas fa-save"></i><span id="btn-label">Ajouter</span></button>
+                    <button id="cancel-edit" class="btn-ghost hidden"><i class="fas fa-times"></i>Annuler</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PREVIEW -->
+        <div>
+            <h2 class="text-sm font-mono uppercase tracking-widest text-neutral-500 mb-3"><i class="fas fa-eye mr-2"></i>Aperçu en direct</h2>
+            <div id="preview" class="glass-card rounded-xl p-5 border-white/5 min-h-[60px] text-sm text-neutral-300"></div>
+        </div>
+
+        <!-- BLOCS EXISTANTS -->
+        <div>
+            <h2 class="text-sm font-mono uppercase tracking-widest text-neutral-500 mb-4"><i class="fas fa-layer-group mr-2"></i>Blocs enregistrés</h2>
+            <ul id="bloc-list" class="space-y-3"></ul>
+        </div>
+    </main>
+
+    <script src="/HA-EE/src/javascript/footer.js"></script>
+    <div id="footer"></div>
+
+    <script type="module">
+        import { supabase, fromAgence, insertAgence, withAgence } from '/HA-EE/src/javascript/sp.js';
+        let editingId = null;
+
+        async function loadBlocs() {
+            const{data,error}=await fromAgence('html_includes').select('*').order('created_at');
+            if(error)return console.error(error);
+            const list=document.getElementById('bloc-list');
+            list.innerHTML='';
+            if(!data.length){list.innerHTML='<li class="text-center py-10 border border-dashed border-white/10 rounded-xl text-neutral-600 font-mono text-xs uppercase tracking-widest"><i class="fas fa-ghost text-2xl mb-3 block opacity-40"></i>Aucun bloc enregistré.</li>';return;}
+            data.forEach(bloc=>{
+                const li=document.createElement('li');
+                li.className='glass-card rounded-xl p-4 flex justify-between items-center gap-4 group';
+                li.innerHTML=`
+                    <div class="flex-1 overflow-hidden">
+                        <h3 class="font-display font-bold text-white">${bloc.titre} <span class="text-[9px] font-mono text-neutral-600 ml-2 uppercase tracking-widest">${bloc.visible?'Visible':'Caché'}</span></h3>
+                        <p class="text-[10px] font-mono text-neutral-600 truncate mt-0.5">${(bloc.code_html||'').replace(/<[^>]*>/g,'').slice(0,80)}</p>
+                    </div>
+                    <div class="flex gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button data-edit="${bloc.id}" class="btn-ghost"><i class="fas fa-pen mr-1"></i>Modifier</button>
+                        <button data-delete="${bloc.id}" class="text-[10px] font-mono border border-ha-red/30 text-ha-red/60 hover:text-ha-red hover:border-ha-red px-2 py-1 rounded-lg transition-all cursor-pointer"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+            addBlocListeners();
+        }
+
+        document.getElementById('add-bloc').addEventListener('click', async () => {
+            const titre=document.getElementById('bloc-titre').value.trim();
+            const code=document.getElementById('bloc-code').value;
+            if(!titre||!code)return;
+            if(editingId){ await fromAgence('html_includes').update({titre,code_html:code}).eq('id',editingId); editingId=null; }
+            else { await insertAgence('html_includes', withAgence({titre,code_html:code}); }
+            document.getElementById('bloc-titre').value='';
+            document.getElementById('bloc-code').value='';
+            document.getElementById('preview').innerHTML='';
+            document.getElementById('btn-label').textContent='Ajouter';
+            document.getElementById('form-mode-label').textContent='Nouveau bloc';
+            document.getElementById('cancel-edit').classList.add('hidden');
+            loadBlocs();
+        });
+
+        document.getElementById('bloc-code').addEventListener('input',e=>{document.getElementById('preview').innerHTML=e.target.value;});
+        document.getElementById('cancel-edit').addEventListener('click',()=>{editingId=null;document.getElementById('bloc-titre').value='';document.getElementById('bloc-code').value='';document.getElementById('preview').innerHTML='';document.getElementById('btn-label').textContent='Ajouter';document.getElementById('form-mode-label').textContent='Nouveau bloc';document.getElementById('cancel-edit').classList.add('hidden');});
+
+        function addBlocListeners() {
+            document.querySelectorAll('[data-edit]').forEach(btn=>{ btn.addEventListener('click',async()=>{ const id=btn.getAttribute('data-edit');const{data}=await fromAgence('html_includes').select('*').eq('id',id).single(); editingId=id; document.getElementById('bloc-titre').value=data.titre; document.getElementById('bloc-code').value=data.code_html; document.getElementById('preview').innerHTML=data.code_html; document.getElementById('btn-label').textContent='Mettre à jour'; document.getElementById('form-mode-label').textContent='Modifier le bloc'; document.getElementById('cancel-edit').classList.remove('hidden'); window.scrollTo({top:0,behavior:'smooth'}); }); });
+            document.querySelectorAll('[data-delete]').forEach(btn=>{ btn.addEventListener('click',async()=>{ const id=btn.getAttribute('data-delete'); if(confirm('Supprimer ce bloc ?')){ await fromAgence('html_includes').delete().eq('id',id); loadBlocs(); } }); });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadBlocs);
+    </script>
+</body>
+</html>

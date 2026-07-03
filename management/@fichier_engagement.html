@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Howard Armory - Module Contrats Dynamiques (SVG)</title>
+  <link rel="shortcut icon" href="https://howardarmory.vercel.app/data/img/favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono&family=Rock+Salt&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #0a0a0a; color: white; }
+    .neo-brutalism { border: 4px solid black; box-shadow: 8px 8px 0px 0px rgba(0,0,0,1); }
+    .slip-paper { background-color: #ffffff !important; color: #000000; min-height: 800px; width: 100%; position: relative; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .font-sig { font-family: 'Rock Salt', cursive; }
+    
+    .watermark-container {
+        position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
+        display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(12, 1fr);
+        opacity: 0.04;
+    }
+    .watermark-item {
+        transform: rotate(-25deg); font-weight: 900; font-size: 1.2rem;
+        text-transform: uppercase; white-space: nowrap; display: flex;
+        align-items: center; justify-content: center; color: black;
+    }
+  </style>
+</head>
+
+<body class="dark:bg-neutral-900 pb-20">
+
+  <script type="module">
+      import { supabase, fromAgence, insertAgence, withAgence } from '/HA-EE/src/javascript/sp.js';
+      window.supabaseClient = supabase; 
+  </script>
+      <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+
+  <div id="menu" class="sticky top-0 z-50 w-full text-sm bg-black p-2 border-b border-yellow-500">
+      <div class="max-w-4xl mx-auto flex justify-between items-center text-yellow-500 font-mono">
+          <span>HA - Systeme personnel</span>
+          <span><i class="fas fa-satellite-dish animate-pulse text-green-500"></i> Actif(s)</span>
+      </div>
+  </div>
+
+  <main id="content" class="w-full max-w-4xl mx-auto pt-10 px-4">
+      <header class="flex flex-col md:flex-row justify-between items-end mb-10 border-b-2 border-yellow-500 pb-4 gap-4">
+        <div>
+            <h1 class="text-4xl font-black uppercase tracking-tighter italic">HA <span class="text-yellow-500 text-5xl">DOCS</span></h1>
+            <p class="text-neutral-400 font-mono text-xs mt-2">/// BY MOLDERSON - BASE INT VECTORIEL ///</p>
+        </div>
+        <div class="text-right">
+             <div id="status-github" class="text-[10px] font-mono bg-neutral-800 px-3 py-1 rounded border border-neutral-600 text-neutral-300 mb-2 inline-block">
+                <i class="fas fa-circle-notch fa-spin mr-2"></i> Init Github...
+            </div>
+             <a href="./ARE.html"><div class="text-[10px] font-mono bg-neutral-800 px-3 py-1 rounded border border-neutral-600 text-neutral-300 mb-2 inline-block">
+                <i class="fas fa-circle-notch fa-spin mr-2"></i> MODELE ARE
+            </div></a>
+            <div class="text-xs text-neutral-400 font-mono">Date : <span id="sys-date">--/--/----</span></div>
+        </div>
+      </header>
+
+      <div class="bg-neutral-900 p-6 rounded-xl border border-neutral-800 mb-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label class="text-xs font-black text-yellow-500 uppercase">1. Sélectionner l'Employé</label>
+            <select id="select-employee" class="w-full p-3 bg-neutral-800 text-white border border-neutral-600 focus:border-yellow-500 outline-none rounded font-mono">
+                <option value="">Chargement...</option>
+            </select>
+        </div>
+        <div>
+            <label class="text-xs font-black text-yellow-500 uppercase">2. Modèle de Contrat</label>
+            <select id="select-template" class="w-full p-3 bg-neutral-800 text-white border border-neutral-600 focus:border-yellow-500 outline-none rounded"></select>
+        </div>
+        <div>
+            <label class="text-xs font-black text-yellow-500 uppercase">3. Type d'engagement</label>
+            <select id="input-type" class="w-full p-3 bg-neutral-800 text-white border border-neutral-600 focus:border-yellow-500 outline-none rounded">
+                <option value="CDI - Opérationnel">C.D.I (Permanent)</option>
+                <option value="CDD - 3 Ans">C.D.D (3 Ans)</option>
+                <option value="CDD - 1 Semaine (Test)">Période d'essai (1 Semaine)</option>
+                <option value="Freelance / Consultant">Freelance / Consultant</option>
+            </select>
+        </div>
+        <div>
+            <label class="text-xs font-black text-yellow-500 uppercase">4. Date de Signature</label>
+            <input type="date" id="input-date" class="w-full p-3 bg-neutral-800 text-white border border-neutral-600 focus:border-yellow-500 outline-none rounded font-mono">
+        </div>
+      </div>
+
+      <div id="contract-area" class="slip-paper p-10 neo-brutalism relative overflow-hidden mb-6 z-10">
+           <div class="flex flex-col items-center justify-center h-64 text-neutral-400 opacity-50">
+                <i class="fas fa-file-code text-6xl mb-4"></i>
+                <p class="font-mono text-sm uppercase">Préparation du moteur de rendu...</p>
+           </div>
+      </div>
+
+      <div class="flex gap-4">
+        <button id="btn-save" onclick="handleSaveAndDownload()" class="flex-1 bg-yellow-500 text-black p-4 font-black uppercase border-4 border-black hover:bg-yellow-400 transition shadow-[4px_4px_0_0_#ffffff] rounded text-xl flex items-center justify-center">
+            <i class="fas fa-vector-square mr-2"></i> 
+            <span id="btn-text">Générer SVG & Archiver</span>
+        </button>
+      </div>
+  </main>
+
+  <script>
+    let GLOBAL_EMPLOYEES = [];
+    let GLOBAL_SALARY_GRID = {};
+    let GLOBAL_TEMPLATES = [];
+    
+    // ATTENTION : REMETTRE TON TOKEN ICI
+    const GITHUB_TOKEN = "VOTRE_TOKEN_ICI"; 
+    const REPO_PATH = "https://api.github.com/repos/PKYT-Service/database_dev/contents/NEW*DRIVE/howard/Répertoire Membre/Salaire par emplois.md";
+    const cleanStr = (str) => str ? str.toString().toLowerCase().replace(/\*/g, '').trim() : '';
+    
+    window.onload = async function() {
+        const today = new Date();
+        document.getElementById('input-date').value = today.toISOString().split('T')[0];
+        document.getElementById('sys-date').innerText = today.toLocaleDateString('fr-FR');
+
+        await Promise.all([fetchSalaryGrid(), fetchEmployees()]);
+        await fetchTemplates();
+
+        document.getElementById('select-employee').addEventListener('change', updateContractData);
+        document.getElementById('input-type').addEventListener('change', updateContractData);
+        document.getElementById('select-template').addEventListener('change', onTemplateSelect);
+        document.getElementById('input-date').addEventListener('change', updateContractData);
+    };
+
+    async function fetchTemplates() {
+        const checkSupabase = setInterval(async () => {
+            if (window.supabaseClient) {
+                clearInterval(checkSupabase);
+                const { data, error } = await fromAgence('modeles_personnels').select('*').order('id');
+                if (!error) {
+                    GLOBAL_TEMPLATES = data;
+                    const select = document.getElementById('select-template');
+                    select.innerHTML = ''; 
+                    data.forEach((tpl, index) => {
+                        select.add(new Option(tpl.nom, tpl.id));
+                        if(index === 0) select.value = tpl.id;
+                    });
+                    if(data.length > 0) onTemplateSelect();
+                }
+            }
+        }, 100);
+    }
+
+    // MODIFICATION PRINCIPALE ICI : EXECUTION DES SCRIPTS
+    function onTemplateSelect() {
+        const id = document.getElementById('select-template').value;
+        const template = GLOBAL_TEMPLATES.find(t => t.id == id);
+        
+        if(template) {
+            const area = document.getElementById('contract-area');
+            
+            // 1. Injection du HTML
+            area.innerHTML = template.html_content;
+
+            // 2. LE RÉVEIL DU JS : Recherche et ré-exécution des balises script
+            const scripts = area.querySelectorAll("script");
+            
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement("script");
+                
+                // Copier tous les attributs (src, type, etc.)
+                Array.from(oldScript.attributes).forEach(attr => {
+                    newScript.setAttribute(attr.name, attr.value);
+                });
+                
+                // Copier le contenu (le code JS à l'intérieur)
+                newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                
+                // Remplacer l'ancien script (inerte) par le nouveau (actif)
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+
+            // 3. Gestion du Watermark
+            const wm = document.getElementById('wm-bg');
+            if(wm) {
+                wm.innerHTML = "";
+                for(let i=0; i<60; i++){ wm.innerHTML += `<div class="watermark-item">Howard Armory</div>`; }
+            }
+            
+            // 4. Mise à jour des données
+            setTimeout(updateContractData, 50);
+        }
+    }
+
+    async function fetchEmployees() {
+        const { data, error } = await fromAgence('employes').select('*').eq('visible', 'true').order('nom');
+        if (!error) {
+            GLOBAL_EMPLOYEES = data;
+            const select = document.getElementById('select-employee');
+            select.innerHTML = '<option value="">-- Choisir un employé --</option>';
+            data.forEach(emp => {
+                select.add(new Option(`${emp.nom.toUpperCase()} ${emp.prenom}`, emp.id_compte || emp.id));
+            });
+        }
+    }
+
+    async function fetchSalaryGrid() {
+        try {
+            const response = await fetch(REPO_PATH, { headers: { "Authorization": `token ${GITHUB_TOKEN}` } });
+            const data = await response.json();
+            const lines = atob(data.content).split('\n');
+            lines.forEach(line => {
+                if (!line.includes('|') || line.includes('---')) return;
+                const cells = line.split('|').map(c => cleanStr(c));
+                const numbers = line.match(/(\d+[.,]\d{2}|\d+)/g);
+                if(cells[2] && numbers) {
+                     GLOBAL_SALARY_GRID[cells[2]] = { 
+                        fixe: parseFloat(numbers[1]?.replace(',', '.') || 0), 
+                        as: parseFloat(numbers[numbers.length - 1]?.replace(',', '.') || 0) 
+                      };
+                }
+            });
+            document.getElementById('status-github').innerHTML = `<i class="fas fa-check-circle text-green-500 mr-2"></i> SYNC OK`;
+        } catch (err) { console.error(err); }
+    }
+
+    function updateContractData() {
+        const empId = document.getElementById('select-employee').value;
+        const typeContrat = document.getElementById('input-type').value;
+        const emp = GLOBAL_EMPLOYEES.find(e => e.id == empId || e.id_compte == empId);
+        const d = new Date(document.getElementById('input-date').value);
+        const formattedDate = d.toLocaleDateString('fr-FR');
+
+        const setVal = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+
+        setVal('print-date', formattedDate);
+        setVal('print-type', typeContrat);
+
+        if (emp) {
+            setVal('print-name', `${emp.nom.toUpperCase()} ${emp.prenom}`);
+            setVal('print-dob', emp.date_naissance || "--/--/----");
+            setVal('print-rank', emp.poste || "Non assigné");
+            setVal('sig-employee', `Lu et approuvé, ${emp.nom} ${emp.prenom}`);
+            const key = cleanStr(emp.poste || "");
+            const sal = GLOBAL_SALARY_GRID[key] || Object.values(GLOBAL_SALARY_GRID).find((v, i) => Object.keys(GLOBAL_SALARY_GRID)[i].includes(key));
+            if (sal) {
+                setVal('print-salary', sal.fixe.toFixed(2) + " $");
+                setVal('print-as', sal.as.toFixed(2) + " $");
+            } else {
+                setVal('print-salary', "À négocier");
+                setVal('print-as', "0.00 $");
+            }
+        }
+    }
+
+    // --- LOGIQUE D'EXPORT SVG ---
+   async function handleSaveAndDownload() {
+    const empId = document.getElementById('select-employee').value;
+    const btn = document.getElementById('btn-save');
+    const btnText = document.getElementById('btn-text');
+
+    if (!empId) return Swal.fire('Attention', 'Veuillez choisir un employé.', 'warning');
+
+    btn.disabled = true;
+    btnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Conversion SVG vers PNG...';
+
+    try {
+        const node = document.getElementById('contract-area');
+        const empName = document.getElementById('print-name')?.innerText || "Inconnu";
+        const tplName = document.getElementById('select-template').options[document.getElementById('select-template').selectedIndex].text;
+
+        // On utilise toPng() qui passe par le moteur SVG en interne
+        const dataUrl = await htmlToImage.toPng(node, {
+            quality: 1.0,
+            pixelRatio: 2, // Pour garder la netteté du SVG sur le PNG
+            backgroundColor: '#ffffff',
+            cacheBust: true, // Évite les bugs de mise en cache des images
+        });
+
+        // 1. Téléchargement du PNG (issu du moteur SVG)
+        const link = document.createElement('a');
+        link.download = `CONTRAT_${tplName}_${empName.replace(/\s+/g, '_')}.png`;
+        link.href = dataUrl;
+        link.click();
+
+        // 2. Archivage Supabase
+        const { error } = await insertAgence('contrats', [{ 
+            employe_id: empId, 
+            employe_nom: empName,
+            type_contrat: tplName,
+            signataire: 'MOLDERSON John' 
+        }]);
+
+        if (error) throw error;
+
+        Swal.fire({ icon: 'success', title: 'PNG Généré', text: 'Le contrat est propre et archivé.', timer: 3000 });
+
+    } catch (err) {
+        console.error('Erreur conversion:', err);
+        Swal.fire('Erreur', 'La conversion SVG vers PNG a échoué.', 'error');
+    } finally {
+        btn.disabled = false;
+        btnText.innerText = 'Générer PNG & Archiver';
+    }
+}
+  </script>
+</body>
+</html>

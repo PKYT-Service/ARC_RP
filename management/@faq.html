@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+    <title>Howard Armory — FAQ DB</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter','sans-serif'], display: ['Outfit','sans-serif'], mono: ['Share Tech Mono','monospace'] },
+                    colors: { neutral: { 850:'#1a1a1a', 900:'#111111', 950:'#070707' }, ha: { red:'#E63946', gold:'#D4AF37' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Styles spécifiques — le thème de base est dans arc-theme.css */
+        body { background-color: #050505; }
+    </style>
+</head>
+<body class="arc-theme text-white selection:bg-ha-gold/30 overflow-y-auto dark-scrollbar min-h-screen">
+    <div id="session/howard"></div>
+    <script src="/HA-EE/src/javascript/menu.js"></script>
+    <div id="menu"></div>
+
+    <main class="max-w-4xl mx-auto p-4 lg:p-8 space-y-8 mt-4 pb-24" perms.pages="2;50;rh;page.faq">
+
+        <!-- HEADER -->
+        <div class="border-b border-white/10 pb-6">
+            <h1 class="text-3xl md:text-4xl font-display font-black uppercase tracking-tight">
+                Base <span class="text-ha-gold">FAQ</span>
+            </h1>
+            <p class="text-xs font-mono text-neutral-500 mt-2 tracking-widest uppercase"><i class="fas fa-pen-to-square mr-2"></i>Gestionnaire des Questions & Réponses Howard Armory</p>
+        </div>
+
+        <!-- FORMULAIRE -->
+        <div class="glass-card rounded-2xl p-6 relative overflow-hidden">
+            <i class="fas fa-question-circle absolute -right-6 -bottom-6 text-8xl text-white/5 rotate-12"></i>
+            <h2 class="text-sm font-mono uppercase tracking-widest text-neutral-400 mb-5"><i class="fas fa-plus mr-2 text-ha-gold"></i>Nouvelle entrée</h2>
+            <form id="faq-form" class="space-y-4 relative z-10">
+                <input type="hidden" id="faq-id">
+                <div>
+                    <label class="text-[10px] font-mono uppercase tracking-widest text-neutral-500 block mb-2">Question</label>
+                    <input id="question" type="text" required class="field" placeholder="Quelle est la procédure pour...">
+                </div>
+                <div>
+                    <label class="text-[10px] font-mono uppercase tracking-widest text-neutral-500 block mb-2">Réponse</label>
+                    <textarea id="reponse" rows="4" required class="field resize-none" placeholder="La procédure est..."></textarea>
+                </div>
+                <div class="flex gap-3 items-center">
+                    <button type="submit" id="save-btn" class="btn-primary"><i class="fas fa-save mr-2"></i>Enregistrer</button>
+                    <button type="button" id="cancel-btn" class="btn-ghost">Annuler</button>
+                    <span id="form-msg" class="text-xs font-mono text-neutral-500 ml-2"></span>
+                </div>
+            </form>
+        </div>
+
+        <!-- QA LIST -->
+        <div>
+            <h2 class="text-sm font-mono uppercase tracking-widest text-neutral-500 mb-4"><i class="fas fa-list mr-2"></i>Entrées enregistrées</h2>
+            <section id="qa-container" class="space-y-3"></section>
+        </div>
+    </main>
+
+    <script src="/HA-EE/src/javascript/footer.js"></script>
+    <div id="footer"></div>
+
+    <script type="module">
+        import { supabase, fromAgence, insertAgence, withAgence } from '/HA-EE/src/javascript/sp.js';
+
+        const container = document.getElementById('qa-container');
+        const form = document.getElementById('faq-form');
+        const inputQuestion = document.getElementById('question');
+        const inputReponse = document.getElementById('reponse');
+        const inputId = document.getElementById('faq-id');
+        const formMsg = document.getElementById('form-msg');
+        const cancelBtn = document.getElementById('cancel-btn');
+
+        async function loadFAQ() {
+            container.innerHTML = '<p class="text-neutral-600 font-mono text-sm text-center py-8 animate-pulse uppercase tracking-widest">Chargement...</p>';
+            const { data, error } = await fromAgence('faq').select('id,question,reponse,created_at,updated_at').order('created_at', { ascending: false });
+            if (error) { container.innerHTML = `<p class="text-ha-red font-mono text-sm">${error.message}</p>`; return; }
+            renderFAQ(data || []);
+        }
+
+        function renderFAQ(items) {
+            container.innerHTML = '';
+            if (!items.length) {
+                container.innerHTML = '<div class="text-center py-12 border border-dashed border-white/10 rounded-2xl text-neutral-600 font-mono text-sm uppercase tracking-widest"><i class="fas fa-ghost text-2xl mb-3 block opacity-40"></i>Aucune question enregistrée.</div>';
+                return;
+            }
+            items.forEach(item => {
+                const card = document.createElement('article');
+                card.className = 'glass-card rounded-xl p-5 flex flex-col gap-3';
+                card.innerHTML = `
+                    <div class="flex items-start justify-between gap-4">
+                        <h3 class="font-display font-bold text-base text-white">${(item.question||'').normalize('NFC')}</h3>
+                        <span class="text-[9px] font-mono text-neutral-600 shrink-0 uppercase tracking-widest">${new Date(item.updated_at||item.created_at).toLocaleString('fr-FR')}</span>
+                    </div>
+                    <p class="text-sm text-neutral-400 leading-relaxed whitespace-pre-wrap font-mono">${(item.reponse||'').normalize('NFC')}</p>
+                    <div class="flex gap-2 pt-2 border-t border-white/5">
+                        <button onclick="window._editFAQ(${JSON.stringify(item).replace(/"/g,'&quot;')})" class="btn-ghost text-xs"><i class="fas fa-pen mr-1"></i>Modifier</button>
+                        <button onclick="window._deleteFAQ('${item.id}')" class="text-[10px] font-mono uppercase tracking-widest text-ha-red/60 hover:text-ha-red border border-ha-red/20 hover:border-ha-red/50 px-3 py-1.5 rounded-lg transition-all cursor-pointer"><i class="fas fa-trash mr-1"></i>Supprimer</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function addFAQ(q, r) { formMsg.textContent = 'Enregistrement...'; const { error } = await insertAgence('faq', [{ question: q, reponse: r }]); if (error) { formMsg.textContent = `Erreur: ${error.message}`; return; } formMsg.textContent = 'Ajouté !'; resetForm(); loadFAQ(); }
+        async function updateFAQ(id, q, r) { formMsg.textContent = 'Mise à jour...'; const { error } = await fromAgence('faq').update({ question: q, reponse: r }).eq('id', id); if (error) { formMsg.textContent = `Erreur: ${error.message}`; return; } formMsg.textContent = 'Mis à jour !'; resetForm(); loadFAQ(); }
+        window._deleteFAQ = async (id) => { if (!confirm('Supprimer cette question ?')) return; await fromAgence('faq').delete().eq('id', id); loadFAQ(); }
+        window._editFAQ = (item) => { inputId.value = item.id; inputQuestion.value = item.question||''; inputReponse.value = item.reponse||''; formMsg.textContent = 'Édition en cours...'; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        function resetForm() { inputId.value=''; inputQuestion.value=''; inputReponse.value=''; formMsg.textContent=''; }
+        cancelBtn.addEventListener('click', e => { e.preventDefault(); resetForm(); });
+        form.addEventListener('submit', async e => { e.preventDefault(); const q = inputQuestion.value.trim(); const r = inputReponse.value.trim(); if (!q || !r) { formMsg.textContent = 'Champs obligatoires.'; return; } const id = inputId.value; if (id) await updateFAQ(id, q, r); else await addFAQ(q, r); });
+        loadFAQ();
+    </script>
+</body>
+</html>

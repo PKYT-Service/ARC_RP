@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+    <title>Howard Armory — Crédits Clients</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode:'class',
+            theme:{ extend:{ fontFamily:{ sans:['Inter','sans-serif'], display:['Outfit','sans-serif'], mono:['Share Tech Mono','monospace'] }, colors:{ neutral:{ 850:'#1a1a1a', 900:'#111111', 950:'#070707' }, ha:{ red:'#E63946', gold:'#D4AF37' } } } }
+        }
+    </script>
+    <style>
+        body { font-family:'Inter',sans-serif; background-color:#070707; }
+        .glass-card { background:rgba(20,20,20,0.6); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.05); transition:all 0.3s ease; }
+        .glass-card:hover { border-color:rgba(212,175,55,0.2); }
+        .field { width:100%; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.08); border-radius:0.75rem; padding:0.65rem 0.9rem; color:#d4d4d4; font-family:'Share Tech Mono',monospace; font-size:0.8125rem; outline:none; transition:border-color 0.3s; }
+        .field:focus { border-color:#D4AF37; }
+        .btn-gold { background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.4); color:#D4AF37; padding:0.5rem 1.25rem; border-radius:0.75rem; font-size:0.7rem; font-family:'Share Tech Mono',monospace; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; transition:all 0.3s; }
+        .btn-gold:hover { background:#D4AF37; color:#000; }
+        .btn-ghost { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#737373; padding:0.45rem 0.8rem; border-radius:0.6rem; font-size:0.7rem; font-family:'Share Tech Mono',monospace; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; transition:all 0.3s; }
+        .btn-ghost:hover { border-color:rgba(255,255,255,0.2); color:#fff; }
+        .dark-scrollbar::-webkit-scrollbar{width:6px;} .dark-scrollbar::-webkit-scrollbar-track{background:transparent;} .dark-scrollbar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:4px;}
+        #toast { transition: opacity .3s; }
+        label { font-size:0.625rem; font-family:'Share Tech Mono',monospace; text-transform:uppercase; letter-spacing:0.1em; color:#737373; display:block; margin-bottom:0.35rem; }
+    </style>
+</head>
+<body class="text-white selection:bg-ha-gold/30 overflow-y-auto dark-scrollbar min-h-screen" perms.pages="2;50;rh;vendeur;page.credits">
+    <div id="session/howard"></div>
+    <script src="/HA-EE/src/javascript/menu.js"></script>
+    <div id="menu"></div>
+
+    <main class="max-w-6xl mx-auto p-4 lg:p-8 space-y-8 mt-4 pb-24">
+
+        <!-- HEADER -->
+        <div class="flex flex-col md:flex-row justify-between md:items-end gap-4 border-b border-white/10 pb-6">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-display font-black uppercase tracking-tight">
+                    Comptes <span class="text-ha-gold">Clients</span>
+                </h1>
+                <p class="text-xs font-mono text-neutral-500 mt-2 tracking-widest uppercase"><i class="fas fa-shield-halved mr-2"></i>Zone Privée — Accès Personnel Autorisé</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <input id="searchInput" type="search" placeholder="Rechercher un client..." class="field" style="width:220px">
+                <span class="text-[10px] font-mono text-neutral-600 uppercase tracking-widest"><span id="countSpan">0</span> résultat(s)</span>
+            </div>
+        </div>
+
+        <!-- FILTRES RAPIDES -->
+        <div class="flex flex-wrap gap-2">
+            <button data-quick="all" class="text-[10px] font-mono uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 text-neutral-400 hover:border-ha-gold/40 hover:text-ha-gold transition-all">Tous</button>
+            <button data-quick="positive" class="text-[10px] font-mono uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 text-neutral-400 hover:border-green-500/40 hover:text-green-400 transition-all">Crédit > 0</button>
+            <button data-quick="zero" class="text-[10px] font-mono uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 text-neutral-400 hover:border-amber-500/40 hover:text-amber-400 transition-all">Crédit = 0</button>
+            <button data-quick="recent" class="text-[10px] font-mono uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 text-neutral-400 hover:border-white/30 hover:text-white transition-all">Récents</button>
+        </div>
+
+        <!-- FORM AJOUT -->
+        <div class="glass-card rounded-2xl p-6 relative overflow-hidden">
+            <i class="fas fa-wallet absolute -right-6 -bottom-6 text-8xl text-white/5"></i>
+            <h2 class="text-sm font-mono uppercase tracking-widest text-neutral-400 mb-5"><i class="fas fa-plus mr-2 text-ha-gold"></i>Ajouter un client</h2>
+            <form id="addForm" class="grid sm:grid-cols-3 gap-4 relative z-10">
+                <div class="sm:col-span-2"><label>Nom du client</label><input id="clientName" required placeholder="Ex: Howard Armory" class="field"></div>
+                <div><label>Crédits initiaux</label><input id="clientCredits" type="number" step="0.01" min="0" placeholder="0.00" class="field"></div>
+                <div class="sm:col-span-3 flex items-center gap-3">
+                    <button type="submit" class="btn-gold"><i class="fas fa-plus mr-2"></i>Ajouter</button>
+                    <span id="addHint" class="text-[10px] font-mono text-neutral-600 uppercase tracking-widest">Le client sera créé immédiatement.</span>
+                </div>
+            </form>
+        </div>
+
+        <!-- GRILLE CLIENTS -->
+        <div>
+            <h2 class="text-sm font-mono uppercase tracking-widest text-neutral-500 mb-4"><i class="fas fa-users mr-2"></i>Registre des clients</h2>
+            <div id="cardsContainer" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+        </div>
+
+        <!-- VUE TABLEAU -->
+        <details class="group">
+            <summary class="cursor-pointer text-[10px] font-mono uppercase tracking-widest text-neutral-600 hover:text-neutral-400 transition-colors flex items-center gap-2">
+                <i class="fas fa-table"></i> Vue tableau détaillée
+            </summary>
+            <div class="mt-4 glass-card rounded-xl overflow-x-auto">
+                <table class="min-w-full text-xs font-mono">
+                    <thead><tr class="border-b border-white/10 text-neutral-500 uppercase tracking-widest">
+                        <th class="px-4 py-3 text-left">ID</th>
+                        <th class="px-4 py-3 text-left">Nom</th>
+                        <th class="px-4 py-3 text-left">Crédits</th>
+                        <th class="px-4 py-3 text-left">Créé</th>
+                        <th class="px-4 py-3 text-left">Modifié</th>
+                        <th class="px-4 py-3 text-left">Actions</th>
+                    </tr></thead>
+                    <tbody id="tableBody" class="divide-y divide-white/5"></tbody>
+                </table>
+            </div>
+        </details>
+    </main>
+
+    <!-- TOAST -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
+        <div class="glass-card px-5 py-3 rounded-xl text-sm font-mono text-white border-ha-gold/30 shadow-lg" id="toast-msg"></div>
+    </div>
+
+    <script src="/HA-EE/src/javascript/footer.js"></script>
+    <div id="footer"></div>
+
+    <script type="module">
+        import { supabase, fromAgence, insertAgence, withAgence } from '/HA-EE/src/javascript/sp.js';
+
+        const $ = (s,r=document)=>r.querySelector(s);
+        const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+
+        const toast=(msg)=>{ const t=$('#toast'); $('#toast-msg').textContent=msg; t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'),2200); }
+        const formatMoney=(n)=>Number(n||0).toFixed(2).replace('.',',')+' €';
+        const fmtDate=(d)=>{ if(!d) return '—'; return new Date(d).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}); }
+        const escapeHtml=(s='')=>s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+        let allClients=[], filtered=[], quickFilter='all', searchTerm='';
+
+        async function fetchClients() {
+            const { data, error } = await fromAgence('clients').select('*').order('date_modification',{ascending:false});
+            if (error) { toast('Erreur chargement.'); return; }
+            allClients=data||[]; applyFilters();
+        }
+
+        async function addClient(nom,credits) { const p={nom}; if(credits&&Number(credits)>0) p.credits=Number(credits); const {data,error}=await fromAgence('clients').insert(p).select('*').single(); if(error){toast('Ajout impossible.');return;} allClients.unshift(data); applyFilters(); toast('Client ajouté.'); }
+        async function deleteClient(id) { const{error}=await fromAgence('clients').delete().eq('id_client',id); if(error){toast('Suppression impossible.');return;} allClients=allClients.filter(c=>c.id_client!==id); applyFilters(); toast('Client supprimé.'); }
+        async function renameClient(id,nom) { const{data,error}=await fromAgence('clients').update({nom}).eq('id_client',id).select('*').single(); if(error){toast('Renommage impossible.');return;} const i=allClients.findIndex(c=>c.id_client===id); if(i>=0)allClients[i]=data; applyFilters(); toast('Nom mis à jour.'); }
+        async function adjustCredits(id,delta) { const cur=allClients.find(c=>c.id_client===id); if(!cur)return; const newC=Number(cur.credits||0)+Number(delta); if(newC<0){toast('Crédit insuffisant.');return;} const{data,error}=await fromAgence('clients').update({credits:newC}).eq('id_client',id).select('*').single(); if(error){toast('Impossible.');return;} const i=allClients.findIndex(c=>c.id_client===id); if(i>=0)allClients[i]=data; applyFilters(); toast('Crédits mis à jour.'); }
+
+        function applyFilters() {
+            const term=(searchTerm||'').trim().toLowerCase();
+            filtered=allClients.filter(c=>!term||(c.nom||'').toLowerCase().includes(term));
+            if(quickFilter==='positive') filtered=filtered.filter(c=>Number(c.credits||0)>0);
+            else if(quickFilter==='zero') filtered=filtered.filter(c=>Number(c.credits||0)===0);
+            else if(quickFilter==='recent') filtered=filtered.toSorted((a,b)=>new Date(b.date_creation)-new Date(a.date_creation)).slice(0,12);
+            renderCards(); renderTable();
+            $('#countSpan').textContent=String(filtered.length);
+        }
+
+        function renderCards() {
+            const wrap=$('#cardsContainer'); wrap.innerHTML='';
+            if(!filtered.length){wrap.innerHTML='<div class="col-span-full text-center py-12 border border-dashed border-white/10 rounded-2xl text-neutral-600 font-mono text-sm uppercase tracking-widest"><i class="fas fa-ghost text-2xl mb-3 block opacity-40"></i>Aucun résultat.</div>';return;}
+            for(const c of filtered) {
+                const card=document.createElement('article');
+                card.className='glass-card rounded-xl p-5 flex flex-col gap-4';
+                const isPos=Number(c.credits||0)>0;
+                card.innerHTML=`
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <div class="text-[9px] font-mono text-neutral-600 uppercase tracking-widest mb-1">Client #${c.id_client}</div>
+                            <h3 class="font-display font-bold text-lg text-white leading-tight">${escapeHtml(c.nom)}</h3>
+                        </div>
+                        <span class="font-black font-mono text-xl ${isPos?'text-ha-gold':'text-neutral-500'}">${formatMoney(c.credits)}</span>
+                    </div>
+                    <div class="flex gap-3 text-[9px] font-mono text-neutral-600 uppercase tracking-widest border-t border-white/5 pt-3">
+                        <span><i class="fas fa-calendar-plus mr-1"></i>${fmtDate(c.date_creation)}</span>
+                        <span><i class="fas fa-edit mr-1"></i>${fmtDate(c.date_modification)}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button data-act="credit" class="btn-gold py-2 text-center text-xs"><i class="fas fa-plus mr-1"></i>Crédit</button>
+                        <button data-act="debit" class="btn-ghost py-2 text-center text-xs"><i class="fas fa-minus mr-1"></i>Débit</button>
+                        <button data-act="rename" class="btn-ghost py-2 text-center text-xs"><i class="fas fa-pen mr-1"></i>Renommer</button>
+                        <button data-act="delete" class="text-[10px] font-mono uppercase tracking-widest py-2 text-ha-red/60 hover:text-ha-red border border-ha-red/20 hover:border-ha-red rounded-lg transition-all cursor-pointer"><i class="fas fa-trash mr-1"></i>Supprimer</button>
+                    </div>
+                `;
+                card.querySelector('[data-act="credit"]').addEventListener('click',async()=>{ const v=Number((prompt('Montant à ajouter (€):','0.00')||'').replace(',','.')); if(!isNaN(v)&&v>0) await adjustCredits(c.id_client,v); });
+                card.querySelector('[data-act="debit"]').addEventListener('click',async()=>{ const v=Number((prompt('Montant à retirer (€):','0.00')||'').replace(',','.')); if(!isNaN(v)&&v>0) await adjustCredits(c.id_client,-v); });
+                card.querySelector('[data-act="rename"]').addEventListener('click',async()=>{ const n=(prompt('Nouveau nom:',c.nom||'')||'').trim(); if(n) await renameClient(c.id_client,n); });
+                card.querySelector('[data-act="delete"]').addEventListener('click',async()=>{ if(confirm(`Supprimer "${c.nom}" ?`)) await deleteClient(c.id_client); });
+                wrap.appendChild(card);
+            }
+        }
+
+        function renderTable() {
+            const tb=$('#tableBody'); tb.innerHTML='';
+            for(const c of filtered) {
+                const tr=document.createElement('tr');
+                tr.className='hover:bg-white/5 text-neutral-400';
+                tr.innerHTML=`<td class="px-4 py-2">${c.id_client}</td><td class="px-4 py-2 text-white">${escapeHtml(c.nom)}</td><td class="px-4 py-2 text-ha-gold font-bold">${formatMoney(c.credits)}</td><td class="px-4 py-2">${fmtDate(c.date_creation)}</td><td class="px-4 py-2">${fmtDate(c.date_modification)}</td>
+                <td class="px-4 py-2"><div class="flex gap-1 flex-wrap">
+                    <button data-t="credit" class="btn-gold" style="padding:0.2rem 0.5rem">+</button>
+                    <button data-t="debit" class="btn-ghost" style="padding:0.2rem 0.5rem">−</button>
+                    <button data-t="rename" class="btn-ghost" style="padding:0.2rem 0.5rem"><i class="fas fa-pen"></i></button>
+                    <button data-t="delete" class="text-ha-red border border-ha-red/30 rounded px-2 py-0.5 text-[10px] hover:bg-ha-red hover:text-white transition-all"><i class="fas fa-trash"></i></button>
+                </div></td>`;
+                tr.querySelector('[data-t="credit"]').addEventListener('click',async()=>{ const v=Number((prompt('Ajouter (€):','0.00')||'').replace(',','.')); if(!isNaN(v)&&v>0) await adjustCredits(c.id_client,v); });
+                tr.querySelector('[data-t="debit"]').addEventListener('click',async()=>{ const v=Number((prompt('Retirer (€):','0.00')||'').replace(',','.')); if(!isNaN(v)&&v>0) await adjustCredits(c.id_client,-v); });
+                tr.querySelector('[data-t="rename"]').addEventListener('click',async()=>{ const n=(prompt('Nouveau nom:',c.nom||'')||'').trim(); if(n) await renameClient(c.id_client,n); });
+                tr.querySelector('[data-t="delete"]').addEventListener('click',async()=>{ if(confirm(`Supprimer "${c.nom}" ?`)) await deleteClient(c.id_client); });
+                tb.appendChild(tr);
+            }
+        }
+
+        $('#addForm').addEventListener('submit',async(e)=>{ e.preventDefault(); const nom=$('#clientName').value.trim(); const credits=$('#clientCredits').value.trim(); if(!nom)return toast('Nom requis.'); await addClient(nom,credits); e.target.reset(); });
+        $('#searchInput').addEventListener('input',e=>{ searchTerm=e.target.value||''; applyFilters(); });
+        $$('button[data-quick]').forEach(btn=>{ btn.addEventListener('click',()=>{ quickFilter=btn.dataset.quick; $$('button[data-quick]').forEach(b=>b.classList.remove('border-ha-gold/40','text-ha-gold')); btn.classList.add('border-ha-gold/40','text-ha-gold'); applyFilters(); }); });
+
+        try {
+            supabase.channel('clients-changes').on('postgres_changes',{event:'*',schema:'public',table:'clients'},()=>fetchClients()).subscribe();
+        } catch(_) {}
+
+        fetchClients();
+    </script>
+</body>
+</html>

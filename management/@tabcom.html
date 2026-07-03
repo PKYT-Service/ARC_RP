@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+    <title>Howard Armory — Tableur Temps Réel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode:'class',
+            theme:{ extend:{ fontFamily:{ sans:['Inter','sans-serif'], display:['Outfit','sans-serif'], mono:['Share Tech Mono','monospace'] }, colors:{ neutral:{ 850:'#1a1a1a', 900:'#111111', 950:'#070707' }, ha:{ red:'#E63946', gold:'#D4AF37' } } } }
+        }
+    </script>
+    <style>
+        body { font-family:'Inter',sans-serif; background-color:#070707; }
+        .glass-card { background:rgba(20,20,20,0.6); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.05); }
+        .dark-scrollbar::-webkit-scrollbar{width:6px;height:6px;} .dark-scrollbar::-webkit-scrollbar-track{background:transparent;} .dark-scrollbar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:4px;}
+        #table-container td:focus { outline:2px solid #E63946; outline-offset:-1px; background:rgba(230,57,70,0.05); }
+        #table-container { overflow:auto; max-height:60vh; }
+        #table-container::-webkit-scrollbar{height:6px;width:6px;} #table-container::-webkit-scrollbar-thumb{background:#4a4a4a;border-radius:4px;}
+        .btn { display:inline-flex; align-items:center; gap:0.4rem; padding:0.4rem 0.8rem; border-radius:0.6rem; font-size:0.65rem; font-family:'Share Tech Mono',monospace; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; transition:all 0.2s; border:1px solid transparent; }
+        .btn-blue { background:rgba(59,130,246,0.1); border-color:rgba(59,130,246,0.3); color:#60a5fa; } .btn-blue:hover { background:#3b82f6; color:#fff; }
+        .btn-green { background:rgba(34,197,94,0.1); border-color:rgba(34,197,94,0.3); color:#4ade80; } .btn-green:hover { background:#22c55e; color:#fff; }
+        .btn-red { background:rgba(230,57,70,0.1); border-color:rgba(230,57,70,0.3); color:#E63946; } .btn-red:hover { background:#E63946; color:#fff; }
+        .btn-yellow { background:rgba(234,179,8,0.1); border-color:rgba(234,179,8,0.3); color:#facc15; } .btn-yellow:hover { background:#eab308; color:#000; }
+        .btn-purple { background:rgba(168,85,247,0.1); border-color:rgba(168,85,247,0.3); color:#a78bfa; } .btn-purple:hover { background:#a855f7; color:#fff; }
+        .btn-ghost { background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.08); color:#737373; } .btn-ghost:hover { color:#fff; border-color:rgba(255,255,255,0.2); }
+    </style>
+</head>
+<body class="text-white selection:bg-ha-red/30 dark-scrollbar min-h-screen" perms.pages="2;50;rh">
+    <div id="session/howard"></div>
+    <script src="/HA-EE/src/javascript/menu.js"></script>
+    <div id="menu"></div>
+
+    <main class="max-w-full mx-auto p-4 lg:p-6 space-y-4 mt-4 pb-24">
+        <!-- HEADER -->
+        <div class="border-b border-white/10 pb-4">
+            <h1 class="text-2xl md:text-3xl font-display font-black uppercase tracking-tight">
+                Tableur <span class="text-ha-red">TABCOM</span>
+            </h1>
+            <p class="text-xs font-mono text-neutral-500 mt-1 tracking-widest uppercase"><i class="fas fa-table mr-2"></i>Gestionnaire de pages dynamiques</p>
+        </div>
+
+        <!-- APP CONTAINER -->
+        <div id="tableur-app" class="space-y-4 w-full"></div>
+
+        <!-- MODAL -->
+        <div id="modal-root" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-md p-4">
+            <div id="modal-content" class="glass-card rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-auto p-6 border-white/10"></div>
+        </div>
+    </main>
+
+    <script src="/HA-EE/src/javascript/footer.js"></script>
+    <div id="footer"></div>
+
+    <script type="module">
+        import { supabase, fromAgence, insertAgence, withAgence } from '/HA-EE/src/javascript/sp.js';
+        const app = document.getElementById('tableur-app');
+        const modalRoot = document.getElementById('modal-root');
+        const modalContent = document.getElementById('modal-content');
+        let pages=[], currentPage=null, cells=[], perms=[];
+
+        function colIndexToLetter(i){ let r='',n=i+1; while(n>0){let rem=(n-1)%26;r=String.fromCharCode(65+rem)+r;n=Math.floor((n-1)/26);} return r; }
+        function letterToColIndex(l){ l=l.toUpperCase(); let r=0; for(let i=0;i<l.length;i++){r*=26;r+=(l.charCodeAt(i)-64);} return r-1; }
+
+        async function loadPages() {
+            const{data:pageData}=await fromAgence('tableur_pages').select('*').order('id_page');
+            pages=pageData||[];
+            if(!pages.length){app.innerHTML='<p class="text-ha-red text-center font-mono text-sm uppercase tracking-widest py-12">Aucune page. Créez-en une !</p>';return;}
+            currentPage=pages.find(p=>p.is_default)||pages[0];
+            await loadCells(); await loadPerms(); renderAdminUI();
+        }
+        async function loadCells(){if(!currentPage)return;const{data}=await fromAgence('tableur_cells').select('*').eq('page_id',currentPage.id_page);cells=data||[];}
+        async function loadPerms(){if(!currentPage)return;const{data}=await fromAgence('tableur_perms').select('*').eq('page_id',currentPage.id_page);perms=data||[];}
+        function openModal(html){modalContent.innerHTML=html;modalRoot.classList.remove('hidden');modalRoot.classList.add('flex');}
+        function closeModal(){modalRoot.classList.add('hidden');modalRoot.classList.remove('flex');modalContent.innerHTML='';}
+        modalRoot.addEventListener('click',(e)=>{if(e.target===modalRoot)closeModal();});
+
+        function renderAdminUI() {
+            app.innerHTML=`
+            <div class="flex flex-wrap gap-2">
+                <button id="add-page" class="btn btn-blue"><i class="fas fa-plus"></i>Page</button>
+                <select id="page-select" class="bg-neutral-900 border border-white/10 rounded-lg px-3 py-1.5 text-xs font-mono text-neutral-300 outline-none focus:border-ha-red transition-colors"></select>
+                <button id="set-default" class="btn btn-yellow"><i class="fas fa-star"></i>Défaut</button>
+                <button id="edit-perms" class="btn btn-purple"><i class="fas fa-user-shield"></i>Permissions</button>
+                <span class="w-px h-6 bg-white/10 self-center hidden sm:block"></span>
+                <button id="add-row" class="btn btn-green"><i class="fas fa-plus"></i>Ligne</button>
+                <button id="add-col" class="btn btn-green"><i class="fas fa-plus"></i>Col</button>
+                <button id="add-row-left" class="btn btn-ghost"><i class="fas fa-arrow-up"></i>Ligne ↑</button>
+                <button id="add-row-right" class="btn btn-ghost"><i class="fas fa-arrow-down"></i>Ligne ↓</button>
+                <button id="add-col-left" class="btn btn-ghost"><i class="fas fa-arrow-left"></i>Col ←</button>
+                <button id="add-col-right" class="btn btn-ghost"><i class="fas fa-arrow-right"></i>Col →</button>
+                <button id="remove-row" class="btn btn-red"><i class="fas fa-minus"></i>Sup. Ligne</button>
+                <button id="remove-col" class="btn btn-red"><i class="fas fa-minus"></i>Sup. Col</button>
+            </div>
+            <div class="glass-card rounded-xl overflow-hidden border-white/5">
+                <div class="overflow-auto dark-scrollbar border-none" id="table-container" tabindex="0" style="max-height:65vh"></div>
+            </div>`;
+
+            const select=document.getElementById('page-select');
+            select.innerHTML=pages.map(p=>`<option value="${p.id_page}">${p.nom_page}${p.is_default?' ★':''}</option>`).join('');
+            select.value=currentPage.id_page;
+            select.addEventListener('change',async()=>{currentPage=pages.find(p=>p.id_page==select.value);await loadCells();await loadPerms();renderTable();});
+            document.getElementById('add-page').addEventListener('click',async()=>{const n=prompt('Nom de la page ?');if(!n)return;const{data}=await insertAgence('tableur_pages', withAgence({nom_page:n}).select();if(data?.length){pages.push(data[0]);await loadPages();}});
+            document.getElementById('add-row').addEventListener('click',async()=>addRowAtIndex(null,'end'));
+            document.getElementById('add-col').addEventListener('click',async()=>addColAtIndex(null,'end'));
+            document.getElementById('set-default').addEventListener('click',async()=>{await fromAgence('tableur_pages').update({is_default:false}).neq('id_page',currentPage.id_page);await fromAgence('tableur_pages').update({is_default:true}).eq('id_page',currentPage.id_page);await loadPages();});
+            document.getElementById('edit-perms').addEventListener('click',renderPermsEditor);
+            document.getElementById('add-row-left').addEventListener('click',async()=>{const i=parseInt(prompt('Ligne AVANT laquelle ajouter (1-based):'));if(!isNaN(i)&&i>0)await addRowAtIndex(i-1,'before');});
+            document.getElementById('add-row-right').addEventListener('click',async()=>{const i=parseInt(prompt('Ligne APRÈS laquelle ajouter (1-based):'));if(!isNaN(i)&&i>0)await addRowAtIndex(i-1,'after');});
+            document.getElementById('add-col-left').addEventListener('click',async()=>{const l=prompt('Colonne à gauche (lettre):');if(l&&/^[A-Za-z]+$/.test(l))await addColAtIndex(letterToColIndex(l),'before');});
+            document.getElementById('add-col-right').addEventListener('click',async()=>{const l=prompt('Colonne à droite (lettre):');if(l&&/^[A-Za-z]+$/.test(l))await addColAtIndex(letterToColIndex(l),'after');});
+            document.getElementById('remove-row').addEventListener('click',async()=>{const i=parseInt(prompt('Ligne à supprimer (1-based):'));if(!isNaN(i)&&i>0)await removeRow(i-1);});
+            document.getElementById('remove-col').addEventListener('click',async()=>{const l=prompt('Colonne à supprimer (lettre):');if(l&&/^[A-Za-z]+$/.test(l))await removeCol(letterToColIndex(l));});
+            renderTable();
+        }
+
+        function escapeHtml(t=''){return t.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+        async function addRowAtIndex(index,pos){await loadCells();const maxRow=cells.length?Math.max(...cells.map(c=>c.ligne)):-1;let nri;if(index===null)nri=maxRow+1;else nri=pos==='before'?index:index+1;const rts=cells.filter(c=>c.ligne>=nri);for(const c of rts)await fromAgence('tableur_cells').update({ligne:c.ligne+1}).eq('id_cell',c.id_cell);cells.filter(c=>c.ligne>=nri).forEach(c=>c.ligne++);const maxCol=cells.length?Math.max(...cells.map(c=>c.colonne)):0;for(let c=0;c<=maxCol;c++){const{data}=await insertAgence('tableur_cells', withAgence({page_id:currentPage.id_page,ligne:nri,colonne:c,valeur:''}).select();if(data?.length)cells.push(data[0]);}await loadCells();renderTable();}
+        async function addColAtIndex(index,pos){await loadCells();const maxCol=cells.length?Math.max(...cells.map(c=>c.colonne)):-1;let nci;if(index===null)nci=maxCol+1;else nci=pos==='before'?index:index+1;const cts=cells.filter(c=>c.colonne>=nci);for(const c of cts)await fromAgence('tableur_cells').update({colonne:c.colonne+1}).eq('id_cell',c.id_cell);cells.filter(c=>c.colonne>=nci).forEach(c=>c.colonne++);const maxRow=cells.length?Math.max(...cells.map(c=>c.ligne)):0;for(let r=0;r<=maxRow;r++){const{data}=await insertAgence('tableur_cells', withAgence({page_id:currentPage.id_page,ligne:r,colonne:nci,valeur:''}).select();if(data?.length)cells.push(data[0]);}await loadCells();renderTable();}
+        async function removeRow(i){await loadCells();const del=cells.filter(c=>c.ligne===i);for(const c of del)await fromAgence('tableur_cells').delete().eq('id_cell',c.id_cell);const rts=cells.filter(c=>c.ligne>i);for(const c of rts)await fromAgence('tableur_cells').update({ligne:c.ligne-1}).eq('id_cell',c.id_cell);await loadCells();renderTable();}
+        async function removeCol(i){await loadCells();const del=cells.filter(c=>c.colonne===i);for(const c of del)await fromAgence('tableur_cells').delete().eq('id_cell',c.id_cell);const cts=cells.filter(c=>c.colonne>i);for(const c of cts)await fromAgence('tableur_cells').update({colonne:c.colonne-1}).eq('id_cell',c.id_cell);await loadCells();renderTable();}
+
+        async function renderTable() {
+            await loadCells();
+            const maxRow=cells.length?Math.max(...cells.map(c=>c.ligne))+1:1;
+            const maxCol=cells.length?Math.max(...cells.map(c=>c.colonne))+1:1;
+            let html=`<table class="min-w-full border-collapse text-xs font-mono table-auto"><thead><tr><th class="border border-white/10 bg-neutral-900 sticky top-0 z-20 w-10 text-neutral-600 px-2 py-1.5"></th>`;
+            for(let c=0;c<maxCol;c++) html+=`<th class="border border-white/10 bg-neutral-900 sticky top-0 z-20 px-3 py-1.5 text-center text-neutral-500 uppercase font-mono tracking-widest text-[10px]">${colIndexToLetter(c)}</th>`;
+            html+=`</tr></thead><tbody>`;
+            for(let r=0;r<maxRow;r++){
+                html+=`<tr class="${r%2===0?'bg-black/30':'bg-black/10'}"><th class="border border-white/10 bg-neutral-900 sticky left-0 z-10 px-2 py-1.5 text-center text-neutral-600 font-mono text-[10px] select-none">${r+1}</th>`;
+                for(let c=0;c<maxCol;c++){const cell=cells.find(x=>x.ligne===r&&x.colonne===c);const val=cell?cell.valeur:'';html+=`<td contenteditable="true" spellcheck="false" data-row="${r}" data-col="${c}" class="border border-white/10 p-1.5 min-w-[80px] max-w-xs break-words text-neutral-300 focus:outline-none hover:bg-white/5 transition-colors">${escapeHtml(val)}</td>`;}
+                html+=`</tr>`;
+            }
+            html+=`</tbody></table>`;
+            document.getElementById('table-container').innerHTML=html;
+            document.querySelectorAll('#table-container td[contenteditable]').forEach(td=>{
+                td.addEventListener('blur',async()=>{const row=parseInt(td.dataset.row),col=parseInt(td.dataset.col),value=td.textContent.trim();let cell=cells.find(c=>c.ligne===row&&c.colonne===col);if(cell){if(cell.valeur!==value)await fromAgence('tableur_cells').update({valeur:value}).eq('id_cell',cell.id_cell);}else if(value!==''){const{data}=await insertAgence('tableur_cells', withAgence({page_id:currentPage.id_page,ligne:row,colonne:col,valeur:value}).select();if(data?.length)cells.push(data[0]);}});
+            });
+        }
+
+        function renderPermsEditor() {
+            let html=`<h2 class="text-xl font-display font-bold text-white mb-5 uppercase tracking-tight"><i class="fas fa-user-shield mr-2 text-ha-red"></i>Permissions</h2>
+            <div class="overflow-x-auto dark-scrollbar"><table class="min-w-full text-xs font-mono mb-4 border-collapse">
+            <thead><tr class="border-b border-white/10 text-neutral-500 uppercase tracking-widest"><th class="px-3 py-2 text-left">Nom</th><th class="px-3 py-2 text-left">Accès</th><th class="px-3 py-2 text-center w-16">Del</th></tr></thead>
+            <tbody class="divide-y divide-white/5">${perms.map(p=>`<tr data-id="${p.id_perm}" class="hover:bg-white/5"><td class="px-3 py-2"><input type="text" class="bg-transparent border border-white/10 rounded px-2 py-1 text-neutral-300 w-full" value="${escapeHtml(p.perm_name)}" data-field="perm_name"></td><td class="px-3 py-2"><input type="text" class="bg-transparent border border-white/10 rounded px-2 py-1 text-neutral-300 w-full" value="${escapeHtml(p.perm_id)}" data-field="perm_id"></td><td class="px-3 py-2 text-center"><button class="btn-delete-perm text-ha-red hover:text-white text-sm"><i class="fas fa-trash-alt"></i></button></td></tr>`).join('')}</tbody></table></div>
+            <div class="flex gap-2 flex-wrap mt-4 border-t border-white/10 pt-4">
+                <input id="new-perm-name" type="text" placeholder="Surnom (ex: Sat)" class="flex-1 min-w-[120px] bg-neutral-900 border border-white/10 rounded-lg px-3 py-2 text-white text-xs font-mono">
+                <input id="new-perm-id" type="text" placeholder="Valeur (ex: 01 ou rh)" class="flex-1 min-w-[120px] bg-neutral-900 border border-white/10 rounded-lg px-3 py-2 text-white text-xs font-mono">
+                <button id="add-perm-btn" class="btn btn-purple"><i class="fas fa-plus"></i>Ajouter</button>
+                <button id="close-perm-editor" class="btn btn-ghost"><i class="fas fa-times"></i>Fermer</button>
+            </div>`;
+            openModal(html);
+            modalContent.querySelectorAll('tbody tr').forEach(tr=>{const id=tr.dataset.id;tr.querySelectorAll('input').forEach(inp=>{inp.addEventListener('change',async e=>{const f=e.target.dataset.field,v=e.target.value.trim();if(!v)return;const u={};u[f]=v;await fromAgence('tableur_perms').update(u).eq('id_perm',id);await loadPerms();});});tr.querySelector('.btn-delete-perm').addEventListener('click',async()=>{if(confirm('Supprimer ?')){await fromAgence('tableur_perms').delete().eq('id_perm',id);await loadPerms();renderPermsEditor();}});});
+            modalContent.querySelector('#add-perm-btn').addEventListener('click',async()=>{const n=modalContent.querySelector('#new-perm-name').value.trim(),v=modalContent.querySelector('#new-perm-id').value.trim();if(!n||!v)return;await insertAgence('tableur_perms', withAgence({page_id:currentPage.id_page,perm_name:n,perm_id:v});await loadPerms();renderPermsEditor();});
+            modalContent.querySelector('#close-perm-editor').addEventListener('click',closeModal);
+        }
+
+        loadPages();
+    </script>
+</body>
+</html>

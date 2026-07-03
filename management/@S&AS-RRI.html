@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- E-CDE Account & Security Soft -->
+    <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+    <title>S&AS - RRI</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace'],
+                    },
+                    colors: {
+                        neutral: { 850: '#1a1a1a', 900: '#111111', 950: '#070707' },
+                        ha: { red: '#e11d48', darkred: '#9f1239', glow: 'rgba(225, 29, 72, 0.5)' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: transparent; }
+        
+        .glass-card {
+            background: rgba(17, 17, 17, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .dark-scrollbar::-webkit-scrollbar { width: 6px; }
+        .dark-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .dark-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+        .input-glass {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            transition: all 0.2s;
+        }
+        .input-glass:focus {
+            border-color: #eab308;
+            outline: none;
+            box-shadow: 0 0 10px rgba(234, 179, 8, 0.2);
+        }
+
+        .input-red-focus:focus {
+            border-color: #e11d48 !important;
+            box-shadow: 0 0 10px rgba(225, 29, 72, 0.3) !important;
+        }
+
+        #payroll-slip-area {
+            background-color: #ffffff;
+            color: #000;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            font-family: 'Share Tech Mono', monospace;
+        }
+    </style>
+</head>
+
+<body class="text-white selection:bg-yellow-500 selection:text-black h-screen overflow-y-auto dark-scrollbar">
+    <div id="session/howard"></div>
+    <script src="/HA-EE/src/javascript/menu.js"></script>
+    <div id="menu" class="hidden"></div>
+    
+    <main id="content" class="w-full h-full p-4 lg:p-8">
+        <div perms.pages="2;rh" class="max-w-5xl mx-auto space-y-8">
+            
+            <header class="flex flex-col md:flex-row justify-between items-end pb-6 border-b border-white/10 gap-4 mb-4">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight text-white drop-shadow-lg">
+                        Howard <span class="text-yellow-500">R.R.I</span>
+                    </h1>
+                    <p class="text-[10px] font-mono text-neutral-400 uppercase tracking-widest mt-2">
+                        <i class="fa-solid fa-file-invoice-dollar mr-2"></i>Registre des Rémunérations Intégrale
+                    </p>
+                    
+                    <div class="flex gap-2 mt-6 relative z-10 glass-card p-2 rounded-xl inline-flex shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+                        <select id="sel-month" class="input-glass rounded-lg p-2 text-xs font-bold outline-none uppercase font-display cursor-pointer">
+                            <option value="0">Janvier</option><option value="1">Février</option><option value="2">Mars</option> 
+                            <option value="3">Avril</option><option value="4">Mai</option><option value="5">Juin</option>
+                            <option value="6">Juillet</option><option value="7">Août</option><option value="8">Septembre</option>
+                            <option value="9">Octobre</option><option value="10">Novembre</option><option value="11">Décembre</option>
+                        </select>
+                        <input type="number" id="sel-year" value="2026" class="input-glass rounded-lg p-2 w-20 text-xs text-center font-mono font-bold outline-none">
+                        <button onclick="updateDateContext()" class="bg-yellow-500 text-black px-4 py-2 rounded-lg font-black uppercase hover:bg-yellow-400 transition transform active:scale-95 shadow-lg">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="status-grille" class="text-[9px] font-mono bg-black/60 px-4 py-2 rounded-lg border border-white/5 text-neutral-400 flex items-center shadow-inner">
+                    <i class="fas fa-spinner fa-spin mr-2 text-yellow-500"></i> Chargement protocoles...
+                </div>
+            </header>
+
+            <div class="glass-card p-6 md:p-8 rounded-3xl relative overflow-hidden shadow-2xl">
+                <div class="absolute right-0 top-0 w-64 h-64 bg-yellow-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+
+                <div class="flex justify-between items-center mb-6 relative z-10">
+                    <label class="block text-xs font-display font-black uppercase tracking-widest text-neutral-400"><i class="fas fa-users mr-2"></i>Effectifs Howard Armory</label>
+                    <button id="btn-batch-all" class="text-[9px] bg-yellow-500/10 hover:bg-yellow-500 text-yellow-500 hover:text-black px-4 py-2 rounded-lg border border-yellow-500/30 uppercase transition-colors font-bold tracking-widest hidden">
+                        <i class="fas fa-file-export mr-2"></i> Tout Sélectionner
+                    </button>
+                </div>
+                
+                <div id="selected-employees-tags" class="flex flex-wrap gap-2 mb-6 min-h-[36px] relative z-10"></div>
+
+                <div class="relative z-10">
+                    <input type="text" id="Headline" list="HeadlineList" placeholder="RECHERCHER UN AGENT..." 
+                           class="w-full p-5 bg-black/60 text-white font-display font-bold border border-white/10 rounded-xl focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 outline-none transition-all uppercase text-sm placeholder:text-neutral-600 shadow-inner">
+                    <i class="fas fa-search absolute right-5 top-1/2 -translate-y-1/2 text-neutral-500"></i>
+                </div>
+                <datalist id="HeadlineList"></datalist>
+            </div>
+
+            <div id="primes-interface" class="hidden glass-card p-6 md:p-8 rounded-3xl border-l-2 border-yellow-500 shadow-2xl relative">
+                <h3 class="text-xs font-display font-black uppercase tracking-widest text-yellow-500 mb-6 flex justify-between items-center">
+                  <span><i class="fas fa-coins mr-2"></i>Gestionnaire de Primes & Sanctions</span>
+                  <span id="edit-mode-indicator" class="hidden text-ha-red animate-pulse bg-ha-red/10 px-3 py-1 rounded bg-black/50 border border-ha-red/30"><i class="fas fa-edit mr-2"></i>MODE ÉDITION</span>
+                </h3>
+                
+                <input type="hidden" id="edit-prime-id" value="">
+
+                <div class="flex flex-col md:flex-row gap-4 items-end bg-black/40 p-5 rounded-2xl border border-white/5">
+                    <div class="w-full md:w-1/4">
+                        <label class="text-[9px] font-mono font-bold uppercase tracking-widest text-neutral-500 mb-2 block">Date d'effet</label>
+                        <select id="prime-day-select" class="w-full input-glass p-3 rounded-lg font-mono text-xs cursor-pointer"></select>
+                    </div>
+                    <div class="w-full md:w-1/2">
+                      <label class="text-[9px] font-mono font-bold uppercase tracking-widest text-neutral-500 mb-2 block">Motif (Prime Risque, Amende...)</label>
+                      <input type="text" id="prime-reason" placeholder="Intitulé motivé" class="w-full input-glass p-3 rounded-lg font-sans text-xs">
+                    </div>
+                    <div class="w-full md:w-1/4">
+                        <label class="text-[9px] font-mono font-bold uppercase tracking-widest text-neutral-500 mb-2 block">Montant ($)</label>
+                        <input type="number" id="prime-amount" step="any" placeholder="+/- 0.00" class="w-full input-glass p-3 rounded-lg font-mono font-black text-right text-xs">
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button id="btn-save-prime" class="bg-yellow-500 hover:bg-yellow-400 text-black font-display font-black py-3 px-6 rounded-lg uppercase tracking-wider text-xs border border-yellow-600 transition-all shadow-lg whitespace-nowrap">
+                            <i class="fas fa-save mr-2"></i><span id="btn-save-text">Ajouter</span>
+                        </button>
+                        <button id="btn-cancel-edit" class="hidden bg-neutral-800 hover:bg-neutral-700 text-white font-bold py-3 px-4 rounded-lg border border-white/10 transition-all">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="active-primes-list" class="mt-6 flex flex-wrap gap-3"></div>
+            </div>
+
+            <!-- PAYROLL SLIP PREVIEW -->
+            <div id="payroll-output" class="hidden mb-12">
+                <div id="payroll-slip-area" class="p-8 md:p-12 relative overflow-hidden rounded-lg">
+                    <div class="flex justify-between items-end border-b-2 border-black pb-6 mb-8 relative z-10">
+                        <div>
+                            <h2 class="text-3xl font-black uppercase tracking-tighter text-black">Howard <span class="opacity-50">Armory</span></h2>
+                            <p class="text-[9px] uppercase font-bold text-neutral-500 tracking-wider">Département Sécurité & Logistique</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[9px] font-black bg-black text-white px-2 py-0.5 inline-block mb-1 uppercase tracking-widest">Période</div>
+                            <div class="font-bold text-xs" id="slip-date-range">--/-- au --/--</div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-end mb-10 relative z-10">
+                        <div>
+                            <p class="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Bénéficiaire</p>
+                            <p id="slip-fullname" class="text-2xl font-black uppercase text-black">---</p>
+                            <p id="slip-poste" class="text-xs text-neutral-600 font-bold uppercase mt-1">---</p>
+                        </div>
+                        <div class="text-right">
+                             <p class="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Matricule</p>
+                             <p class="text-sm font-bold text-black">HA-SEC-00X</p>
+                        </div>
+                    </div>
+
+                    <table class="w-full text-xs border-collapse mb-10 relative z-10">
+                        <thead class="bg-black text-white text-[9px] uppercase tracking-wider">
+                            <tr>
+                                <th class="text-left p-3 font-bold">Date</th>
+                                <th class="text-center p-3 font-bold">Volume (Tranches)</th>
+                                <th class="text-right p-3 font-bold">Rémunération</th>
+                            </tr>
+                        </thead>
+                        <tbody id="daily-rows" class="divide-y divide-black/10"></tbody>
+                    </table>
+
+                    <div class="flex justify-end relative z-10">
+                        <div class="bg-black text-white p-6 min-w-[250px] border-l-4 border-yellow-500 shadow-xl">
+                            <p class="text-[9px] uppercase tracking-widest font-bold mb-1 opacity-70">Net à Payer (R.R.I)</p>
+                            <p id="slip-total-salaire" class="text-3xl font-black text-yellow-500 tracking-tighter">0.00 $</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VETO CONTROL PANEL -->
+            <section id="veto-control-panel" class="mt-16 glass-card border-l-2 border-ha-red rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-80 h-80 bg-ha-red/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+
+                <div class="flex flex-col md:flex-row items-start md:items-center gap-6 mb-8 border-b border-white/5 pb-8 relative z-10">
+                    <div class="bg-ha-red/10 border border-ha-red/30 text-ha-red p-5 rounded-2xl shadow-inner">
+                        <i class="fas fa-gavel text-3xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-display font-black uppercase text-white tracking-tight">Panel Contrôle <span class="text-ha-red">Veto</span></h2>
+                        <p class="text-neutral-500 text-[10px] font-mono mt-2 uppercase tracking-widest">Validation stricte • Override Manuel</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-[10px] font-display font-bold uppercase text-ha-red mb-3 tracking-widest">1. Cible (Agent)</label>
+                            <div class="relative">
+                                <input type="text" id="veto-emp-name" list="veto-employees-list" placeholder="NOM DE L'AGENT..." 
+                                       onchange="fetchAgentHistory()"
+                                       class="w-full input-glass input-red-focus p-4 rounded-xl text-sm font-bold uppercase transition-all shadow-inner">
+                                <i class="fas fa-crosshairs absolute right-5 top-1/2 -translate-y-1/2 text-ha-red/50"></i>
+                            </div>
+                            <datalist id="veto-employees-list"></datalist>
+                        </div>
+                        
+                        <div id="agent-confirm" class="hidden bg-black/50 p-4 rounded-xl border border-ha-red/30 transition-all">
+                            <p class="text-neutral-500 text-[9px] uppercase font-mono tracking-widest mb-1">Dossier actif ciblé</p>
+                            <p id="confirm-name" class="text-white font-display font-black uppercase text-lg leading-tight truncate"></p>
+                            <p id="confirm-poste" class="text-ha-red text-[10px] uppercase font-mono tracking-wider truncate"></p>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-display font-bold uppercase text-ha-red mb-3 tracking-widest">2. Journée d'incident</label>
+                            <select id="veto-date-select" onchange="showDayStats()" 
+                                    class="w-full input-glass input-red-focus p-4 rounded-xl font-mono text-xs uppercase cursor-pointer">
+                                <option value="">-- En attente dossier --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="inspection-results" class="bg-black/40 border border-white/5 rounded-2xl p-6 flex flex-col justify-center items-center text-center opacity-30 transition-opacity duration-300">
+                        <div class="bg-neutral-900 border border-white/10 rounded-full w-14 h-14 flex items-center justify-center mb-4 shadow-inner">
+                            <i class="fas fa-search-dollar text-neutral-500 text-xl"></i>
+                        </div>
+                        <p class="text-neutral-500 text-[10px] uppercase font-display font-bold mb-6 tracking-widest">Analyse RRI de la journée</p>
+                        
+                        <div id="veto-stats" class="space-y-4 w-full">
+                            <div class="bg-black/60 p-4 rounded-xl border border-white/5 shadow-inner">
+                                <div class="text-[9px] font-mono text-neutral-500 uppercase tracking-widest mb-1">Salaire Fixe</div>
+                                <div class="text-2xl font-mono font-black text-white" id="veto-preview-wage">0.00 $</div>
+                            </div>
+                            
+                            <div class="bg-black/60 p-4 rounded-xl border border-white/5 shadow-inner">
+                                <div class="text-[9px] font-mono text-neutral-500 uppercase tracking-widest mb-1">Assurance Santé</div>
+                                <div class="text-lg font-mono font-bold text-green-500" id="veto-preview-as">+ 0.00 $</div>
+                            </div>
+
+                            <div class="pt-4 border-t border-white/5">
+                                <div class="text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-widest bg-neutral-900 border border-white/5 inline-block px-3 py-1 rounded-md shadow-inner" id="veto-preview-time">0 TRANCHES</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-black/60 border border-white/5 rounded-2xl p-6 space-y-6 flex flex-col justify-between">
+                        <div class="text-center">
+                            <h4 class="text-ha-red font-display font-black uppercase text-xs tracking-widest"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Sanction & Validation</h4>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between bg-neutral-900 hover:bg-neutral-800 p-4 rounded-xl border border-white/5 transition-colors cursor-pointer" onclick="document.getElementById('check-pay-fixe').click()">
+                                <span class="text-[10px] font-display font-bold text-white uppercase tracking-wider">Verser le Salaire ?</span>
+                                <label class="relative inline-flex items-center cursor-pointer pointer-events-none">
+                                    <input type="checkbox" id="check-pay-fixe" checked class="sr-only peer">
+                                    <div class="w-9 h-5 bg-neutral-800 border border-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500 shadow-inner"></div>
+                                </label>
+                            </div>
+
+                            <div class="flex items-center justify-between bg-neutral-900 hover:bg-neutral-800 p-4 rounded-xl border border-white/5 transition-colors cursor-pointer" onclick="document.getElementById('check-pay-as').click()">
+                                <span class="text-[10px] font-display font-bold text-white uppercase tracking-wider">Verser l'Assurance ?</span>
+                                <label class="relative inline-flex items-center cursor-pointer pointer-events-none">
+                                    <input type="checkbox" id="check-pay-as" checked class="sr-only peer">
+                                    <div class="w-9 h-5 bg-neutral-800 border border-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500 shadow-inner"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-[9px] uppercase font-bold text-neutral-500 tracking-widest font-mono">Raison de la décision</label>
+                            <textarea id="veto-reason" placeholder="Motif obligatoire: Ex: Refus d'obtempérer..." class="w-full input-glass input-red-focus p-4 rounded-xl text-xs text-white resize-none h-20 outline-none font-sans"></textarea>
+                        </div>
+
+                        <button onclick="applyVeto()" class="w-full bg-ha-red/10 border border-ha-red/30 text-ha-red font-display font-black py-4 rounded-xl uppercase hover:bg-ha-red hover:text-white transition-all active:scale-95 flex justify-center items-center gap-3 text-xs tracking-widest shadow-[0_0_15px_rgba(225,29,72,0.1)] hover:shadow-[0_0_20px_rgba(225,29,72,0.4)]">
+                            <i class="fas fa-fingerprint text-lg"></i>
+                            <span>Appliquer Règle</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+      
+    <script type="module">
+        import { supabase, fromAgence, insertAgence, withAgence } from '/HA-EE/src/javascript/sp.js';
+
+        const GITHUB_TOKEN = "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";
+        const REPO_PATH = "https://api.github.com/repos/PKYT-Service/database_dev/contents/NEW*DRIVE/howard/HA - Portail Public/Information/1. Salaire & Emploi.md";
+
+        let grillePaie = {};
+        let employeeList = [];
+        let selectedEmps = [];
+        let currentEmp = null;
+        let loadedPrimes = [];
+        let dailyData = {};
+        let selectedVetoAgent = null;
+
+        let selectedMonth, selectedYear, firstDayOfMonth, lastDayOfMonth;
+
+        window.onload = async () => {
+            const now = new Date();
+            document.getElementById('sel-month').value = now.getMonth();
+            document.getElementById('sel-year').value = now.getFullYear();
+            window.updateDateContext();
+            await initSystem();
+        };
+
+        window.updateDateContext = () => {
+            selectedMonth = parseInt(document.getElementById('sel-month').value);
+            selectedYear = parseInt(document.getElementById('sel-year').value);
+            
+            const start = new Date(selectedYear, selectedMonth, 1);
+            const end = new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59);
+            firstDayOfMonth = start.toISOString();
+            lastDayOfMonth = end.toISOString();
+
+            if(currentEmp) generate(currentEmp.nom + " " + currentEmp.prenom);
+            
+            const btn = document.querySelector('button[onclick="updateDateContext()"] i');
+            if(btn) {
+                btn.classList.add('fa-spin');
+                setTimeout(() => btn.classList.remove('fa-spin'), 500);
+            }
+        };
+
+        async function initSystem() {
+            try {
+                const res = await fetch(REPO_PATH, { headers: { "Authorization": `token ${GITHUB_TOKEN}` } });
+                const data = await res.json();
+                const content = atob(data.content);
+                content.split('\n').forEach(line => {
+                    if (line.includes('|')) {
+                        const c = line.split('|').map(x => x.trim().toLowerCase().replace(/\*/g, ''));
+                        if (c.length >= 6) {
+                            grillePaie[c[2]] = { fixe: parseFloat(c[4]?.replace(',','.')) || 0, as: parseFloat(c[5]?.replace(',','.')) || 0 };
+                        }
+                    }
+                });
+                document.getElementById('status-grille').innerHTML = `<i class="fas fa-check-circle text-green-500 mr-2 shadow-[0_0_8px_rgba(34,197,94,0.5)] rounded-full"></i> RRI : Grille Synchro`;
+
+                const { data: list } = await fromAgence('employes').select('nom, prenom, email, poste, echelon').order('nom');
+                if (list) {
+                    employeeList = list;
+                    document.getElementById('HeadlineList').innerHTML = list.map(e => `<option value="${e.nom} ${e.prenom}">`).join('');
+                    document.getElementById('veto-employees-list').innerHTML = list.map(e => `<option value="${e.nom} ${e.prenom}">${e.poste}</option>`).join('');
+                }
+
+            } catch (e) { 
+                document.getElementById('status-grille').innerHTML = `<i class="fas fa-exclamation-triangle text-ha-red mr-2"></i> Erreur Synchro`;
+            }
+        }
+
+        document.getElementById('Headline').addEventListener('change', (e) => {
+            const val = e.target.value;
+            const emp = employeeList.find(x => (x.nom + " " + x.prenom) === val);
+            
+            if(emp) {
+                if(!selectedEmps.find(s => s.email === emp.email)) {
+                    selectedEmps.push(emp);
+                    renderSelectedTags();
+                    currentEmp = emp; 
+                    generate(val);
+                    document.getElementById('veto-emp-name').value = `${emp.nom} ${emp.prenom}`;
+                    window.fetchAgentHistory();
+                }
+            }
+            e.target.value = "";
+        });
+
+        function renderSelectedTags() {
+            const container = document.getElementById('selected-employees-tags');
+            container.innerHTML = selectedEmps.map(emp => `
+                <span class="bg-neutral-900 border border-yellow-500/30 text-white text-[10px] font-mono font-bold px-3 py-1.5 rounded-lg flex items-center gap-3 shadow-inner group">
+                    <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                    ${emp.nom} ${emp.prenom}
+                    <button onclick="removeSelected('${emp.email}')" class="text-neutral-500 group-hover:text-ha-red transition-colors outline-none"><i class="fas fa-times"></i></button>
+                </span>
+            `).join('');
+        }
+
+        window.removeSelected = (email) => {
+            selectedEmps = selectedEmps.filter(e => e.email !== email);
+            renderSelectedTags();
+            if(selectedEmps.length > 0) {
+                currentEmp = selectedEmps[selectedEmps.length - 1];
+                generate(currentEmp.nom + " " + currentEmp.prenom);
+            } else {
+                document.getElementById('primes-interface').classList.add('hidden');
+                document.getElementById('payroll-output').classList.add('hidden');
+                currentEmp = null;
+            }
+        };
+
+        document.getElementById('btn-save-prime').addEventListener('click', async () => {
+            if(selectedEmps.length === 0) return Swal.fire({title: "Erreur", text:"Aucun agent sélectionné", icon: "error"});
+            
+            const primeId = document.getElementById('edit-prime-id').value;
+            const date = document.getElementById('prime-day-select').value;
+            const reason = document.getElementById('prime-reason').value || "Ajustement RRI";
+            const amount = parseFloat(document.getElementById('prime-amount').value);
+
+            if(!date || isNaN(amount)) return Swal.fire({title:"Format Invalide", text:"Vérifiez date/montant.", icon:"warning"});
+
+            Swal.fire({ title: 'Traitement RRI...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            try {
+                if(primeId) {
+                    await fromAgence('primes_exceptionnelles').update({
+                        date_prime: date, motif: reason, montant: amount
+                    }).eq('id', primeId);
+                } else {
+                    const inserts = selectedEmps.map(emp => ({
+                        email: emp.email, date_prime: date, motif: reason, montant: amount
+                    }));
+                    await fromAgence('primes_exceptionnelles').insert(inserts);
+                }
+                
+                cancelEdit();
+                generate(currentEmp.nom + " " + currentEmp.prenom);
+                Swal.fire({ title: "Enregistré", icon: "success", timer: 1500, showConfirmButton: false });
+            } catch (err) {
+                Swal.fire({title:"Erreur", text:"Échec écriture BDD", icon:"error"});
+            }
+        });
+
+        window.editPrime = (id, date, motif, montant) => {
+            document.getElementById('edit-mode-indicator').classList.remove('hidden');
+            document.getElementById('btn-cancel-edit').classList.remove('hidden');
+            document.getElementById('btn-save-text').innerText = "Modifier";
+            
+            document.getElementById('edit-prime-id').value = id;
+            document.getElementById('prime-day-select').value = date;
+            document.getElementById('prime-reason').value = motif;
+            document.getElementById('prime-amount').value = montant;
+            
+            document.getElementById('primes-interface').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        window.deletePrime = async (id) => {
+            const { isConfirmed } = await Swal.fire({ 
+                title: 'Retirer ligne ?', icon: 'warning', 
+                showCancelButton: true, confirmButtonColor: '#e11d48'
+            });
+            if(isConfirmed) {
+                await fromAgence('primes_exceptionnelles').delete().eq('id', id);
+                generate(currentEmp.nom + " " + currentEmp.prenom);
+            }
+        };
+
+        function cancelEdit() {
+            document.getElementById('edit-mode-indicator').classList.add('hidden');
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+            document.getElementById('btn-save-text').innerText = "Ajouter";
+            document.getElementById('edit-prime-id').value = "";
+            document.getElementById('prime-reason').value = "";
+            document.getElementById('prime-amount').value = "";
+        }
+        document.getElementById('btn-cancel-edit').addEventListener('click', cancelEdit);
+
+        async function generate(fullName) {
+            if(!fullName) return;
+            const [nom, ...pre] = fullName.split(' ');
+            const prenom = pre.join(' ');
+            let emp = employeeList.find(e => e.nom === nom && e.prenom === prenom);
+            if(!emp) return;
+
+            const [servRes, primeRes] = await Promise.all([
+                fromAgence('assurance_sante').select('*').eq('email', emp.email).eq('statut', 'valide'),
+                fromAgence('primes_exceptionnelles').select('*').eq('email', emp.email).gte('date_prime', firstDayOfMonth).lte('date_prime', lastDayOfMonth)
+            ]);
+
+            loadedPrimes = primeRes.data || [];
+            
+            const container = document.getElementById('active-primes-list');
+            container.innerHTML = loadedPrimes.map(p => {
+                const isNeg = p.montant < 0;
+                const style = isNeg ? 'border-ha-red/50 text-ha-red bg-ha-red/10' : 'border-yellow-500/50 text-yellow-500 bg-yellow-500/10';
+                return `
+                <div class="${style} border text-[10px] px-3 py-1.5 rounded flex items-center gap-3 cursor-pointer hover:bg-black"
+                     onclick="editPrime('${p.id}', '${p.date_prime}', '${p.motif}', ${p.montant})">
+                    <span class="font-bold font-mono">${new Date(p.date_prime).toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'})}</span>
+                    <span class="text-white">${p.motif}</span>
+                    <span class="font-black">${p.montant > 0 ? '+' : ''}${p.montant}$</span>
+                    <button onclick="event.stopPropagation(); deletePrime('${p.id}')" class="text-neutral-500 ml-2"><i class="fas fa-times"></i></button>
+                </div>`;
+            }).join('');
+
+            const selectDate = document.getElementById('prime-day-select');
+            const workDays = [...new Set((servRes.data || []).map(s => s.date_service))].sort();
+            selectDate.innerHTML = workDays.length > 0 
+                ? workDays.map(d => `<option value="${d}">${new Date(d).toLocaleDateString()}</option>`).join('')
+                : `<option value="${new Date().toISOString().split('T')[0]}">${new Date().toLocaleDateString()} (Aujourd'hui)</option>`;
+
+            document.getElementById('primes-interface').classList.remove('hidden');
+            document.getElementById('payroll-output').classList.remove('hidden');
+
+            renderTable(servRes.data, emp);
+        }
+
+        function renderTable(services, emp) {
+            const rows = document.getElementById('daily-rows');
+            const totalNetEl = document.getElementById('slip-total-salaire');
+            rows.innerHTML = "";
+            
+            let totalSalaire = 0;
+            const tarif = grillePaie[emp.poste.toLowerCase()] || { fixe: 0 };
+
+            const dailySummary = {};
+            services?.forEach(s => {
+                const d = s.date_service;
+                if(!dailySummary[d]) dailySummary[d] = { tranches: 0, base: 0 };
+                
+                dailySummary[d].tranches += 1; 
+                dailySummary[d].base += (tarif.fixe);
+            });
+
+            if(Object.keys(dailySummary).length === 0) {
+                 rows.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-neutral-400 italic">Aucune donnée pour cette période.</td></tr>`;
+            }
+
+            Object.keys(dailySummary).sort().forEach(date => {
+                const data = dailySummary[date];
+                totalSalaire += data.base;
+                rows.innerHTML += `
+                    <tr>
+                        <td class="p-3 border-r border-black/10 font-bold">${new Date(date).toLocaleDateString()}</td>
+                        <td class="p-3 text-center border-r border-black/10 text-neutral-600">${data.tranches} <span class="text-[8px] uppercase">sessions</span></td>
+                        <td class="p-3 text-right font-black">${data.base.toFixed(0)} $</td>
+                    </tr>`;
+            });
+
+            const totalPrimes = loadedPrimes.reduce((sum, p) => sum + parseFloat(p.montant), 0);
+            const finalTotal = totalSalaire + totalPrimes;
+
+            document.getElementById('slip-fullname').innerText = `${emp.nom} ${emp.prenom}`;
+            document.getElementById('slip-poste').innerText = `${emp.poste} (Ech. ${emp.echelon || 'I'})`;
+            document.getElementById('slip-date-range').innerText = `${selectedMonth+1}/${selectedYear}`;
+            totalNetEl.innerText = `${finalTotal.toFixed(2)} $`;
+        }
+
+        window.fetchAgentHistory = async () => {
+            const input = document.getElementById('veto-emp-name').value.trim();
+            selectedVetoAgent = employeeList.find(e => `${e.nom} ${e.prenom}`.toLowerCase() === input.toLowerCase());
+            
+            if(!selectedVetoAgent) {
+                document.getElementById('agent-confirm').classList.add('hidden');
+                return;
+            }
+
+            document.getElementById('agent-confirm').classList.remove('hidden');
+            document.getElementById('confirm-name').innerText = `${selectedVetoAgent.nom} ${selectedVetoAgent.prenom}`;
+            document.getElementById('confirm-poste').innerText = selectedVetoAgent.poste;
+
+            const { data: services } = await fromAgence('assurance_sante')
+                .select('*')
+                .eq('email', selectedVetoAgent.email)
+                .eq('statut', 'valide')
+                .order('date_service', { ascending: false });
+
+            if(services) aggregateServicesForVeto(services);
+        };
+
+        function aggregateServicesForVeto(services) {
+            dailyData = {};
+            const select = document.getElementById('veto-date-select');
+            select.innerHTML = '<option value="">-- Choisir une date --</option>';
+
+            services.forEach(s => {
+                const date = s.date_service;
+                if(!dailyData[date]) dailyData[date] = { tranches: 0, totalAS: 0, totalFixe: 0 };
+
+                let tranchesLocales = 0;
+                try {
+                    const slots = typeof s.horaires === 'string' ? JSON.parse(s.horaires) : s.horaires;
+                    slots.forEach(v => {
+                        const [hD, mD] = v.de.split(':').map(Number);
+                        let [hA, mA] = v.a.split(':').map(Number);
+                        let diff = (hA * 60 + mA) - (hD * 60 + mD);
+                        if(diff < 0) diff += 1440;
+                        tranchesLocales += Math.floor(diff / 15);
+                    });
+                } catch(e) {}
+
+                dailyData[date].tranches += tranchesLocales;
+                dailyData[date].totalAS += parseFloat(s.total_as || 0);
+                dailyData[date].totalFixe += (tranchesLocales * parseFloat(s.archive_salaire_fixe || 0));
+            });
+
+            Object.keys(dailyData).forEach(date => {
+                const opt = document.createElement('option');
+                opt.value = date;
+                opt.innerText = new Date(date).toLocaleDateString() + ` (${dailyData[date].tranches} tranches)`;
+                select.appendChild(opt);
+            });
+        }
+
+        window.showDayStats = () => {
+            const date = document.getElementById('veto-date-select').value;
+            const container = document.getElementById('inspection-results');
+            
+            if(!date || !dailyData[date]) {
+                container.classList.add('opacity-30');
+                return;
+            }
+
+            const stats = dailyData[date];
+            container.classList.remove('opacity-30');
+            document.getElementById('veto-preview-wage').innerText = `${stats.totalFixe.toFixed(2)} $`;
+            document.getElementById('veto-preview-as').innerText = `+ ${stats.totalAS.toFixed(2)} $`;
+            document.getElementById('veto-preview-time').innerText = `${stats.tranches} TRANCHES`;
+        };
+
+        window.applyVeto = async () => {
+            const date = document.getElementById('veto-date-select').value;
+            const payFixe = document.getElementById('check-pay-fixe').checked;
+            const payAS = document.getElementById('check-pay-as').checked;
+            const reason = document.getElementById('veto-reason').value;
+
+            if (!selectedVetoAgent || !selectedVetoAgent.email || !date) {
+                return Swal.fire({title:"Incomplet", text:"Sélectionnez agent et date.", icon:"warning"});
+            }
+
+            const payload = {
+                email: selectedVetoAgent.email,
+                date_ref: date,
+                pay_fixe: Boolean(payFixe),
+                pay_as: Boolean(payAS),
+                motif: reason || "Veto de Sécurité - Howard Armory"
+            };
+
+            const { data, error } = await supabase
+                .from('payroll_calendar_rules')
+                .upsert(payload, { onConflict: 'email, date_ref' });
+
+            if (error) {
+                Swal.fire({ title: "Échec Veto", text: error.message, icon: "error" });
+            } else {
+                Swal.fire({
+                    title: "Veto Appliqué",
+                    text: `Décision enregistrée pour le ${new Date(date).toLocaleDateString()}`,
+                    icon: "success"
+                });
+            }
+        };
+    </script>
+</body>
+</html>
+
+
