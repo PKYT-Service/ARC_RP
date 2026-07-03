@@ -1,0 +1,213 @@
+/* A.R.C — Thème unifié (accueil.html / index.html) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap');
+
+:root {
+    --arc-bg: #050505;
+    --arc-surface: rgba(8, 8, 8, 0.75);
+    --arc-border: rgba(255, 255, 255, 0.05);
+    --arc-gold: #c5a059;
+    --arc-gold-dim: rgba(197, 160, 89, 0.08);
+    --arc-gold-border: rgba(197, 160, 89, 0.18);
+    --arc-text: #a3a3a3;
+    --arc-text-muted: #525252;
+}
+
+html.dark, html[class="dark"] {
+    color-scheme: dark;
+}
+
+body.arc-theme,
+html.dark body,
+html[class="dark"] body {
+    background-color: var(--arc-bg);
+    color: var(--arc-text);
+    font-family: 'Inter', sans-serif;
+    antialiased: true;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Ambient glow */
+.arc-theme .ambient-glow,
+.ambient-glow {
+    position: fixed;
+    width: 40vw;
+    height: 40vw;
+    background: radial-gradient(circle, var(--arc-gold-dim) 0%, transparent 60%);
+    border-radius: 50%;
+    z-index: 0;
+    filter: blur(80px);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Glass panels */
+.glass-panel,
+.glass-card,
+.glass {
+    background: var(--arc-surface);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--arc-border);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover,
+.glass:hover {
+    border-color: var(--arc-gold-border);
+}
+
+.glass-gold {
+    border-color: var(--arc-gold-border);
+}
+
+/* Form fields */
+.field,
+.arc-field {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.75rem;
+    padding: 0.6rem 0.9rem;
+    color: #d4d4d4;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8125rem;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.field:focus,
+.arc-field:focus {
+    border-color: var(--arc-gold);
+}
+
+/* Buttons */
+.btn-primary,
+.arc-btn-primary {
+    background: rgba(197, 160, 89, 0.1);
+    border: 1px solid rgba(197, 160, 89, 0.4);
+    color: var(--arc-gold);
+    padding: 0.45rem 1rem;
+    border-radius: 0.6rem;
+    font-size: 0.7rem;
+    font-family: 'Share Tech Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover,
+.arc-btn-primary:hover {
+    background: var(--arc-gold);
+    color: #050505;
+}
+
+.btn-ghost,
+.arc-btn-ghost {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #737373;
+    padding: 0.45rem 1rem;
+    border-radius: 0.6rem;
+    font-size: 0.7rem;
+    font-family: 'Share Tech Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-ghost:hover,
+.arc-btn-ghost:hover {
+    border-color: rgba(197, 160, 89, 0.3);
+    color: #fff;
+}
+
+/* Accent gold override (remplace ha-red sur les pages thème) */
+.arc-theme .text-ha-red,
+html.dark .text-ha-red {
+    color: var(--arc-gold) !important;
+}
+
+.arc-theme .text-ha-gold,
+.text-ha-gold {
+    color: var(--arc-gold);
+}
+
+.arc-theme .border-ha-red,
+html.dark .border-ha-red {
+    border-color: var(--arc-gold-border) !important;
+}
+
+.arc-theme .selection\:bg-ha-red\/30::selection,
+html.dark ::selection {
+    background: rgba(197, 160, 89, 0.3);
+    color: #fff;
+}
+
+/* Scrollbar */
+.dark-scrollbar::-webkit-scrollbar,
+.arc-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+.dark-scrollbar::-webkit-scrollbar-track,
+.arc-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dark-scrollbar::-webkit-scrollbar-thumb,
+.arc-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.dark-scrollbar::-webkit-scrollbar-thumb:hover,
+.arc-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(197, 160, 89, 0.4);
+}
+
+/* Loader ring */
+.loader-ring {
+    width: 48px;
+    height: 48px;
+    border: 2px solid rgba(197, 160, 89, 0.1);
+    border-left-color: var(--arc-gold);
+    border-radius: 50%;
+    animation: arc-spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+}
+
+@keyframes arc-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Labels */
+label,
+.arc-label {
+    font-size: 0.625rem;
+    font-family: 'Share Tech Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #737373;
+    display: block;
+    margin-bottom: 0.35rem;
+}
+
+/* Page headers */
+.arc-page-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1.5rem;
+}
+
+.arc-page-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    color: #fff;
+}
+
+.arc-page-title span {
+    color: var(--arc-gold);
+}

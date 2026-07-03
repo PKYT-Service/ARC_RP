@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A.R.C. Systems | Global Finance Dashboard</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;1,400&display=swap" rel="stylesheet">
+    <!-- J'ai laissé FontAwesome si tu l'utilisais pour tes icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .gold-gradient { background: linear-gradient(135deg, #F5EBE0 0%, #D4AF37 50%, #AA823C 100%); }
+        .text-gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #AA823C 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* Background Tech ARC */
+        .tech-grid { background-size: 50px 50px; background-image: linear-gradient(to right, rgba(170, 130, 60, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(170, 130, 60, 0.03) 1px, transparent 1px); }
+        .tech-dots { background-image: radial-gradient(rgba(170, 130, 60, 0.12) 1px, transparent 0); background-size: 25px 25px; }
+        @keyframes drift-slow { 0%, 100% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.15); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
+        @keyframes drift-reverse { 0%, 100% { transform: translate(0px, 0px) scale(1.1); } 50% { transform: translate(-40px, 40px) scale(0.85); } }
+        .animate-drift-1 { animation: drift-slow 20s infinite ease-in-out; }
+        .animate-drift-2 { animation: drift-reverse 25s infinite ease-in-out; }
+
+        /* Nouveaux Panels ARC */
+        .glass-panel { 
+            background: rgba(255, 255, 255, 0.7); 
+            border: 1px solid rgba(220, 207, 192, 0.5); /* border-dark-700/50 */
+            backdrop-filter: blur(12px);
+            border-radius: 1.25rem;
+            box-shadow: 0 10px 30px rgba(170, 130, 60, 0.05);
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-panel:hover {
+            transform: translateY(-2px);
+            border-color: rgba(170, 130, 60, 0.4);
+            box-shadow: 0 15px 35px rgba(170, 130, 60, 0.1);
+        }
+        
+        /* Boutons filtres ARC */
+        .btn-filter {
+            transition: all 0.2s ease;
+            color: #4A3E31; /* champagne-200 */
+            border-color: rgba(220, 207, 192, 0.8);
+            background: rgba(250, 248, 245, 0.5);
+        }
+        .btn-filter:hover {
+            background: #ffffff;
+            border-color: #D4AF37;
+        }
+        .btn-filter.active { 
+            border-color: #AA823C; 
+            color: #1A140E; 
+            background: #ffffff;
+            box-shadow: 0 2px 10px rgba(170, 130, 60, 0.1);
+        }
+    </style>
+</head>
+<body class="text-champagne-100 min-h-screen p-4 lg:p-8 relative overflow-x-hidden antialiased flex flex-col">
+
+    <!-- Fonds animés A.R.C. -->
+    <div class="fixed inset-0 tech-grid pointer-events-none z-0"></div>
+    <div class="fixed inset-0 tech-dots pointer-events-none z-0 opacity-40"></div>
+    <div class="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-champagne-300/10 blur-[120px] pointer-events-none z-0 animate-drift-1"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[55vw] h-[55vw] rounded-full bg-champagne-500/10 blur-[150px] pointer-events-none z-0 animate-drift-2"></div>
+
+    <!-- Contenu principal -->
+    <div class="relative z-10 flex-1 flex flex-col max-w-7xl mx-auto w-full">
+        
+        <!-- Header & Filtres -->
+        <header class="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-8 border-b border-dark-700/30 pb-6">
+            <div class="flex items-center gap-4">
+                <div class="h-12 w-12 rounded-xl gold-gradient flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-champagne-500/20">▲</div>
+                <div>
+                    <h1 class="text-3xl font-serif text-champagne-100">Global <span class="italic text-champagne-500">Finance</span>.</h1>
+                    <p class="text-xs font-medium uppercase tracking-widest text-champagne-200/60 mt-1"><i class="fa-solid fa-chart-line mr-2"></i>Analyse journalière & Taxation Fédérale</p>
+                </div>
+            </div>
+            <div class="flex gap-2 mt-6 lg:mt-0 bg-white/50 p-1 rounded-lg border border-dark-700/30 backdrop-blur-sm">
+                <button onclick="applyFilter('all')" id="btn-all" class="btn-filter px-4 py-2 text-[10px] font-bold uppercase rounded-md tracking-wider">Depuis 2023</button>
+                <button onclick="applyFilter('year')" id="btn-year" class="btn-filter px-4 py-2 text-[10px] font-bold uppercase rounded-md tracking-wider active">Cette Année</button>
+                <button onclick="applyFilter('month')" id="btn-month" class="btn-filter px-4 py-2 text-[10px] font-bold uppercase rounded-md tracking-wider">Ce Mois</button>
+            </div>
+        </header>
+
+        <!-- KPI -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+            <div class="glass-panel p-5 border-t-2 border-t-champagne-400 relative overflow-hidden">
+                <div class="absolute -right-2 -top-2 opacity-5 text-7xl text-champagne-500"><i class="fa-solid fa-vault"></i></div>
+                <p class="text-[10px] uppercase text-champagne-200/70 font-bold tracking-widest">Total Déboursé</p>
+                <h2 id="kpi-total" class="text-3xl font-semibold text-gold-gradient mt-1 tracking-tight">0.00 $</h2>
+            </div>
+            <div class="glass-panel p-5 relative overflow-hidden">
+                <div class="absolute -right-2 -top-2 opacity-5 text-7xl text-champagne-200"><i class="fa-solid fa-money-bill-wave"></i></div>
+                <p class="text-[10px] uppercase text-champagne-200/70 font-bold tracking-widest">Salaires Fixes</p>
+                <h2 id="kpi-salaires" class="text-2xl font-semibold text-champagne-100 mt-1 tracking-tight">0.00 $</h2>
+            </div>
+            <div class="glass-panel p-5 relative overflow-hidden">
+                <div class="absolute -right-2 -top-2 opacity-5 text-7xl text-champagne-200"><i class="fa-solid fa-gem"></i></div>
+                <p class="text-[10px] uppercase text-champagne-200/70 font-bold tracking-widest">Primes Excep.</p>
+                <h2 id="kpi-primes" class="text-2xl font-semibold text-champagne-100 mt-1 tracking-tight">0.00 $</h2>
+            </div>
+            <div class="glass-panel p-5 relative overflow-hidden">
+                <div class="absolute -right-2 -top-2 opacity-5 text-7xl text-champagne-200"><i class="fa-solid fa-briefcase-medical"></i></div>
+                <p class="text-[10px] uppercase text-champagne-200/70 font-bold tracking-widest">Assurance Santé</p>
+                <h2 id="kpi-as" class="text-2xl font-semibold text-champagne-100 mt-1 tracking-tight">0.00 $</h2>
+            </div>
+            <div class="glass-panel p-5 border-t-2 border-t-[#4A3E31] relative overflow-hidden">
+                <div class="absolute -right-2 -top-2 opacity-5 text-7xl text-champagne-200"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                <p class="text-[10px] uppercase text-champagne-200 font-bold tracking-widest">Taxes (15.3%)</p>
+                <h2 id="kpi-taxes" class="text-2xl font-semibold text-[#4A3E31] mt-1 tracking-tight">0.00 $</h2>
+            </div>
+        </div>
+
+        <!-- Charts Area -->
+        <div class="flex flex-col gap-6 flex-1">
+            
+            <div class="glass-panel p-6 w-full">
+                <h3 class="text-[11px] font-bold uppercase text-champagne-400 mb-4 tracking-[0.2em] flex items-center"><i class="fa-solid fa-calendar-day mr-3"></i>Évolution Globale & Flux de Trésorerie</h3>
+                <div class="relative h-[300px] w-full">
+                    <canvas id="mainTimeChart"></canvas>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-8">
+                <div class="glass-panel p-6">
+                    <h3 class="text-[11px] font-bold uppercase text-champagne-400 mb-4 tracking-[0.2em] flex items-center"><i class="fa-solid fa-scale-balanced mr-3"></i>Répartition Salaire & Prime</h3>
+                    <div class="relative h-[250px] w-full">
+                        <canvas id="salairePrimeChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6">
+                    <h3 class="text-[11px] font-bold uppercase text-champagne-400 mb-4 tracking-[0.2em] flex items-center"><i class="fa-solid fa-landmark mr-3"></i>Charges Patronales (Santé & Taxes)</h3>
+                    <div class="relative h-[250px] w-full">
+                        <canvas id="salaireAsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<script type="module">
+        // 1. On importe TOUT depuis ton fichier central sp.js (plus besoin de l'URL brute ici !)
+        import { supabase, fromAgence } from '/HA-EE/src/javascript/sp.js';
+
+        // Taux de taxation américain FICA (Social Security + Medicare) estimé pour le RP
+        const US_PAYROLL_TAX_RATE = 0.069; 
+
+        let rawData = { services: [], primes: [] };
+        let charts = { main: null, sp: null, sa: null };
+
+        // Fonction pour calculer les tranches horaires
+        function calculerTranches(horairesStr) {
+            let totalMinutes = 0;
+            if (!horairesStr) return 0;
+            
+            try {
+                const slots = typeof horairesStr === 'string' ? JSON.parse(horairesStr) : horairesStr;
+                slots.forEach(slot => {
+                    if (!slot.de || !slot.a) return;
+                    const [hD, mD] = slot.de.split(':').map(Number);
+                    let [hA, mA] = slot.a.split(':').map(Number);
+                    let debut = hD * 60 + mD; 
+                    let fin = hA * 60 + mA;
+                    if (fin < debut) fin += 1440; // Gestion minuit
+                    totalMinutes += (fin - debut);
+                });
+                return Math.floor(totalMinutes / 15);
+            } catch (e) {
+                console.error("Erreur parsing horaires:", e);
+                return 0;
+            }
+        }
+
+        async function initData() {
+            const [{data: srv}, {data: prm}] = await Promise.all([
+                fromAgence('assurance_sante').select('*').eq('statut', 'valide'),
+                fromAgence('primes_exceptionnelles').select('*')
+            ]);
+            
+            rawData.services = srv || [];
+            rawData.primes = prm || [];
+            
+            applyFilter('all');
+        }
+
+        window.applyFilter = (mode) => {
+            document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-${mode}`).classList.add('active');
+
+            const now = new Date();
+            let start = '2023-01-01';
+            
+            if (mode === 'year') {
+                start = `${now.getFullYear()}-01-01`;
+            } else if (mode === 'month') {
+                start = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+            }
+
+            processData(start);
+        };
+
+        function processData(start) {
+            let stats = {}; 
+            let totals = { s: 0, p: 0, a: 0, t: 0 };
+            
+            rawData.services.filter(s => s.date_service >= start).forEach(s => {
+                const day = s.date_service.substring(0, 10); 
+                if(!stats[day]) stats[day] = { s: 0, p: 0, a: 0, t: 0 };
+                
+                const tranches = calculerTranches(s.horaires);
+                const tarifUnitaireFixe = parseFloat(s.archive_salaire_fixe || 0);
+                
+                const salaireTotalJour = tarifUnitaireFixe * tranches;
+                const asTotalJour = parseFloat(s.total_as || 0); 
+
+                stats[day].s += salaireTotalJour; 
+                stats[day].a += asTotalJour;
+                
+                totals.s += salaireTotalJour; 
+                totals.a += asTotalJour;
+            });
+
+            rawData.primes.filter(p => p.date_prime >= start).forEach(p => {
+                const day = p.date_prime.substring(0, 10);
+                if(!stats[day]) stats[day] = { s: 0, p: 0, a: 0, t: 0 };
+                
+                const primeVal = parseFloat(p.montant || 0);
+                stats[day].p += primeVal; 
+                totals.p += primeVal;
+            });
+
+            // Calcul des taxes journalières (basé sur la masse salariale + primes)
+            Object.keys(stats).forEach(day => {
+                const taxesJour = (stats[day].s + stats[day].p) * US_PAYROLL_TAX_RATE;
+                stats[day].t = taxesJour;
+                totals.t += taxesJour;
+            });
+
+            updateUI(stats, totals);
+        }
+
+        function updateUI(stats, totals) {
+            const formatCash = (val) => val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $';
+
+            // Mise à jour des KPI (Total inclut maintenant les taxes)
+            document.getElementById('kpi-total').innerText = formatCash(totals.s + totals.p + totals.a + totals.t);
+            document.getElementById('kpi-salaires').innerText = formatCash(totals.s);
+            document.getElementById('kpi-primes').innerText = formatCash(totals.p);
+            document.getElementById('kpi-as').innerText = formatCash(totals.a);
+            document.getElementById('kpi-taxes').innerText = formatCash(totals.t);
+
+            const labels = Object.keys(stats).sort(); 
+            const dataSalaire = labels.map(l => stats[l].s);
+            const dataPrime = labels.map(l => stats[l].p);
+            const dataAS = labels.map(l => stats[l].a);
+            const dataTaxes = labels.map(l => stats[l].t);
+
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                color: '#a3a3a3',
+                scales: {
+                    x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#737373', maxTicksLimit: 15 } },
+                    y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#737373' } }
+                },
+                plugins: {
+                    legend: { labels: { color: '#a3a3a3', font: { family: 'Outfit' } } }
+                }
+            };
+
+            // GRAPHIQUE 1 : GLOBAL
+            if(charts.main) charts.main.destroy();
+            charts.main = new Chart(document.getElementById('mainTimeChart'), {
+                type: 'line',
+                data: { 
+                    labels, 
+                    datasets: [
+                        { label: 'Salaires', data: dataSalaire, borderColor: '#ffffff', backgroundColor: 'rgba(255,255,255,0.05)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 2 },
+                        { label: 'Primes', data: dataPrime, borderColor: '#c5a059', backgroundColor: 'rgba(197,160,89,0.1)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 2 },
+                        { label: 'Assurance Santé', data: dataAS, borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 2 },
+                        { label: 'Taxes US', data: dataTaxes, borderColor: '#06b6d4', backgroundColor: 'rgba(6,182,212,0.1)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 2 }
+                    ]
+                },
+                options: { ...commonOptions, interaction: { mode: 'index', intersect: false } }
+            });
+
+            // GRAPHIQUE 2 : SALAIRE & PRIME
+            if(charts.sp) charts.sp.destroy();
+            charts.sp = new Chart(document.getElementById('salairePrimeChart'), {
+                type: 'bar',
+                data: { 
+                    labels, 
+                    datasets: [
+                        { label: 'Salaire', data: dataSalaire, backgroundColor: 'rgba(255,255,255,0.8)', borderRadius: 2 },
+                        { label: 'Prime', data: dataPrime, backgroundColor: '#c5a059', borderRadius: 2 }
+                    ]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        x: { stacked: true, grid: { display: false } },
+                        y: { stacked: true, grid: { color: 'rgba(255, 255, 255, 0.05)' } }
+                    }
+                }
+            });
+
+            // GRAPHIQUE 3 : CHARGES (Double Ligne AS + Taxes)
+            if(charts.sa) charts.sa.destroy();
+            charts.sa = new Chart(document.getElementById('salaireAsChart'), {
+                type: 'line',
+                data: { 
+                    labels, 
+                    datasets: [
+                        { label: 'Assurance Santé', data: dataAS, borderColor: '#ef4444', backgroundColor: '#ef4444', tension: 0.3, pointRadius: 3 },
+                        { label: 'Taxes', data: dataTaxes, borderColor: '#06b6d4', backgroundColor: '#06b6d4', borderDash: [5, 5], tension: 0.3, pointRadius: 3 }
+                    ]
+                },
+                options: { ...commonOptions, interaction: { mode: 'index', intersect: false } }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", initData);
+    </script>
+  <div id="footer" class="fixed bottom-0 left-0 w-full z-50 transition-transform duration-300">
+        <script src="/HA-EE/src/javascript/footer.js" type="module"></script>
+    </div>  
+</body>
+</html>

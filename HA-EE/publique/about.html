@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A.R.C. Systems | À propos V-AG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --arc-gold: #AA823C;
+            --arc-champagne: #D4AF37;
+            --arc-light: #FAF8F5;
+            --arc-dark: #1A140E;
+        }
+        body {
+            background-color: var(--arc-light);
+            color: var(--arc-dark);
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+        .font-display { font-family: 'Outfit', sans-serif; }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        .tactical-border {
+            border: 1px solid rgba(170, 130, 60, 0.2);
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        .tactical-border:hover {
+            border-color: var(--arc-gold);
+            box-shadow: 0 10px 30px rgba(170, 130, 60, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .tab-active {
+            color: var(--arc-gold);
+            border-bottom: 2px solid var(--arc-gold);
+        }
+
+        @media (min-width: 768px) {
+            .chart-container { height: 350px; }
+        }
+
+        /* Custom Scrollbar - Thème Clair */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--arc-light); }
+        ::-webkit-scrollbar-thumb { background: var(--arc-gold); border-radius: 10px; }
+
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, rgba(170, 130, 60, 0.3), transparent);
+            position: absolute;
+            z-index: 10;
+            top: 0;
+            animation: scan 3s ease-in-out infinite;
+        }
+        @keyframes scan {
+            0% { top: 0; opacity: 0; }
+            50% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-[#AA823C] selection:text-white relative">
+
+    <!-- Fond décoratif Matrice ARC -->
+    <div class="fixed inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(#AA823C_1px,transparent_1px)] [background-size:20px_20px] z-0"></div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-black/5 shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#D4AF37] to-[#AA823C] flex items-center justify-center font-bold text-white text-xs shadow-md">▲</div>
+                <span class="font-display text-lg font-black tracking-tighter uppercase text-[#1A140E]">A.R.C. Systems</span>
+            </div>
+            <div class="hidden md:flex gap-8">
+                <button onclick="scrollToSection('heritage')" class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 hover:text-[#AA823C] transition-colors">Fondation</button>
+                <button onclick="scrollToSection('operations')" class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 hover:text-[#AA823C] transition-colors">Matrice</button>
+                <button onclick="scrollToSection('intelligence')" class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 hover:text-[#AA823C] transition-colors">Data Core</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-20 relative z-10">
+        <!-- Section: Hero & Vision -->
+        <section id="heritage" class="relative py-24 overflow-hidden border-b border-black/5">
+            <div class="scanline"></div>
+            <div class="max-w-7xl mx-auto px-6 relative z-20">
+                <div class="inline-block px-3 py-1 border border-[#AA823C]/30 bg-[#AA823C]/5 rounded-md mb-8">
+                    <p class="text-[9px] text-[#AA823C] font-black uppercase tracking-[0.4em]">Initialisation V4</p>
+                </div>
+                <h1 class="text-5xl md:text-8xl font-black uppercase tracking-tighter text-[#1A140E] mb-12 leading-none">
+                    LE CONTRÔLE <br><span class="bg-gradient-to-r from-[#D4AF37] to-[#AA823C] bg-clip-text text-transparent">ABSOLU.</span>
+                </h1>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                    <div class="space-y-8">
+                        <p class="text-lg text-gray-600 leading-relaxed uppercase tracking-wide">
+                            Centralisation des ressources, cryptage des données et gestion des accréditations. A.R.C. Systems définit le nouveau standard de la sécurité corporative.
+                        </p>
+                        <div class="bg-white/60 p-8 border-l-4 border-[#AA823C] rounded-r-2xl shadow-sm italic">
+                            <p class="text-xl text-[#1A140E] mb-4 font-serif">« L'ordre naît de la structure. Notre réseau est la fondation de votre efficacité. »</p>
+                            <cite class="text-[10px] font-bold uppercase tracking-widest text-[#AA823C]">— Conseil d'Administration A.R.C.</cite>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <div class="aspect-square bg-white rounded-full shadow-2xl shadow-[#AA823C]/10 border border-[#AA823C]/20 flex items-center justify-center p-12">
+                            <div class="text-center">
+                                <span class="block text-8xl mb-4 text-[#AA823C] opacity-80">🛡️</span>
+                                <p class="text-[10px] font-black uppercase tracking-[0.5em] text-[#1A140E]">Kernel E-CDE</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Operations (Matrice) -->
+        <section id="operations" class="py-24 bg-white/40">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="mb-16">
+                    <h2 class="text-3xl font-black uppercase tracking-tighter text-[#1A140E] mb-4">Structure Matrice</h2>
+                    <p class="text-xs text-gray-500 uppercase tracking-widest">Sélectionnez un nœud réseau.</p>
+                </div>
+
+                <div class="flex flex-wrap gap-4 mb-12 border-b border-black/5">
+                    <button onclick="showTab('tab-infra')" id="btn-infra" class="tab-btn px-6 py-4 text-[10px] font-black uppercase tracking-widest transition-all tab-active">01. Infrastructure</button>
+                    <button onclick="showTab('tab-security')" id="btn-security" class="tab-btn px-6 py-4 text-[10px] font-black uppercase tracking-widest transition-all text-gray-400">02. Sécurité</button>
+                    <button onclick="showTab('tab-sync')" id="btn-sync" class="tab-btn px-6 py-4 text-[10px] font-black uppercase tracking-widest transition-all text-gray-400">03. Synchronisation</button>
+                </div>
+
+                <div id="tab-infra" class="tab-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div class="p-8 tactical-border rounded-2xl">
+                            <h3 class="text-xl font-bold text-[#1A140E] mb-6 uppercase tracking-widest">Serveurs Dédiés</h3>
+                            <p class="text-sm leading-loose text-gray-600 mb-8">
+                                Hébergement hautement disponible via Supabase. Nos clusters assurent une latence minimale et une redondance des données pour maintenir vos services opérationnels H24.
+                            </p>
+                            <ul class="space-y-4 text-[10px] font-bold uppercase tracking-widest text-gray-700">
+                                <li class="flex items-center gap-3"><span class="text-[#AA823C] text-sm">▲</span> PostgreSQL Natif</li>
+                                <li class="flex items-center gap-3"><span class="text-[#AA823C] text-sm">▲</span> API REST Auto-générée</li>
+                                <li class="flex items-center gap-3"><span class="text-[#AA823C] text-sm">▲</span> Temps de réponse < 50ms</li>
+                            </ul>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <div class="text-9xl opacity-20 text-[#AA823C]">🗄️</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-security" class="tab-content hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div class="p-8 tactical-border rounded-2xl">
+                            <h3 class="text-xl font-bold text-[#1A140E] mb-6 uppercase tracking-widest">Accréditation RLS</h3>
+                            <p class="text-sm leading-loose text-gray-600 mb-8">
+                                Row Level Security activé sur 100% de la matrice. Aucune donnée n'est extraite sans une validation de session stricte. Le Kernel EnesCDE V4 bloque toute intrusion.
+                            </p>
+                            <div class="p-4 border border-[#AA823C]/30 bg-amber-500/5 rounded-lg">
+                                <p class="text-[9px] font-black text-[#AA823C] uppercase mb-1">Statut Pare-feu</p>
+                                <p class="text-[#1A140E] font-display font-bold flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ACTIF & IMPÉNÉTRABLE
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <div class="text-9xl opacity-20 text-[#AA823C]">🔒</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-sync" class="tab-content hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div class="p-8 tactical-border rounded-2xl">
+                            <h3 class="text-xl font-bold text-[#1A140E] mb-6 uppercase tracking-widest">Temps Réel</h3>
+                            <p class="text-sm leading-loose text-gray-600 mb-8">
+                                Connectivité WebSocket permanente. Les modifications de statut, les accréditations et les messages internes sont diffusés à l'ensemble du réseau en quelques millisecondes.
+                            </p>
+                            <button class="px-8 py-3 bg-gradient-to-r from-[#D4AF37] to-[#AA823C] text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-opacity shadow-md">
+                                Forcer le ping réseau <mark class="bg-white/20 text-white ml-2 px-1 rounded italic text-[8px]">Logs ON</mark>
+                            </button>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <div class="text-9xl opacity-20 text-[#AA823C]">⚡</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Intelligence (Charts) -->
+        <section id="intelligence" class="py-24 border-t border-black/5 bg-[#FAF8F5]">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center mb-20">
+                    <h2 class="text-4xl font-black uppercase tracking-tighter text-[#1A140E] mb-4">Télémétrie Data Core</h2>
+                    <div class="h-1 w-20 bg-[#AA823C] mx-auto mb-6 rounded-full"></div>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-[0.4em]">Analyse de charge 2026</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                    <div class="text-center p-6 bg-white rounded-2xl shadow-sm border border-black/5">
+                        <div class="chart-container mb-6">
+                            <canvas id="chartLocal"></canvas>
+                        </div>
+                        <h4 class="text-[#1A140E] font-black uppercase tracking-widest text-xs">Requêtes Traitées</h4>
+                        <p class="text-[10px] text-[#AA823C] mt-2 font-mono font-bold">99.9% Uptime</p>
+                    </div>
+                    <div class="text-center p-6 bg-white rounded-2xl shadow-sm border border-black/5">
+                        <div class="chart-container mb-6">
+                            <canvas id="chartNational"></canvas>
+                        </div>
+                        <h4 class="text-[#1A140E] font-black uppercase tracking-widest text-xs">Charge Supabase</h4>
+                        <p class="text-[10px] text-[#AA823C] mt-2 font-mono font-bold">42.0% Capacité</p>
+                    </div>
+                    <div class="text-center p-6 bg-white rounded-2xl shadow-sm border border-black/5">
+                        <div class="chart-container mb-6">
+                            <canvas id="chartGlobal"></canvas>
+                        </div>
+                        <h4 class="text-[#1A140E] font-black uppercase tracking-widest text-xs">Intégrité RLS</h4>
+                        <p class="text-[10px] text-[#AA823C] mt-2 font-mono font-bold">100.0% Sécurisé</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+<div id="footer" class="fixed bottom-0 left-0 w-full z-50 transition-transform duration-300">
+        <script src="/HA-EE/src/javascript/footer.js" type="module"></script>
+    </div>
+    <!--<footer class="py-12 bg-white border-t border-black/10">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-8">
+                <div>
+                    <p class="text-[10px] font-black text-[#1A140E] uppercase tracking-widest mb-2 flex items-center gap-2">
+                        <span class="w-3 h-3 rounded bg-[#AA823C] text-white flex items-center justify-center text-[8px]">▲</span> A.R.C. Systems Corporate
+                    </p>
+                    <p class="text-[9px] text-gray-500 uppercase tracking-widest">Ressources Centralisées • Framework EnesCDE</p>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-2 bg-emerald-500/10 px-3 py-1.5 rounded-md border border-emerald-500/20">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span class="text-[9px] font-bold text-emerald-700 uppercase tracking-widest">Matrice Online</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-12 text-center border-t border-black/5 pt-8">
+                <p class="text-[8px] text-gray-400 uppercase tracking-[0.5em]">Secured Connection — All Rights Reserved © 2026</p>
+            </div>
+        </div>
+    </footer>-->
+
+    <script>
+        // --- Navigation Logic ---
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- Tabs Logic ---
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('tab-active', 'text-[#1A140E]');
+                btn.classList.add('text-gray-400');
+            });
+
+            document.getElementById(tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('btn-' + tabId.replace('tab-', ''));
+            activeBtn.classList.add('tab-active');
+            activeBtn.classList.remove('text-gray-400');
+        }
+
+        // --- Data Visualizations (Adapté au thème clair) ---
+        function initCharts() {
+            // Configuration commune de Chart.js
+            Chart.defaults.color = '#6b7280';
+            Chart.defaults.font.family = 'Inter';
+
+            const chartConfig = (label, value, color) => ({
+                type: 'doughnut',
+                data: {
+                    labels: [label, 'Reste'],
+                    datasets: [{
+                        data: [value, 100 - value],
+                        // Modification ici : fond gris très clair pour la partie vide du graph
+                        backgroundColor: [color, '#F3F4F6'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    cutout: '80%',
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { 
+                            enabled: true,
+                            backgroundColor: 'rgba(26, 20, 14, 0.9)',
+                            titleFont: { size: 10, family: 'Inter' },
+                            bodyFont: { size: 12, weight: 'bold' }
+                        }
+                    }
+                }
+            });
+
+            // Injection des graphs avec la couleur OR d'ARC
+            new Chart(document.getElementById('chartLocal'), chartConfig('Requêtes Traitées', 99.9, '#AA823C'));
+            new Chart(document.getElementById('chartNational'), chartConfig('Charge Serveur', 42.0, '#AA823C'));
+            new Chart(document.getElementById('chartGlobal'), chartConfig('Intégrité RLS', 100, '#AA823C'));
+        }
+
+        document.addEventListener('DOMContentLoaded', initCharts);
+    </script>
+</body>
+</html>

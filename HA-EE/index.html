@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-[#FAF8F5]">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A.R.C. — Agency Resource Center | Secure Portal</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: { 950: '#FAF8F5', 900: '#F5F1EB', 800: '#EBE4DA', 700: '#DCCFC0' },
+                        champagne: { 100: '#1A140E', 200: '#4A3E31', 300: '#D4AF37', 400: '#C5A059', 500: '#AA823C' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .gold-gradient { background: linear-gradient(135deg, #F5EBE0 0%, #D4AF37 50%, #AA823C 100%); }
+        .tech-grid { background-size: 50px 50px; background-image: linear-gradient(to right, rgba(170, 130, 60, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(170, 130, 60, 0.03) 1px, transparent 1px); }
+        .tech-dots { background-image: radial-gradient(rgba(170, 130, 60, 0.12) 1px, transparent 0); background-size: 25px 25px; }
+        @keyframes drift-slow { 0%, 100% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.15); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
+        @keyframes drift-reverse { 0%, 100% { transform: translate(0px, 0px) scale(1.1); } 50% { transform: translate(-40px, 40px) scale(0.85); } }
+        .animate-drift-1 { animation: drift-slow 20s infinite ease-in-out; }
+        .animate-drift-2 { animation: drift-reverse 25s infinite ease-in-out; }
+    </style>
+</head>
+<body class="text-champagne-100 min-h-full flex items-center justify-center p-4 md:p-8 relative overflow-hidden antialiased bg-[#FAF8F5]">
+
+    <div class="absolute inset-0 tech-grid pointer-events-none z-0"></div>
+    <div class="absolute inset-0 tech-dots pointer-events-none z-0 opacity-40"></div>
+    <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-champagne-300/5 blur-[120px] pointer-events-none z-0 animate-drift-1"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[55vw] h-[55vw] rounded-full bg-champagne-500/5 blur-[150px] pointer-events-none z-0 animate-drift-2"></div>
+
+    <div class="w-full max-w-5xl bg-white/90 border border-dark-700/40 rounded-3xl overflow-hidden backdrop-blur-2xl shadow-xl shadow-champagne-500/5 grid grid-cols-1 lg:grid-cols-12 min-h-[650px] z-10 relative">
+        
+        <div class="lg:col-span-5 border-b lg:border-b-0 lg:border-r border-dark-700/30 p-8 flex flex-col justify-between bg-gradient-to-b from-[#FDFCFB] to-[#F5F1EB] relative">
+            <div class="flex items-center gap-3">
+                <div class="h-8 w-8 rounded-lg gold-gradient flex items-center justify-center text-white font-bold text-sm shadow-md">▲</div>
+                <span class="font-serif tracking-widest text-lg bg-gradient-to-r from-champagne-200 to-champagne-500 bg-clip-text text-transparent">A.R.C.</span>
+            </div>
+            <div class="my-12 lg:my-0 space-y-4">
+                <h2 class="font-serif text-3xl md:text-4xl font-normal leading-tight text-champagne-100">
+                    Centre de Ressources <span class="italic text-champagne-500">d'Agence</span>.
+                </h2>
+                <p class="text-xs text-champagne-200/70 max-w-sm leading-relaxed">
+                    Accédez à la matrice sécurisée. Connectez vos filiales, gérez les privilèges du personnel et déployez vos bases de données instantanément.
+                </p>
+            </div>
+            <div class="flex items-center justify-between text-xs text-champagne-200/50 border-t border-dark-800 pt-4">
+                <span>Kernel: EnesCDE V4</span>
+                <span>© A.R.C. Systems</span>
+            </div>
+        </div>
+
+        <div class="lg:col-span-7 p-8 md:p-12 flex flex-col justify-center bg-white/40 relative">
+            
+            <div id="login-section" class="space-y-6 block">
+                <div>
+                    <h3 class="text-2xl font-serif text-champagne-100 mb-1.5">Portail d'Accès</h3>
+                    <p class="text-xs text-champagne-200/60 font-medium uppercase tracking-widest">Connectez-vous</p>
+                </div>
+
+                <div class="flex gap-3 mt-4">
+                    <button type="button" id="btn-google-login" class="flex-1 py-2.5 inline-flex justify-center items-center gap-2 text-[10px] font-bold uppercase tracking-widest rounded-xl border border-dark-700/60 bg-[#FAF8F5] text-champagne-100 hover:bg-white transition shadow-inner">
+                        <svg class="w-4 h-4" viewBox="0 0 46 47"><path d="M46 24.0287C46 22.09 45.8533 20.68 45.5013 19.2112H23.4694V27.9356H36.4069C35.8147 31.05 34.043 33.5684 31.4239 35.2505V40.8521H38.9719C43.3458 36.8778 46 31.05 46 24.0287Z" fill="#4285F4"/><path d="M23.4694 47C29.8061 47 35.1161 44.914 38.9719 40.8521L31.4239 35.2505C29.35 36.6582 26.6542 37.5256 23.4694 37.5256C17.3197 37.5256 12.0831 33.3986 10.223 27.8183H2.38318V33.8229C6.26425 41.4429 14.2255 47 23.4694 47Z" fill="#34A853"/><path d="M10.223 27.8183C9.74239 26.3981 9.46322 24.8967 9.46322 23.3642C9.46322 21.8317 9.74239 20.3303 10.223 18.9101V12.9056H2.38318C0.850604 15.9328 0 19.4975 0 23.3642C0 27.2309 0.850604 30.7956 2.38318 33.8229L10.223 27.8183Z" fill="#FBBC05"/><path d="M23.4694 9.20436C27.0253 9.20436 30.0827 10.4208 32.5599 12.723L39.1171 6.24151C35.084 2.45973 29.8061 0 23.4694 0C14.2255 0 6.26425 5.55708 2.38318 13.1771L10.223 19.1816C12.0831 13.6014 17.3197 9.20436 23.4694 9.20436Z" fill="#EA4335"/></svg>
+                        Google
+                    </button>
+                    <button type="button" id="btn-discord-login" class="flex-1 py-2.5 inline-flex justify-center items-center gap-2 text-[10px] font-bold uppercase tracking-widest rounded-xl border border-[#5865F2]/20 bg-[#5865F2]/5 text-[#5865F2] hover:bg-[#5865F2]/10 transition shadow-inner">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16"><path d="M13.545 2.907a13.227 13.227 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.19 12.19 0 0 0-3.658 0 8.258 8.258 0 0 0-.412-.833.051.051 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.041.041 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032c.001.014.01.028.021.037a13.276 13.276 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019c.308-.42.582-.863.818-1.329a.05.05 0 0 0-.01-.059.051.051 0 0 0-.018-.011 8.875 8.875 0 0 1-1.248-.595.05.05 0 0 1-.02-.066.051.051 0 0 1 .015-.019c.084-.063.168-.129.248-.195a.05.05 0 0 1 .051-.007c2.619 1.196 5.454 1.196 8.041 0a.052.052 0 0 1 .053.007c.08.066.164.132.248.195a.051.051 0 0 1-.004.085 8.254 8.254 0 0 1-1.249.594.05.05 0 0 0-.03.03.052.052 0 0 0 .003.041c.24.465.515.909.817 1.329a.05.05 0 0 0 .056.019 13.235 13.235 0 0 0 4.001-2.02.049.049 0 0 0 .021-.037c.334-3.451-.559-6.449-2.366-9.106a.034.034 0 0 0-.02-.019Zm-8.198 7.307c-.789 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.45.73 1.438 1.613 0 .888-.637 1.612-1.438 1.612Zm5.316 0c-.788 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.451.73 1.438 1.613 0 .888-.631 1.612-1.438 1.612Z"/></svg>
+                        Discord
+                    </button>
+                </div>
+
+                <div class="py-2 flex items-center text-[9px] font-bold text-champagne-200/40 uppercase tracking-[0.3em] before:flex-1 before:border-t before:border-dark-700/30 before:me-4 after:flex-1 after:border-t after:border-dark-700/30 after:ms-4"> connexion intenre</div>
+
+                <form id="loginform" class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-semibold uppercase tracking-widest text-[#AA823C] mb-2">Email</label>
+                        <input type="email" id="log-email" required class="w-full bg-[#FAF8F5] border border-dark-700/60 rounded-xl px-4 py-3 text-sm text-champagne-100 focus:outline-none focus:border-champagne-400">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-[10px] font-semibold uppercase tracking-widest text-[#AA823C]">Mot de passe</label>
+                        </div>
+                        <input type="password" id="log-pass" required class="w-full bg-[#FAF8F5] border border-dark-700/60 rounded-xl px-4 py-3 text-sm text-champagne-100 focus:outline-none focus:border-champagne-400">
+                    </div>
+                    <div id="login-status" class="text-xs font-bold text-center mt-2 hidden"></div>
+                    <button type="submit" class="w-full bg-[#1A140E] hover:bg-[#2A2219] text-white text-[11px] uppercase tracking-widest font-bold py-3.5 rounded-xl transition mt-2">
+                        se connecter
+                    </button>
+                </form>
+
+                <p class="text-center text-xs text-champagne-200/60">Nouveau ? 
+                    <button id="toggle-to-register" class="text-[#AA823C] hover:underline ml-1 focus:outline-none font-medium">inscrivez-vous</button>
+                </p>
+            </div>
+
+            <div id="register-section" class="space-y-6 hidden">
+                <div>
+                    <h3 class="text-2xl font-serif text-champagne-100 mb-1.5">Enregistrer un Nœud</h3>
+                    <p class="text-xs text-champagne-200/60">Configurez l'accès centralisé pour votre système.</p>
+                </div>
+
+                <div class="flex gap-3 mt-4">
+                    <button type="button" id="btn-google-reg" class="flex-1 py-2.5 inline-flex justify-center items-center gap-2 text-[10px] font-bold uppercase tracking-widest rounded-xl border border-dark-700/60 bg-[#FAF8F5] text-champagne-100 hover:bg-white transition shadow-inner">Google OAuth</button>
+                    <button type="button" id="btn-discord-reg" class="flex-1 py-2.5 inline-flex justify-center items-center gap-2 text-[10px] font-bold uppercase tracking-widest rounded-xl border border-[#5865F2]/20 bg-[#5865F2]/5 text-[#5865F2] hover:bg-[#5865F2]/10 transition shadow-inner">Discord OAuth</button>
+                </div>
+
+                <form id="registerform" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-semibold uppercase tracking-widest text-[#AA823C] mb-2">Nom RP</label>
+                            <input type="text" id="reg-nom" required class="w-full bg-[#FAF8F5] border border-dark-700/60 rounded-xl px-4 py-3 text-sm text-champagne-100 focus:outline-none focus:border-champagne-400">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold uppercase tracking-widest text-[#AA823C] mb-2">Prénom RP</label>
+                            <input type="text" id="reg-prenom" required class="w-full bg-[#FAF8F5] border border-dark-700/60 rounded-xl px-4 py-3 text-sm text-champagne-100 focus:outline-none focus:border-champagne-400">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-semibold uppercase tracking-widest text-[#AA823C] mb-2">Poste / Grade</label>
+                            <input type="text" id="reg-poste" required class="w-full bg-[#FAF8F5] border border-dark-700/60 rounded-xl px-4 py-3 text-sm text-champagne-100 focus:outline-none focus:border-champagne-400">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold uppercase tracking-widest text-[#AA823C] mb-2">Sélectionner l'Agence</label>
+                            <select id="reg-agence" required class="w-full bg-[#FAF8F5] border border-dark-700/60 rounded-xl px-4 py-3 text-sm text-champagne-100 focus:outline-none focus:border-champagne-400 appearance-none">
+                                <option value="" disabled selected>Chargement...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-semibold uppercase tracking-widest text-[#AA823C] mb-2">Email de contact</label>
+                        <input type="email" id="reg-email" required class="w-full bg-[#FAF8F5] border border-dark-700/60 rounded-xl px-4 py-3 text-sm text-champagne-100 focus:outline-none focus:border-champagne-400">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-[10px] font-semibold uppercase tracking-widest text-[#AA823C] mb-2">Mot de passe</label>
+                        <input type="password" id="reg-pass" required class="w-full bg-[#FAF8F5] border border-dark-700/60 rounded-xl px-4 py-3 text-sm text-champagne-100 focus:outline-none focus:border-champagne-400">
+                    </div>
+
+                    <div id="register-status" class="text-xs font-bold text-center mt-2 hidden"></div>
+
+                    <button type="submit" class="w-full gold-gradient text-white text-[11px] uppercase tracking-widest font-bold py-3.5 rounded-xl transition mt-2">
+                        Déployer le Compte
+                    </button>
+                </form>
+
+                <p class="text-center text-xs text-champagne-200/60">Déjà enregistré ? 
+                    <button id="toggle-to-login" class="text-[#AA823C] hover:underline ml-1 focus:outline-none font-medium">Retour à la connexion</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase, setAgenceSession, hashEmail } from './src/javascript/sp.js';
+
+        // --- HASHAGE ---
+        async function hashData(string) {
+            return hashEmail(string);
+        }
+
+        // --- TOGGLE UI ---
+        const loginSec = document.getElementById('login-section');
+        const registerSec = document.getElementById('register-section');
+        
+        document.getElementById('toggle-to-register').addEventListener('click', () => {
+            loginSec.classList.add('hidden');
+            registerSec.classList.remove('hidden');
+            loadAgencies(); // Charge la liste SQL au moment d'afficher l'inscription
+        });
+        
+        document.getElementById('toggle-to-login').addEventListener('click', () => {
+            registerSec.classList.add('hidden');
+            loginSec.classList.remove('hidden');
+        });
+
+        // --- FETCH AGENCES (SQL) ---
+        async function loadAgencies() {
+            const select = document.getElementById('reg-agence');
+            select.innerHTML = '<option value="" disabled selected>Chargement...</option>';
+            
+            const { data, error } = await supabase.from('agence_liste').select('id_agence, nom_entreprise');
+            
+            if (error) {
+                console.error("Erreur fetch agences:", error);
+                select.innerHTML = '<option value="" disabled selected>Erreur de chargement</option>';
+                return;
+            }
+            
+            select.innerHTML = '<option value="" disabled selected>Choisir une agence...</option>';
+            data.forEach(agence => {
+                select.innerHTML += `<option value="${agence.id_agence}">${agence.nom_entreprise}</option>`;
+            });
+        }
+
+        // --- OAUTH LOGIC ---
+        async function handleOAuth(provider, isRegister = false) {
+            const redirectUrl = isRegister 
+                ? window.location.origin + "/HA-EE/portail/complete-profile.html"
+                : window.location.origin + window.location.pathname;
+
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: provider,
+                options: { redirectTo: redirectUrl }
+            });
+            if (error) alert("Erreur OAuth : " + error.message);
+        }
+
+        document.getElementById('btn-google-login').addEventListener('click', () => handleOAuth('google'));
+        document.getElementById('btn-discord-login').addEventListener('click', () => handleOAuth('discord'));
+        document.getElementById('btn-google-reg').addEventListener('click', () => handleOAuth('google', true));
+        document.getElementById('btn-discord-reg').addEventListener('click', () => handleOAuth('discord', true));
+
+        // --- AUTH LISTENER ---
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+                const token = await hashData(session.user.email);
+                sessionStorage.setItem('session_token', token);
+                sessionStorage.setItem('isAuth', 'true');
+                if(!window.location.href.includes('complete-profile')) {
+                    window.location.href = "./portail/";
+                }
+            }
+        });
+
+        // --- LOGIN ---
+        document.getElementById('loginform').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('log-email').value.trim();
+            const password = document.getElementById('log-pass').value;
+            const status = document.getElementById('login-status');
+
+            try {
+                const { data: valid, error } = await supabase.rpc('check_login', { p_email: email, p_password: password });
+
+                if (error || !valid) {
+                    status.textContent = "❌ Accès refusé.";
+                    status.classList.remove('hidden', 'text-green-500');
+                    status.classList.add('text-red-500');
+                    return;
+                }
+
+                const token = await hashData(email);
+                sessionStorage.setItem('session_token', token);
+                sessionStorage.setItem('isAuth', 'true');
+
+                const { data: emp } = await supabase.from('employes').select('id_agence, email').eq('email', email).maybeSingle();
+                if (emp?.id_agence) setAgenceSession(emp.id_agence, emp.email);
+
+                window.location.href = "./portail/";
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        // --- REGISTER ---
+        document.getElementById('registerform').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const status = document.getElementById('register-status');
+            status.textContent = "⌛ Traitement...";
+            status.classList.remove('hidden', 'text-red-500', 'text-green-500');
+            status.classList.add('text-[#AA823C]');
+
+            const nom = document.getElementById('reg-nom').value.toUpperCase().trim();
+            const prenom = document.getElementById('reg-prenom').value.trim();
+            const poste = document.getElementById('reg-poste').value.trim();
+            const id_agence = document.getElementById('reg-agence').value;
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-pass').value;
+
+            try {
+                // ATTENTION: Met bien à jour ta fonction RPC pour accepter p_poste et p_id_agence !
+                const { data, error } = await supabase.rpc('create_employe_account', {
+                    p_email: email,
+                    p_password: password,
+                    p_nom: nom,
+                    p_prenom: prenom,
+                    p_poste: poste,
+                    p_id_agence: id_agence
+                });
+
+                if (error) throw error;
+
+                status.textContent = "✅ Nœud créé avec succès !";
+                status.classList.remove('text-[#AA823C]', 'text-red-500');
+                status.classList.add('text-green-500');
+
+                setTimeout(() => {
+                    document.getElementById('toggle-to-login').click();
+                }, 2000);
+
+            } catch (err) {
+                console.error(err);
+                status.textContent = "❌ Erreur serveur";
+                status.classList.remove('text-[#AA823C]', 'text-green-500');
+                status.classList.add('text-red-500');
+            }
+        });
+    </script>
+</body>
+</html>
