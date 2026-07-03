@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>A.R.C | Portail Administratif</title>
+    <link rel="shortcut icon" href="https://howardarmory.vercel.app/data/img/favicon.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: { 950: '#FAF8F5', 900: '#F5F1EB', 800: '#EBE4DA', 700: '#DCCFC0' },
+                        champagne: { 100: '#1A140E', 200: '#4A3E31', 300: '#D4AF37', 400: '#C5A059', 500: '#AA823C' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .gold-gradient { background: linear-gradient(135deg, #F5EBE0 0%, #D4AF37 50%, #AA823C 100%); }
+        .tech-grid { background-size: 50px 50px; background-image: linear-gradient(to right, rgba(170, 130, 60, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(170, 130, 60, 0.03) 1px, transparent 1px); }
+        .tech-dots { background-image: radial-gradient(rgba(170, 130, 60, 0.12) 1px, transparent 0); background-size: 25px 25px; }
+        @keyframes drift-slow { 0%, 100% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.15); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
+        @keyframes drift-reverse { 0%, 100% { transform: translate(0px, 0px) scale(1.1); } 50% { transform: translate(-40px, 40px) scale(0.85); } }
+        .animate-drift-1 { animation: drift-slow 20s infinite ease-in-out; }
+        .animate-drift-2 { animation: drift-reverse 25s infinite ease-in-out; }
+    </style>
+</head>
+
+<body class="text-champagne-100 min-h-screen flex items-center justify-center p-4 md:p-8 relative overflow-hidden antialiased bg-[#FAF8F5]">
+
+    <div class="absolute inset-0 tech-grid pointer-events-none z-0"></div>
+    <div class="absolute inset-0 tech-dots pointer-events-none z-0 opacity-40"></div>
+    <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-champagne-300/5 blur-[120px] pointer-events-none z-0 animate-drift-1"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[55vw] h-[55vw] rounded-full bg-champagne-500/5 blur-[150px] pointer-events-none z-0 animate-drift-2"></div>
+
+    <div class="relative z-10 w-full max-w-xl">
+        <div class="bg-white/90 border border-dark-700/40 rounded-3xl p-8 md:p-12 text-center backdrop-blur-2xl shadow-xl shadow-champagne-500/5">
+            
+            <div class="mx-auto h-14 w-14 rounded-2xl gold-gradient flex items-center justify-center text-white font-bold text-lg shadow-md mb-6">
+                ▲
+            </div>
+
+            <h1 class="font-serif text-3xl md:text-4xl font-normal leading-tight text-champagne-100 mb-2">
+                A.R.C
+            </h1>
+            <h2 class="text-[10px] text-champagne-200/60 font-semibold uppercase tracking-[0.3em] mb-8">
+                Portail Administratif & Vision
+            </h2>
+
+            <div class="bg-[#FAF8F5] border border-dark-700/60 rounded-xl p-4 mb-8 text-left font-mono text-xs text-champagne-200/80 shadow-inner space-y-1">
+                <p class="text-[#AA823C] font-semibold">> SECURE ACCESS PROTOCOL INIT...</p>
+                <p>> UPLINK STATUS: ESTABLISHED</p>
+                <p>> SYSTEM MATRIX: READY FOR AUTH</p>
+            </div>
+
+            <p class="text-xs text-champagne-200/70 max-w-sm mx-auto leading-relaxed mb-8">
+                L'accès à ce terminal est strictement réservé au personnel mandaté de l'agence. Toute tentative d'intrusion sera bloquée.
+            </p>
+
+            <div class="space-y-4">
+                <a href="./HA-EE/" class="w-full bg-[#1A140E] hover:bg-[#2A2219] text-white text-[11px] uppercase tracking-widest font-bold py-3.5 px-6 rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
+                    S'Authentifier
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                </a>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center text-[10px] text-champagne-200/50 font-medium uppercase tracking-widest space-y-1">
+            <p>A.R.C © 2026 Systems</p>
+            <p>Kernel: <span id="node-id" class="text-champagne-500">ARC & EUPD</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Effet de Node ID dynamique adapté au thème A.R.C.
+        document.getElementById('node-id').textContent = 'ARC & EUPD.' + Math.floor(Math.random() * 900 + 100) + '-V7';
+    </script>
+</body>
+</html>
