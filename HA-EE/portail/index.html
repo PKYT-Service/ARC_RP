@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-[#FAF8F5]">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#FAF8F5">
+    <title>A.R.C. — Secure Gateway Injection</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: { 950: '#FAF8F5', 900: '#F5F1EB', 800: '#EBE4DA', 700: '#DCCFC0' },
+                        champagne: { 100: '#1A140E', 200: '#4A3E31', 300: '#D4AF37', 400: '#C5A059', 500: '#AA823C' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .gold-gradient { background: linear-gradient(135deg, #F5EBE0 0%, #D4AF37 50%, #AA823C 100%); }
+        .text-gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #AA823C 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* Grille et Orbes ARC */
+        .tech-grid { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(170, 130, 60, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(170, 130, 60, 0.03) 1px, transparent 1px); }
+        @keyframes drift-slow { 0%, 100% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(40px, -60px) scale(1.1); } 66% { transform: translate(-30px, 30px) scale(0.95); } }
+        @keyframes drift-reverse { 0%, 100% { transform: translate(0px, 0px) scale(1.05); } 50% { transform: translate(-50px, 50px) scale(0.9); } }
+        .animate-drift-1 { animation: drift-slow 22s infinite ease-in-out; }
+        .animate-drift-2 { animation: drift-reverse 28s infinite ease-in-out; }
+
+        /* Structure du Panel de Tête Courbé */
+        .tactical-header-arc {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(170, 130, 60, 0.2);
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%);
+            box-shadow: 0 10px 40px rgba(170, 130, 60, 0.03);
+        }
+
+        /* Hologramme doré */
+        .security-ring {
+            border: 1px dashed #D4AF37;
+            animation: spin-right 25s linear infinite;
+        }
+        .security-ring-inner {
+            border: 2px solid transparent;
+            border-top: 2px solid #AA823C;
+            border-bottom: 2px solid #AA823C;
+            animation: spin-left 5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        @keyframes spin-right { 100% { transform: rotate(360deg); } }
+        @keyframes spin-left { 100% { transform: rotate(-360deg); } }
+        @keyframes pulse-soft { 0%, 100% { transform: scale(1); opacity: 0.85; } 50% { transform: scale(1.06); opacity: 1; } }
+        .animate-pulse-soft { animation: pulse-soft 2.5s ease-in-out infinite; }
+
+        /* Bouton Terminal Style ARC */
+        .action-btn-arc {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(170, 130, 60, 0.4);
+            font-family: 'Courier New', Courier, monospace;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            box-shadow: 0 4px 20px rgba(170, 130, 60, 0.05);
+            transition: all 0.3s ease;
+        }
+        .action-btn-arc::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: 0; width: 100%; height: 8px;
+            background: linear-gradient(to bottom, transparent, rgba(212, 175, 55, 0.4), transparent);
+            animation: scan 2.2s linear infinite;
+        }
+        @keyframes scan { 0% { top: -10%; } 100% { top: 110%; } }
+    </style>
+</head>
+<body class="text-champagne-100 min-h-screen flex flex-col relative overflow-hidden antialiased">
+
+    <div class="fixed inset-0 tech-grid pointer-events-none z-0"></div>
+    <div class="fixed top-[-5%] left-[-5%] w-[45vw] h-[45vw] rounded-full bg-champagne-300/10 blur-[100px] pointer-events-none z-0 animate-drift-1"></div>
+    <div class="fixed bottom-[-5%] right-[-5%] w-[50vw] h-[50vw] rounded-full bg-champagne-500/10 blur-[130px] pointer-events-none z-0 animate-drift-2"></div>
+
+    <div class="tactical-header-arc h-[42%] w-full relative flex items-center justify-center z-10">
+        <div class="relative w-36 h-36 flex items-center justify-center">
+            <div class="security-ring absolute inset-0 rounded-full opacity-30"></div>
+            <div class="security-ring-inner absolute w-[80%] h-[80%] rounded-full opacity-70 filter drop-shadow-[0_0_8px_rgba(214,175,55,0.5)]"></div>
+            
+            <svg class="text-champagne-500 animate-pulse-soft filter drop-shadow-[0_0_10px_rgba(170,130,60,0.3)]" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+
+            <div class="absolute bottom-1 right-1 bg-[#FAF8F5] text-champagne-500 font-mono text-[9px] font-bold border border-champagne-400 px-1.5 py-0.5 rounded-full shadow-sm animate-pulse">
+                NODE_OK
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-1 flex flex-col items-center justify-center px-6 text-center z-10">
+        <h1 class="font-serif text-2xl tracking-wide text-champagne-100">Authentification</h1>
+        <p class="text-xs font-medium uppercase tracking-widest text-champagne-200/50 mt-1.5 mb-10">Liaison cryptée au Kernel...</p>
+
+        <button class="action-btn-arc relative overflow-hidden min-w-[290px] py-4 px-6 text-[11px] font-bold uppercase tracking-wider text-champagne-500" id="loaderText">
+            Initialisation...
+        </button>
+
+        <div class="mt-auto mb-8 flex flex-col items-center gap-1">
+            <span class="font-serif text-sm tracking-widest text-gold-gradient font-medium">Agency Resource Center</span>
+            <span class="text-[9px] font-mono font-semibold text-champagne-200/40 tracking-wider uppercase">Kernel: EnesCDE V4 • Secure Uplink</span>
+        </div>
+    </div>
+
+    <script>
+        // Redirection après l'injection complète des paquets
+        setTimeout(() => {
+            window.location.href = "/HA-EE/portail/Accueil.html"; 
+        }, 2500);
+
+        const msgs = [
+            "Connexion au serveur ARC...",
+            "Calcul de l'empreinte SHA-256...",
+            "Vérification de la clé de nœud...",
+            "Injection des droits privilèges...",
+            "Accès autorisé. Redirection..."
+        ];
+        
+        let i = 0;
+        const loader = document.getElementById('loaderText');
+        
+        const textInterval = setInterval(() => {
+            if (i < msgs.length) {
+                loader.innerText = msgs[i];
+                i++;
+            } else {
+                clearInterval(textInterval);
+            }
+        }, 450);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1906 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- E-CDE Account & Security Soft -->
+    <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+    <title>Howard Armory - Mon Compte</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace'],
+                    },
+                    colors: {
+                        neutral: { 850: '#1a1a1a', 900: '#111111', 950: '#070707' },
+                        ha: { red: '#E63946', gold: '#D4AF37' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #070707;
+        }
+
+        .glass-card {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #737373;
+            padding: 0.45rem 1rem;
+            border-radius: 0.6rem;
+            font-size: 0.7rem;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-ghost:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(212, 175, 55, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .dark-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dark-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .dark-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body class="text-white selection:bg-ha-gold/30 h-screen overflow-y-auto dark-scrollbar">
+    <div id="session/howard"></div>
+    <script src="/HA-EE/src/javascript/menu.js"></script>
+    <div id="menu"></div>
+
+    <main id="content" class="w-full max-w-4xl mx-auto p-4 lg:p-8 space-y-8 mt-4">
+
+        <h1 class="text-3xl md:text-4xl font-display font-black tracking-tight uppercase border-b border-white/10 pb-4">
+            Terminal <span class="text-ha-gold">Personnel</span>
+        </h1>
+
+        <!-- PROFIL CARD -->
+        <div class="glass-card rounded-2xl relative overflow-hidden flex flex-col md:flex-row shadow-2xl">
+            <div
+                class="absolute inset-0 bg-gradient-to-br from-ha-gold/5 via-transparent to-transparent pointer-events-none">
+            </div>
+
+            <!-- Badge Section -->
+            <div
+                class="w-full md:w-1/3 bg-black/40 p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-white/10 relative overflow-hidden">
+                <i class="fas fa-qrcode absolute -right-6 -bottom-6 text-8xl text-white/5 rotate-12"></i>
+                <div
+                    class="w-24 h-24 rounded-2xl bg-neutral-900 border border-ha-gold/30 flex items-center justify-center text-ha-gold mb-4 shadow-[0_0_15px_rgba(212,175,55,0.2)]">
+                    <i class="fas fa-user-secret text-4xl"></i>
+                </div>
+                <div class="text-center">
+                    <p class="text-[10px] font-mono tracking-widest uppercase text-neutral-500 mb-1">Employé Enregistré
+                    </p>
+                    <p class="text-xs font-mono text-green-400 bg-green-500/10 px-2 py-1 rounded inline-block">
+                        ACCRÉDITATION ACTIVE</p>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            <div class="w-full md:w-2/3 p-8">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h2 class="text-3xl font-display font-bold uppercase"><span id="db_prenom">Chargement</span>
+                            <span id="db_nom">...</span></h2>
+                        <a id="db_email" class="text-xs font-mono tracking-widest text-ha-gold">...</a>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-y-6 gap-x-4">
+                    <div>
+                        <p class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1">Poste Assigné
+                        </p>
+                        <p id="db_poste"
+                            class="font-bold text-sm bg-neutral-900 px-3 py-2 rounded-lg border border-white/5 inline-block">
+                            --</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1">Statut Présence
+                        </p>
+                        <p id="db_presence"
+                            class="font-bold text-sm bg-neutral-900 px-3 py-2 rounded-lg border border-white/5 inline-block">
+                            --</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1">Échelon Civil
+                        </p>
+                        <p id="db_echelon" class="font-mono text-sm text-neutral-300">--</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1">Date de
+                            Naissance</p>
+                        <p class="font-mono text-sm text-neutral-300 flex items-center gap-2">
+                            <span id="db_date_naissance">--/--/----</span>
+                            <button onclick="openDobPopup()" class="text-xs text-ha-gold/50 hover:text-ha-gold"
+                                title="Demander une modification"><i class="fas fa-pen"></i></button>
+                        </p>
+                        <p id="db_date_naissance_pending" class="text-[9px] text-amber-500 mt-1 hidden"><i
+                                class="fas fa-clock mr-1"></i>Modification en attente</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SOLDE ASSURANCE SANTE -->
+        <div
+            class="w-full bg-neutral-950 border border-neutral-800 rounded-2xl p-6 shadow-2xl overflow-hidden relative group mt-8">
+            <div
+                class="absolute -right-10 -top-10 w-40 h-40 bg-red-600/5 rounded-full blur-3xl group-hover:bg-red-600/10 transition-all duration-700">
+            </div>
+            <div class="flex items-center gap-5">
+                <div
+                    class="h-14 w-14 bg-black rounded-2xl flex items-center justify-center border border-neutral-800 shadow-inner">
+                    <i class="fas fa-hand-holding-dollar text-red-600 text-2xl"></i>
+                </div>
+                <div
+                    class="flex-1 relative z-10 flex flex-col md:flex-row justify-between md:items-center gap-4 md:gap-6">
+                    <div>
+                        <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 mb-1">Cagnotte
+                            Assurance Santé</h3>
+                        <div id="balance-display"
+                            class="text-3xl md:text-4xl font-black text-white tracking-tighter flex items-baseline gap-2">
+                            <span class="text-neutral-800 animate-pulse">Calcul...</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col md:items-end border-l border-neutral-800 pl-6 hidden md:flex">
+                        <span class="text-[9px] font-mono text-neutral-600 uppercase mb-2 md:text-right">Utilisateur
+                            détecté : <br><span id="user-email-tag" class="text-red-500">Validation...</span></span>
+                        <div class="flex items-center gap-2">
+                            <span class="h-2 w-2 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.5)]"></span>
+                            <span class="text-xs font-bold text-neutral-300 uppercase tracking-widest">LIQUIDE
+                                DISPONIBLE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DOSSIER RH -->
+        <h2 class="text-xl font-display font-bold uppercase mt-12 mb-4 border-b border-white/10 pb-2"><i
+                class="fas fa-folder-open text-ha-gold mr-3"></i>Dossier RH</h2>
+
+        <div class="space-y-6">
+            <!-- Documents Personnels -->
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-base font-bold font-mono tracking-widest uppercase text-neutral-300">Déclarations &
+                        Documents</h3>
+                    <button onclick="openDocPopup()" class="btn-ghost text-xs"><i class="fas fa-plus mr-2"></i>Nouveau
+                        Document</button>
+                </div>
+                <div id="rh-documents-list" class="space-y-3">
+                    <p class="text-neutral-500 text-xs font-mono animate-pulse">Chargement...</p>
+                </div>
+            </div>
+
+            <!-- Contrats -->
+            <div class="glass-card rounded-2xl p-6 border-ha-gold/20 relative overflow-hidden group">
+                <div
+                    class="absolute -right-6 -bottom-6 w-32 h-32 bg-ha-gold/5 rounded-full blur-2xl group-hover:bg-ha-gold/10 transition-all duration-700">
+                </div>
+                <div class="relative z-10">
+                    <h3 class="text-base font-bold font-mono tracking-widest uppercase text-ha-gold mb-4"><i
+                            class="fas fa-file-signature mr-2"></i>Contrats d'Emploi</h3>
+                    <div id="rh-contrats-list" class="space-y-3">
+                        <p class="text-neutral-500 text-xs font-mono animate-pulse">Chargement...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Armement Perso -->
+            <div class="glass-card rounded-2xl p-6 border-blue-500/10">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-base font-bold font-mono tracking-widest uppercase text-blue-400"><i
+                            class="fa-solid fa-gun mr-2"></i>Déclaration Armement</h3>
+                    <button onclick="openWeaponPopup()"
+                        class="btn-ghost text-xs border-blue-500/30 text-blue-400 hover:bg-blue-500 hover:text-white transition-all"><i
+                            class="fas fa-plus mr-2"></i>Déclarer arme</button>
+                </div>
+                <div id="rh-weapons-list" class="space-y-3">
+                    <p class="text-neutral-500 text-xs font-mono animate-pulse">Chargement...</p>
+                </div>
+            </div>
+
+            <!-- Licences & Permis -->
+            <div class="glass-card rounded-2xl p-6 border-purple-500/10">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-base font-bold font-mono tracking-widest uppercase text-purple-400"><i
+                            class="fas fa-id-card mr-2"></i>Licences &amp; Permis</h3>
+                    <button onclick="openLicencePopup()"
+                        class="btn-ghost text-xs border-purple-500/30 text-purple-400 hover:bg-purple-500 hover:text-white transition-all"><i
+                            class="fas fa-plus mr-2"></i>Ajouter licence</button>
+                </div>
+                <div id="rh-licences-list" class="space-y-3">
+                    <p class="text-neutral-500 text-xs font-mono animate-pulse">Chargement...</p>
+                </div>
+            </div>
+        </div>
+        <!-- DOCUMENTS MULTI-PARTITES -->
+        <h2 class="text-xl font-display font-bold uppercase mt-12 mb-4 border-b border-white/10 pb-2"><i
+                class="fas fa-file-alt text-blue-500 mr-3"></i>Centre de Documents Partagés</h2>
+
+        <div class="glass-card rounded-2xl p-6">
+            <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
+                <div>
+                    <h3 class="text-base font-bold font-mono tracking-widest uppercase text-neutral-300">Bibliothèque de
+                        Documents Avancés</h3>
+                    <p class="text-xs text-neutral-500 font-mono mt-1">Gérez vos documents publics, partages sélectifs,
+                        et requêtes de signatures électroniques.</p>
+                </div>
+                <button onclick="openDocAdvancedPopup()"
+                    class="btn-ghost text-xs whitespace-nowrap bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500 hover:text-white"><i
+                        class="fas fa-cloud-upload-alt mr-2"></i>Nouveau Document Partagé</button>
+            </div>
+            <div class="space-y-6">
+                <!-- Mes Créations -->
+                <div>
+                    <h4
+                        class="text-xs font-mono font-bold text-blue-400 mb-3 uppercase tracking-widest border-b border-white/5 pb-2">
+                        Mes Créations</h4>
+                    <div id="adv-docs-list-me" class="space-y-3">
+                        <p class="text-neutral-500 text-xs font-mono animate-pulse">Chargement...</p>
+                    </div>
+                </div>
+
+                <!-- Documents Partagés (Créés par autrui) -->
+                <div>
+                    <h4
+                        class="text-xs font-mono font-bold text-neutral-500 mb-3 uppercase tracking-widest border-b border-white/5 pb-2">
+                        Partages Entrants</h4>
+                    <div id="adv-docs-list-others" class="space-y-3">
+                        <p class="text-neutral-500 text-xs font-mono animate-pulse">Chargement...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RAPPORTS D'INCIDENTS -->
+        <h2 class="text-xl font-display font-bold uppercase mt-12 mb-4 border-b border-white/10 pb-2"><i
+                class="fas fa-exclamation-triangle text-red-500 mr-3"></i>Rapports & Incidents</h2>
+
+        <div class="glass-card rounded-2xl p-6">
+            <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
+                <div>
+                    <h3 class="text-base font-bold font-mono tracking-widest uppercase text-neutral-300">Rapports
+                        Administratifs</h3>
+                    <p class="text-xs text-neutral-500 font-mono mt-1">Vous n'avez accès qu'aux rapports validés vous
+                        impliquant, ou à ceux que vous avez rédigés.</p>
+                </div>
+                <button onclick="openRapportPopup()"
+                    class="btn-ghost text-xs whitespace-nowrap bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500 hover:text-white"><i
+                        class="fas fa-pen mr-2"></i>Rédiger un Rapport</button>
+            </div>
+            <div id="rapports-list" class="space-y-3">
+                <p class="text-neutral-500 text-xs font-mono animate-pulse">Chargement...</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- WEAPON POPUP -->
+    <div id="weapon-popup"
+        class="fixed inset-0 bg-black/80 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div
+            class="glass-card rounded-2xl p-6 w-full max-w-lg border-blue-500/20 max-h-[95vh] flex flex-col overflow-hidden">
+            <h3 class="text-lg font-display font-bold mb-2 text-blue-400">Déclaration d'Arme</h3>
+            <p class="text-[10px] text-neutral-400 mb-4 font-mono">Toute déclaration est soumise à vérification de la
+                part de l'administration RH.</p>
+
+            <input type="hidden" id="weapon-id" value="">
+
+            <div class="flex-1 space-y-4 mb-4 overflow-y-auto dark-scrollbar pr-2">
+                <div>
+                    <label class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Modèle de
+                        l'arme</label>
+                    <input type="text" id="weapon-name" placeholder="Ex: Glock 19, SIG Sauer P320..."
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-sm outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Numéro de
+                        Série (S/N)</label>
+                    <input type="text" id="weapon-sn" placeholder="Ex: HAW-8419X..."
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-sm outline-none focus:border-blue-500 uppercase">
+                </div>
+                <div>
+                    <label class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Mode de
+                        tir / Type</label>
+                    <select id="weapon-mode"
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-sm outline-none focus:border-blue-500">
+                        <option value="Semi-Automatique">Semi-Automatique</option>
+                        <option value="Automatique">Automatique</option>
+                        <option value="Autre (Spécial)">Autre (Spécial)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Résidence (adresse)</label>
+                    <input type="text" id="weapon-residence" placeholder="Ex: 13th Main St, Nashville, Tennessee"
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-sm outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-white/5 shrink-0">
+                <button onclick="closeWeaponPopup()"
+                    class="px-4 py-2 text-xs font-mono text-neutral-400 hover:text-white transition-colors uppercase">Annuler</button>
+                <button onclick="submitWeapon()" id="weapon-submit-btn"
+                    class="px-5 py-2 text-xs font-mono font-bold bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition-colors uppercase shadow-[0_0_15px_rgba(59,130,246,0.3)]">Déclarer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LICENCE POPUP -->
+    <div id="licence-popup"
+        class="fixed inset-0 bg-black/80 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div
+            class="glass-card rounded-2xl p-6 w-full max-w-lg border-purple-500/20 max-h-[95vh] flex flex-col overflow-hidden">
+            <h3 class="text-lg font-display font-bold mb-2 text-purple-400"><i
+                    class="fas fa-id-card mr-2"></i>Déclaration de Licence / Permis</h3>
+            <p class="text-[10px] text-neutral-400 mb-4 font-mono">Soumise à validation RH. Toute modification repassera
+                en attente de vérification.</p>
+
+            <input type="hidden" id="licence-id" value="">
+
+            <div class="flex-1 space-y-4 mb-4 overflow-y-auto dark-scrollbar pr-2">
+                <div>
+                    <label class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Type de
+                        Licence / Permis</label>
+                    <select id="licence-type"
+                        onchange="document.getElementById('licence-autre-container').classList.toggle('hidden', this.value !== 'Autre')"
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-sm outline-none focus:border-purple-500">
+                        <option value="Permis Arme Automatique">Permis Arme Automatique</option>
+                        <option value="Permis de conduire (voiture)">Permis de conduire (voiture)</option>
+                        <option value="Permis de conduire (camion)">Permis de conduire (camion)</option>
+                        <option value="Permis de conduire (moto)">Permis de conduire (moto)</option>
+                        <option value="Permis de conduire (bateau)">Permis de conduire (bateau)</option>
+                        <option value="Permis de conduire (helico)">Permis de conduire (helicop.)</option>
+                        <option value="Autre">Autre (Préciser)</option>
+                    </select>
+                </div>
+                <div id="licence-autre-container" class="hidden">
+                    <label class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Nom exact
+                        du permis</label>
+                    <input type="text" id="licence-autre-nom" placeholder="Ex: Licence de sécurité privée..."
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-sm outline-none focus:border-purple-500">
+                </div>
+                <div>
+                    <label class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Résidence (adresse)</label>
+                    <input type="text" id="licence-residence" placeholder="Ex: 13th Main St, Nashville, Tennessee"
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-sm outline-none focus:border-purple-500">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Date
+                            de Demande</label>
+                        <input type="date" id="licence-date-demande"
+                            class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-sm outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Date
+                            d'Obtention <span class="normal-case text-neutral-600">(laisser vide si en
+                                cours)</span></label>
+                        <input type="date" id="licence-date-acquis"
+                            class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-sm outline-none focus:border-purple-500">
+                    </div>
+                </div>
+                <div>
+                    <label
+                        class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Commentaire
+                        (Optionnel)</label>
+                    <textarea id="licence-commentaire" rows="3"
+                        placeholder="Numéro de référence, remarques particulières..."
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-xs outline-none focus:border-purple-500 dark-scrollbar"
+                        style="resize:vertical"></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-white/5 shrink-0">
+                <button onclick="closeLicencePopup()"
+                    class="px-4 py-2 text-xs font-mono text-neutral-400 hover:text-white transition-colors uppercase">Annuler</button>
+                <button onclick="submitLicence()" id="licence-submit-btn"
+                    class="px-5 py-2 text-xs font-mono font-bold bg-purple-500 text-white rounded-lg hover:bg-purple-400 transition-colors uppercase shadow-[0_0_15px_rgba(168,85,247,0.3)]">Déclarer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RAPPORT POPUP -->
+    <div id="rapport-popup"
+        class="fixed inset-0 bg-black/80 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div
+            class="glass-card rounded-2xl p-6 w-full max-w-2xl border-red-500/20 max-h-[95vh] flex flex-col overflow-hidden">
+            <h3 class="text-lg font-display font-bold mb-2 text-red-500">Rapport d'Incident</h3>
+            <p class="text-[10px] text-neutral-400 mb-4 font-mono">Soumis à validation RH avant d'être visible par les
+                intéressés. Le rédacteur pourra toujours modifier son rapport par la suite (nouvelle validation
+                requise).</p>
+
+            <input type="hidden" id="rapport-id" value="">
+
+            <div class="overflow-y-auto dark-scrollbar pr-2 flex-1 space-y-4 mb-4">
+                <div>
+                    <label class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Titre du
+                        Rapport</label>
+                    <input type="text" id="rapport-titre" placeholder="Accident de tir..."
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-sm outline-none focus:border-red-500">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label
+                            class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Responsable(s)
+                            impliqué(s)</label>
+                        <select id="rapport-responsables" multiple
+                            class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-xs outline-none focus:border-red-500 h-24 dark-scrollbar">
+                        </select>
+                        <p class="text-[9px] text-neutral-500 mt-1 uppercase">Ctrl+Clic pour sélect. multiple</p>
+                    </div>
+                    <div>
+                        <label
+                            class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Témoin(s)</label>
+                        <select id="rapport-temoins" multiple
+                            class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-xs outline-none focus:border-red-500 h-24 dark-scrollbar">
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Importer
+                        Fichier (.md, .html, Images) (Optionnel)</label>
+                    <input type="file" id="rapport-file" accept=".md,.html,.png,.jpg,.jpeg,.webp"
+                        class="w-full text-xs text-neutral-400 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-[10px] file:font-bold file:font-mono file:bg-red-500/20 file:text-red-400 hover:file:bg-red-500/30 cursor-pointer">
+                </div>
+                <div class="text-center text-[10px] text-neutral-600 font-mono">- OU CONTENU BRUT -</div>
+                <div>
+                    <textarea id="rapport-content" rows="6" placeholder="Description des faits..."
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-xs outline-none focus:border-red-500 dark-scrollbar"
+                        style="resize:vertical"></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-white/5">
+                <button onclick="closeRapportPopup()"
+                    class="px-4 py-2 rounded-lg text-xs font-mono font-bold text-neutral-400 hover:text-white transition-colors">Annuler</button>
+                <button onclick="submitRapport()" id="rapport-submit-btn"
+                    class="px-4 py-2 rounded-lg text-xs font-mono font-bold bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500 hover:text-white transition-colors">Soumettre
+                    pour Validation</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DOCUMENT ADVANCED POPUP -->
+    <div id="doc-advanced-popup"
+        class="fixed inset-0 bg-black/80 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div
+            class="glass-card rounded-2xl p-6 w-full max-w-2xl border-blue-500/20 max-h-[95vh] flex flex-col overflow-hidden">
+            <h3 class="text-lg font-display font-bold mb-2 text-blue-500">Document Partagé / Multi-signatures</h3>
+
+            <input type="hidden" id="advdoc-id" value="">
+
+            <div class="overflow-y-auto dark-scrollbar pr-2 flex-1 space-y-4 mb-4">
+                <div>
+                    <label class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Titre du
+                        Document</label>
+                    <input type="text" id="advdoc-titre" placeholder="Titre..."
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-sm outline-none focus:border-blue-500">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label
+                            class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Visibilité</label>
+                        <select id="advdoc-visibilite"
+                            class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-xs outline-none focus:border-blue-500 mb-2"
+                            onchange="document.getElementById('advdoc-acces-container').className = this.value === 'specifique' ? 'block' : 'hidden'">
+                            <option value="prive">Moi + RH Uniquement</option>
+                            <option value="specifique">Personnes spécifiques + RH</option>
+                            <option value="public">Rendre Public (Tout employé)</option>
+                        </select>
+
+                        <div id="advdoc-acces-container" class="hidden">
+                            <label
+                                class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Employés
+                                Autorisés à voir</label>
+                            <select id="advdoc-acces" multiple
+                                class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-xs outline-none focus:border-blue-500 h-24 dark-scrollbar"></select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label
+                                class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Signatures
+                                RH</label>
+                            <label
+                                class="flex items-center gap-2 cursor-pointer text-xs font-mono text-neutral-300 hover:text-white">
+                                <input type="checkbox" id="advdoc-rh-sign" class="accent-blue-500 w-4 h-4">
+                                Validation/signature RH requise
+                            </label>
+                        </div>
+                        <div>
+                            <label
+                                class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Signatures
+                                Employés Requises</label>
+                            <select id="advdoc-signatures" multiple
+                                class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-xs outline-none focus:border-blue-500 h-24 dark-scrollbar"></select>
+                            <p class="text-[9px] text-neutral-500 mt-1 uppercase">Séléctionnez ceux qui doivent signer
+                                (vous y compris si besoin).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Contenu
+                        (.md, .html, Images)</label>
+                    <input type="file" id="advdoc-file" accept=".md,.html,.png,.jpg,.jpeg,.webp"
+                        class="w-full text-xs text-neutral-400 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-[10px] file:font-bold file:font-mono file:bg-blue-500/20 file:text-blue-400 hover:file:bg-blue-500/30 cursor-pointer">
+                </div>
+                <div class="text-center text-[10px] text-neutral-600 font-mono">- OU SAISIE BRUTE -</div>
+                <div>
+                    <textarea id="advdoc-content" rows="6" placeholder="Contenu du document..."
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-xs outline-none focus:border-blue-500 dark-scrollbar"
+                        style="resize:vertical"></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-white/5">
+                <button onclick="closeDocAdvancedPopup()"
+                    class="px-4 py-2 rounded-lg text-xs font-mono font-bold text-neutral-400 hover:text-white transition-colors">Annuler</button>
+                <button onclick="submitDocAdvanced()" id="advdoc-submit-btn"
+                    class="px-4 py-2 rounded-lg text-xs font-mono font-bold bg-blue-500/10 text-blue-500 border border-blue-500/30 hover:bg-blue-500 hover:text-white transition-colors">Créer
+                    le Document</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DOB POPUP -->
+    <div id="dob-popup"
+        class="fixed inset-0 bg-black/80 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl p-6 w-full max-w-sm border-ha-gold/20">
+            <h3 class="text-lg font-display font-bold mb-4">Modification de Naissance</h3>
+            <p class="text-xs text-neutral-400 mb-4">Votre demande sera soumise aux RH pour validation avant d'être
+                appliquée.</p>
+            <input type="date" id="dob-input"
+                class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-sm mb-4 outline-none focus:border-ha-gold">
+            <div class="flex justify-end gap-2">
+                <button onclick="closeDobPopup()"
+                    class="px-4 py-2 rounded-lg text-xs font-mono font-bold text-neutral-400 hover:text-white transition-colors">Annuler</button>
+                <button onclick="submitDobChange()" id="dob-submit-btn"
+                    class="px-4 py-2 rounded-lg text-xs font-mono font-bold bg-ha-gold/10 text-ha-gold border border-ha-gold/30 hover:bg-ha-gold hover:text-black transition-colors">Soumettre</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DOCUMENT POPUP -->
+    <div id="doc-popup"
+        class="fixed inset-0 bg-black/80 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl p-6 w-full max-w-sm">
+            <h3 class="text-lg font-display font-bold mb-4">Nouveau Document</h3>
+            <div class="space-y-3 mb-4">
+                <div>
+                    <label class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Type de
+                        Document</label>
+                    <select id="doc-type"
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-sm outline-none focus:border-neutral-500">
+                        <option value="cv">Curriculum Vitae (CV)</option>
+                        <option value="lettre_motivation">Lettre de motivation</option>
+                        <option value="declaration_armes">Déclaration d'armes</option>
+                        <option value="FDP">Fiche de paie</option>
+                        <option value="FL">Fiche lecture</option>
+                        <option value="rapport">Rapport / Autre</option>
+                    </select>
+                </div>
+                <!-- Contenu MD/HTML -->
+                <div>
+                    <label class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Importer
+                        Fichier (.md, .html, Images)</label>
+                    <input type="file" id="doc-file" accept=".md,.html,.png,.jpg,.jpeg,.webp"
+                        class="w-full text-xs text-neutral-400 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-[10px] file:font-bold file:font-mono file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer">
+                </div>
+                <div class="text-center text-[10px] my-1 text-neutral-600 font-mono">- OU CONTENU BRUT -</div>
+                <div>
+                    <textarea id="doc-content" rows="6" placeholder="# Titre..."
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-[10px] outline-none focus:border-neutral-500 dark-scrollbar"
+                        style="resize:vertical"></textarea>
+                </div>
+
+                <div>
+                    <label class="text-[10px] text-neutral-500 uppercase font-mono tracking-widest mb-1 block">Note
+                        abrégée (optionnel)</label>
+                    <input type="text" id="doc-comment" placeholder="Précisions..."
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-sm outline-none focus:border-neutral-500">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeDocPopup()"
+                    class="px-4 py-2 rounded-lg text-xs font-mono font-bold text-neutral-400 hover:text-white transition-colors">Annuler</button>
+                <button onclick="submitDocument()" id="doc-submit-btn"
+                    class="px-4 py-2 rounded-lg text-xs font-mono font-bold bg-white/5 text-white border border-white/10 hover:bg-white hover:text-black transition-colors">Soumettre</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DOCUMENT VIEW POPUP -->
+    <div id="doc-view-popup"
+        class="fixed inset-0 bg-black/90 backdrop-blur-md hidden z-[100] flex items-center justify-center p-4">
+        <div
+            class="glass-card rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col border border-white/10 shadow-2xl relative overflow-hidden">
+            <div
+                class="absolute inset-0 bg-gradient-to-b from-ha-gold/5 via-transparent to-transparent pointer-events-none">
+            </div>
+            <div
+                class="h-14 border-b border-white/10 flex items-center justify-between px-6 bg-black/50 relative z-10 shrink-0">
+                <h3 id="view-doc-title" class="text-sm font-display font-bold uppercase tracking-widest text-ha-gold">
+                    Document</h3>
+                <button onclick="closeDocView()" class="text-neutral-400 hover:text-white transition-colors"><i
+                        class="fas fa-times text-xl"></i></button>
+            </div>
+            <div id="view-doc-content"
+                class="p-8 overflow-y-auto dark-scrollbar flex-1 relative z-10 text-sm text-neutral-200">
+            </div>
+        </div>
+    </div>
+
+    <!-- SIGNATURE PAD POPUP -->
+    <div id="signature-popup" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden z-[200] flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl p-6 w-full max-w-md border border-white/10 shadow-2xl flex flex-col items-center">
+            <h3 class="text-sm font-display font-bold text-white mb-4 uppercase tracking-widest" id="signature-title"><i class="fas fa-pen-nib mr-2 text-ha-gold"></i>Apposer votre signature</h3>
+            <div class="bg-white rounded-xl overflow-hidden shadow-inner border-[3px] border-neutral-300 w-full mb-4">
+                <canvas id="signature-pad" class="w-full h-48 cursor-crosshair touch-none" style="touch-action: none;"></canvas>
+            </div>
+            <div class="flex justify-between w-full">
+                <button onclick="clearSignature()" class="text-xs font-mono text-neutral-400 hover:text-red-400 transition-colors uppercase tracking-widest"><i class="fas fa-eraser mr-1"></i>Effacer</button>
+                <div class="flex gap-2">
+                    <button onclick="closeSignaturePopup()" class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold text-neutral-400 hover:bg-white/5 transition-colors uppercase">Annuler</button>
+                    <button onclick="submitSignature()" class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-ha-gold text-black hover:bg-yellow-500 transition-colors uppercase shadow-[0_0_10px_rgba(212,175,55,0.3)]">Valider</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/HA-EE/src/javascript/footer.js"></script>
+    <div id="footer"></div>
+
+    <script type="module">
+        import { supabase, fromAgence, insertAgence, withAgence } from '/HA-EE/src/javascript/sp.js';
+
+        async function getHash(text) {
+            const utf8 = new TextEncoder().encode(text.toLowerCase().trim());
+            const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function initProfil() {
+            const token = sessionStorage.getItem('session_token');
+            const isAuth = sessionStorage.getItem('isAuth');
+
+            if (!token || !isAuth) {
+                document.getElementById('db_prenom').textContent = "Erreur";
+                document.getElementById('db_nom').textContent = "Auth";
+                return;
+            }
+
+            try {
+                // Trouver l'utilisateur par hash
+                const { data: employes } = await fromAgence('employes').select('*').order('nom', { ascending: true });
+                let user = null;
+                for (const emp of (employes || [])) {
+                    if (await getHash(emp.email) === token) { user = emp; break; }
+                }
+
+                if (!user) return;
+                window.currentUser = user;
+                window.allEmployees = employes || []; // Store for selects
+
+                // Afficher le profil
+                document.getElementById('db_nom').textContent = user.nom;
+                document.getElementById('db_prenom').textContent = user.prenom;
+                document.getElementById('db_email').textContent = user.email;
+                document.getElementById('db_date_naissance').textContent = user.date_naissance || "--";
+                document.getElementById('db_poste').textContent = user.poste || "--";
+                document.getElementById('db_echelon').textContent = user.echelon || "--";
+                document.getElementById('db_presence').textContent = user.presence || "--";
+
+                // Afficher le solde AS
+                document.getElementById('user-email-tag').innerText = user.email;
+                const { data: cagnottes } = await fromAgence('assurance_sante').select('total_as').eq('email', user.email).eq('statut', 'valide');
+                const total = (cagnottes || []).reduce((sum, item) => sum + (Number(item.total_as) || 0), 0);
+
+                document.getElementById('balance-display').innerHTML = `
+                    ${total.toLocaleString('en-US', { minimumFractionDigits: 2 })} $
+                    <span class="text-xs text-neutral-500 font-normal ml-2 uppercase tracking-widest">Solde validé</span>
+                `;
+
+                // Load Dossier RH & Rapports
+                loadDossierRH();
+                loadRapports();
+                loadAdvDocs();
+
+            } catch (err) {
+                console.error("Erreur profil:", err);
+            }
+        }
+
+        let rhDocumentsArray = [];
+
+        async function loadDossierRH() {
+            if (!currentUser) return;
+            try {
+                const { data, error } = await fromAgence('inf_rh').select('*').eq('id_employe', currentUser.id_compte).order('cree_le', { ascending: false });
+                if (error) { console.error("Erreur HR files:", error); return; }
+
+                rhDocumentsArray = data || [];
+
+                const docsList = document.getElementById('rh-documents-list');
+                const contratsList = document.getElementById('rh-contrats-list');
+                const weaponsList = document.getElementById('rh-weapons-list');
+                const licencesList = document.getElementById('rh-licences-list');
+                const pendingDob = document.getElementById('db_date_naissance_pending');
+
+                docsList.innerHTML = ''; contratsList.innerHTML = ''; weaponsList.innerHTML = ''; licencesList.innerHTML = '';
+                let hasPendingDob = false;
+
+                rhDocumentsArray.forEach(doc => {
+                    if (doc.type_doc === 'date_naissance' && doc.statut === 'en_attente') {
+                        hasPendingDob = true;
+                    }
+                    else if (doc.type_doc === 'contrat') {
+                        contratsList.innerHTML += renderContratCard(doc);
+                    }
+                    else if (doc.type_doc === 'declaration_armes') {
+                        weaponsList.innerHTML += renderWeaponCard(doc);
+                    }
+                    else if (doc.type_doc === 'declaration_licence') {
+                        licencesList.innerHTML += renderLicenceCard(doc);
+                    }
+                    else if (['cv', 'lettre_motivation', 'rapport'].includes(doc.type_doc)) {
+                        docsList.innerHTML += renderDocCard(doc);
+                    }
+                });
+
+                if (hasPendingDob) pendingDob.classList.remove('hidden');
+                else pendingDob.classList.add('hidden');
+
+                if (docsList.innerHTML === '') docsList.innerHTML = '<p class="text-xs font-mono text-neutral-600 uppercase">Aucun document soumis.</p>';
+                if (contratsList.innerHTML === '') contratsList.innerHTML = '<p class="text-xs font-mono text-neutral-600/50 uppercase">Aucun contrat attribué.</p>';
+                if (weaponsList.innerHTML === '') weaponsList.innerHTML = '<p class="text-[10px] font-mono text-neutral-600/50 uppercase tracking-widest">Aucune arme déclarée.</p>';
+                if (licencesList.innerHTML === '') licencesList.innerHTML = '<p class="text-[10px] font-mono text-neutral-600/50 uppercase tracking-widest">Aucune licence déclarée.</p>';
+
+            } catch (e) { console.error(e); }
+        }
+
+        function renderStatus(statut) {
+            if (statut === 'en_attente') return '<span class="text-[9px] font-mono font-bold tracking-widest uppercase bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded">En Attente</span>';
+            if (statut === 'valide') return '<span class="text-[9px] font-mono font-bold tracking-widest uppercase bg-green-500/10 text-green-500 border border-green-500/20 px-2 py-0.5 rounded">Validé</span>';
+            if (statut === 'refuse') return '<span class="text-[9px] font-mono font-bold tracking-widest uppercase bg-red-500/10 text-red-500 border border-red-500/20 px-2 py-0.5 rounded">Refusé</span>';
+            return statut;
+        }
+
+        function getTypeLabel(type) {
+            const types = { 'cv': 'Curriculum Vitae', 'lettre_motivation': 'Lettre de Motivation', 'declaration_armes': 'Décla. Arme', 'rapport': 'Rapport' };
+            return types[type] || type;
+        }
+
+        function renderDocCard(doc) {
+            const dateStr = new Date(doc.cree_le).toLocaleDateString('fr-FR');
+            let actions = `<button onclick="viewDoc('${doc.id_rh}')" class="text-[10px] uppercase font-mono tracking-widest border border-white/10 hover:bg-white/5 px-2 py-1 rounded inline-block transition-colors"><i class="fas fa-eye mr-1"></i>Ouvrir</button>`;
+            return `
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-black/40 border border-white/5 rounded-xl p-3 gap-3">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h4 class="text-sm font-bold font-mono uppercase tracking-widest">${getTypeLabel(doc.type_doc)}</h4>
+                            ${renderStatus(doc.statut)}
+                        </div>
+                        <div class="text-[10px] font-mono text-neutral-500">${dateStr} ${doc.commentaire ? '— ' + doc.commentaire : ''}</div>
+                    </div>
+                    <div class="shrink-0 flex gap-2">
+                        ${actions}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderContratCard(doc) {
+            const dateStr = new Date(doc.cree_le).toLocaleDateString('fr-FR');
+            let actions = `<button onclick="viewDoc('${doc.id_rh}')" class="text-[10px] uppercase font-mono text-ha-gold border border-ha-gold/30 hover:bg-ha-gold/10 px-2 py-1 rounded inline-block transition-colors"><i class="fas fa-file-contract mr-1"></i>Voir Contrat</button>`;
+
+            let badgeSign = doc.signature_employe ?
+                '<span class="text-[9px] font-mono font-bold tracking-widest uppercase text-green-500"><i class="fas fa-check-circle mr-1"></i>Signé</span>' :
+                '<span class="text-[9px] font-mono font-bold tracking-widest uppercase text-neutral-500"><i class="fas fa-clock mr-1"></i>En attente de signature</span>';
+
+            let signBtn = doc.signature_employe ? '' :
+                `<button onclick="signContrat('${doc.id_rh}')" class="text-[10px] uppercase font-mono font-bold bg-ha-gold text-black border border-ha-gold hover:bg-yellow-400 px-3 py-1 rounded transition-colors shadow-[0_0_10px_rgba(212,175,55,0.3)]"><i class="fas fa-pen-nib mr-1"></i>Signer</button>`;
+
+            return `
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-black/40 border border-white/5 rounded-xl p-4 gap-3 position-relative">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h4 class="text-sm font-bold font-mono text-white">CONTRAT DE TRAVAIL</h4>
+                            ${badgeSign}
+                        </div>
+                        <div class="text-[10px] font-mono text-neutral-500">Émis le ${dateStr}</div>
+                    </div>
+                    <div class="shrink-0 flex items-center gap-3">
+                        ${actions}
+                        ${signBtn}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderWeaponCard(doc) {
+            let data = {};
+            try { data = JSON.parse(doc.valeur); } catch (e) { }
+
+            let statusHtml = renderStatus(doc.statut);
+            if (doc.statut === 'demande_suppression') {
+                statusHtml = '<span class="text-[9px] font-mono font-bold tracking-widest uppercase bg-red-500/10 text-red-500 border border-red-500/20 px-2 py-0.5 rounded">Attente Détente / Supp.</span>';
+            }
+
+            let actions = `<button onclick="editWeapon('${doc.id_rh}')" class="text-[10px] uppercase font-mono text-amber-500 border border-amber-500/30 hover:bg-amber-500/10 px-2 py-1 rounded inline-block transition-colors"><i class="fas fa-pen mr-1"></i>Éditer</button>`;
+
+            if (doc.statut !== 'demande_suppression') {
+                actions += `<button onclick="deleteWeapon('${doc.id_rh}')" class="text-[10px] uppercase font-mono text-red-500 hover:text-white hover:bg-red-500 border border-red-500/30 px-2 py-1 rounded inline-block transition-colors ml-2"><i class="fas fa-trash"></i></button>`;
+            }
+
+            return `
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-black/40 border ${doc.statut === 'valide' ? 'border-green-500/20' : 'border-white/5'} rounded-xl p-3 gap-3">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h4 class="text-sm font-bold font-display uppercase tracking-wider text-white">${data.nom || 'Inconnu'}</h4>
+                            ${statusHtml}
+                        </div>
+                        <div class="text-[10px] font-mono text-neutral-400 flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <span><i class="fas fa-hashtag text-neutral-600 mr-1"></i>${data.sn || 'Aucun'}</span>
+                            <span>|</span>
+                            <span><i class="fas fa-crosshairs text-neutral-600 mr-1"></i>${data.mode || 'Standard'}</span>
+                            ${data.residence ? `<span>|</span><span><i class="fas fa-map-marker-alt text-neutral-600 mr-1"></i>${data.residence}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="shrink-0 flex gap-2">
+                        ${actions}
+                    </div>
+                </div>
+            `;
+        }
+
+        window.openWeaponPopup = () => {
+            document.getElementById('weapon-popup').classList.remove('hidden');
+            document.getElementById('weapon-id').value = '';
+            document.getElementById('weapon-name').value = '';
+            document.getElementById('weapon-sn').value = '';
+            document.getElementById('weapon-mode').value = 'Semi-Automatique';
+            document.getElementById('weapon-residence').value = '';
+            document.getElementById('weapon-submit-btn').textContent = 'Déclarer';
+        };
+
+        window.closeWeaponPopup = () => {
+            document.getElementById('weapon-popup').classList.add('hidden');
+        };
+
+        window.submitWeapon = async () => {
+            const id = document.getElementById('weapon-id').value;
+            const nom = document.getElementById('weapon-name').value.trim();
+            const sn = document.getElementById('weapon-sn').value.trim().toUpperCase();
+            const mode = document.getElementById('weapon-mode').value;
+            const residence = document.getElementById('weapon-residence').value.trim();
+
+            if (!nom || !sn) return alert("Le modèle et le numéro de série sont obligatoires.");
+
+            const weaponJson = JSON.stringify({ nom, sn, mode, residence });
+            const btn = document.getElementById('weapon-submit-btn');
+            btn.textContent = 'En cours...';
+
+            if (id) {
+                await fromAgence('inf_rh').update({ valeur: weaponJson, statut: 'en_attente' }).eq('id_rh', id);
+            } else {
+                await insertAgence('inf_rh', [{ id_employe: currentUser.id_compte, type_doc: 'declaration_armes', valeur: weaponJson, statut: 'en_attente' }]);
+            }
+            closeWeaponPopup();
+            loadDossierRH();
+        };
+
+        window.editWeapon = (id) => {
+            const doc = rhDocumentsArray.find(d => d.id_rh === id);
+            if (!doc) return;
+            openWeaponPopup();
+            document.getElementById('weapon-id').value = doc.id_rh;
+            try {
+                const data = JSON.parse(doc.valeur);
+                document.getElementById('weapon-name').value = data.nom || '';
+                document.getElementById('weapon-sn').value = data.sn || '';
+                document.getElementById('weapon-mode').value = data.mode || 'Semi-Automatique';
+                document.getElementById('weapon-residence').value = data.residence || '';
+            } catch (e) { }
+            document.getElementById('weapon-submit-btn').textContent = 'Mettre à jour';
+        };
+
+        window.deleteWeapon = async (id) => {
+            if (!confirm("Vous êtes sur le point de rendre ou détruire cette arme. Le DRH devra valider la suppression définitive. Confirmer ?")) return;
+            await fromAgence('inf_rh').update({ statut: 'demande_suppression', commentaire: 'L\'employé souhaite retirer cette arme.' }).eq('id_rh', id);
+            loadDossierRH();
+        };
+
+        // =================== LICENCES & PERMIS ===================
+
+        function renderLicenceCard(doc) {
+            let data = {};
+            try { data = JSON.parse(doc.valeur); } catch (e) { }
+
+            const nomLicence = data.type === 'Autre' ? (data.nomAutre || 'Inconnu') : (data.type || 'Inconnu');
+            const dateD = data.date_demande ? new Date(data.date_demande).toLocaleDateString('fr-FR') : '—';
+            const dateA = data.date_acquis ? new Date(data.date_acquis).toLocaleDateString('fr-FR') : null;
+
+            let statusHtml = renderStatus(doc.statut);
+            if (doc.statut === 'demande_suppression') {
+                statusHtml = '<span class="text-[9px] font-mono font-bold tracking-widest uppercase bg-red-500/10 text-red-500 border border-red-500/20 px-2 py-0.5 rounded">Suppression Demandée</span>';
+            }
+
+            let actions = `<button onclick="editLicence('${doc.id_rh}')" class="text-[10px] uppercase font-mono text-amber-500 border border-amber-500/30 hover:bg-amber-500/10 px-2 py-1 rounded transition-colors"><i class="fas fa-pen mr-1"></i>Éditer</button>`;
+            if (doc.statut !== 'demande_suppression') {
+                actions += `<button onclick="deleteLicence('${doc.id_rh}')" class="text-[10px] uppercase font-mono text-red-500 hover:bg-red-500 hover:text-white border border-red-500/30 px-2 py-1 rounded transition-colors ml-2"><i class="fas fa-trash"></i></button>`;
+            }
+
+            return `
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-black/40 border ${doc.statut === 'valide' ? 'border-purple-500/20' : 'border-white/5'} rounded-xl p-3 gap-3">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h4 class="text-sm font-bold font-display uppercase tracking-wider text-white">${nomLicence}</h4>
+                            ${statusHtml}
+                        </div>
+                        <div class="text-[10px] font-mono text-neutral-400 flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <span><i class="fas fa-paper-plane text-neutral-600 mr-1"></i>Demande : ${dateD}</span>
+                            ${dateA ? `<span><i class="fas fa-check text-green-500 mr-1"></i>Obtenu : ${dateA}</span>` : '<span class="text-amber-500/70 italic">Obtention en cours...</span>'}
+                            ${data.residence ? `<span><i class="fas fa-map-marker-alt text-neutral-600 mr-1"></i>${data.residence}</span>` : ''}
+                            ${data.commentaire ? `<span class="text-neutral-500 border-l border-white/10 pl-2">${data.commentaire}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="shrink-0 flex gap-2">${actions}</div>
+                </div>
+            `;
+        }
+
+        window.openLicencePopup = () => {
+            document.getElementById('licence-popup').classList.remove('hidden');
+            document.getElementById('licence-id').value = '';
+            document.getElementById('licence-type').value = 'Permis Arme Automatique';
+            document.getElementById('licence-autre-nom').value = '';
+            document.getElementById('licence-autre-container').classList.add('hidden');
+            document.getElementById('licence-residence').value = '';
+            document.getElementById('licence-date-demande').value = '';
+            document.getElementById('licence-date-acquis').value = '';
+            document.getElementById('licence-commentaire').value = '';
+            document.getElementById('licence-submit-btn').textContent = 'Déclarer';
+        };
+
+        window.closeLicencePopup = () => {
+            document.getElementById('licence-popup').classList.add('hidden');
+        };
+
+        window.submitLicence = async () => {
+            const id = document.getElementById('licence-id').value;
+            const type = document.getElementById('licence-type').value;
+            const nomAutre = document.getElementById('licence-autre-nom').value.trim();
+            const residence = document.getElementById('licence-residence').value.trim();
+            const date_demande = document.getElementById('licence-date-demande').value;
+            const date_acquis = document.getElementById('licence-date-acquis').value;
+            const commentaire = document.getElementById('licence-commentaire').value.trim();
+
+            if (!date_demande) return alert('La date de demande est obligatoire.');
+            if (type === 'Autre' && !nomAutre) return alert('Veuillez préciser le nom du permis.');
+
+            const licenceJson = JSON.stringify({ type, nomAutre, residence, date_demande, date_acquis, commentaire });
+            const btn = document.getElementById('licence-submit-btn');
+            btn.textContent = 'En cours...';
+
+            if (id) {
+                await fromAgence('inf_rh').update({ valeur: licenceJson, statut: 'en_attente' }).eq('id_rh', id);
+            } else {
+                await insertAgence('inf_rh', [{ id_employe: currentUser.id_compte, type_doc: 'declaration_licence', valeur: licenceJson, statut: 'en_attente' }]);
+            }
+            closeLicencePopup();
+            loadDossierRH();
+        };
+
+        window.editLicence = (id) => {
+            const doc = rhDocumentsArray.find(d => d.id_rh === id);
+            if (!doc) return;
+            openLicencePopup();
+            document.getElementById('licence-id').value = doc.id_rh;
+            try {
+                const data = JSON.parse(doc.valeur);
+                document.getElementById('licence-type').value = data.type || 'Permis Arme Automatique';
+                if (data.type === 'Autre') {
+                    document.getElementById('licence-autre-container').classList.remove('hidden');
+                    document.getElementById('licence-autre-nom').value = data.nomAutre || '';
+                }
+                document.getElementById('licence-residence').value = data.residence || '';
+                document.getElementById('licence-date-demande').value = data.date_demande || '';
+                document.getElementById('licence-date-acquis').value = data.date_acquis || '';
+                document.getElementById('licence-commentaire').value = data.commentaire || '';
+            } catch (e) { }
+            document.getElementById('licence-submit-btn').textContent = 'Mettre à jour';
+        };
+
+        window.deleteLicence = async (id) => {
+            if (!confirm('Confirmer la demande de révocation de cette licence ? Le DRH devra valider la suppression.')) return;
+            await fromAgence('inf_rh').update({ statut: 'demande_suppression', commentaire: "L'employé souhaite révoquer cette licence." }).eq('id_rh', id);
+            loadDossierRH();
+        };
+
+        window.signContrat = async function (id) {
+            if (!confirm("Voulez-vous officiellement signer ce contrat ? Cette action valeur de signature électronique.")) return;
+            const { error } = await fromAgence('inf_rh').update({ signature_employe: true }).eq('id_rh', id);
+            if (!error) loadDossierRH();
+        };
+
+        // --- GESTION DES RAPPORTS ---
+        let rapportsArray = [];
+        async function loadRapports() {
+            if (!currentUser) return;
+            try {
+                // To fetch: redacteur = me OR (responsables ? me AND statut = valide) OR (temoins ? me AND statut = valide)
+                const meId = currentUser.id_compte;
+                const { data, error } = await fromAgence('inf_rh_rapports')
+                    .select('*')
+                    .or(`id_redacteur.eq.${meId},and(responsables.cs.[${meId}],statut.eq.valide),and(temoins.cs.[${meId}],statut.eq.valide)`)
+                    .order('cree_le', { ascending: false });
+
+                if (error) { console.error("Erreur HR Rapports:", error); return; }
+                rapportsArray = data || [];
+
+                const rList = document.getElementById('rapports-list');
+                rList.innerHTML = '';
+
+                rapportsArray.forEach(rap => {
+                    const dateStr = new Date(rap.cree_le).toLocaleDateString('fr-FR');
+                    let badge = '';
+                    let isRedacteur = (rap.id_redacteur === currentUser.id_compte);
+
+                    if (rap.statut === 'en_attente') badge = '<span class="text-[9px] font-mono font-bold uppercase text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded">En Attente Validation</span>';
+                    else if (rap.statut === 'refuse') badge = '<span class="text-[9px] font-mono font-bold uppercase text-red-500 bg-red-500/10 px-2 py-0.5 rounded">Refusé par RH</span>';
+                    else if (rap.statut === 'valide') badge = '<span class="text-[9px] font-mono font-bold uppercase text-green-500 bg-green-500/10 px-2 py-0.5 rounded">Validé & Publié</span>';
+
+                    let roleStr = '';
+                    if (isRedacteur) roleStr = '<span class="text-[9px] text-blue-400 bg-blue-400/10 border border-blue-400/20 px-1 rounded uppercase tracking-widest"><i class="fas fa-pen-nib mr-1"></i>Rédacteur</span>';
+                    else if ((rap.responsables || []).includes(currentUser.id_compte)) roleStr = '<span class="text-[9px] text-red-500 bg-red-500/10 border border-red-500/20 px-1 rounded uppercase tracking-widest"><i class="fas fa-user-tag mr-1"></i>Responsable</span>';
+                    else if ((rap.temoins || []).includes(currentUser.id_compte)) roleStr = '<span class="text-[9px] text-neutral-400 bg-neutral-500/10 border border-neutral-500/20 px-1 rounded uppercase tracking-widest"><i class="fas fa-eye mr-1"></i>Témoin</span>';
+
+                    let actEdit = isRedacteur ? `<button onclick="openRapportPopup('${rap.id_rapport}')" class="text-[10px] text-blue-400 border border-blue-400/30 hover:bg-blue-400/10 px-2 py-1 rounded transition-colors uppercase"><i class="fas fa-edit mr-1"></i>Éditer</button>` : '';
+
+                    rList.innerHTML += `
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-black/40 border border-white/5 rounded-xl p-3 gap-3">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h4 class="text-sm font-bold font-mono text-white truncate max-w-sm">${rap.titre}</h4>
+                                    ${badge}
+                                </div>
+                                <div class="text-[10px] font-mono text-neutral-500 flex items-center gap-2">
+                                    <span>Émis le ${dateStr}</span>
+                                    <span>|</span>
+                                    ${roleStr}
+                                </div>
+                            </div>
+                            <div class="shrink-0 flex gap-2">
+                                <button onclick="viewRapport('${rap.id_rapport}')" class="text-[10px] uppercase font-mono tracking-widest border border-white/10 hover:bg-white/5 px-2 py-1 rounded inline-block transition-colors"><i class="fas fa-eye mr-1"></i>Ouvrir</button>
+                                ${actEdit}
+                            </div>
+                        </div>`;
+                });
+
+                if (rList.innerHTML === '') rList.innerHTML = '<p class="text-xs font-mono text-neutral-600/50 uppercase">Aucun rapport vous concernant.</p>';
+
+            } catch (e) { console.error("Load R:", e); }
+        }
+
+        window.openRapportPopup = (idToEdit = null) => {
+            const respSelect = document.getElementById('rapport-responsables');
+            const temSelect = document.getElementById('rapport-temoins');
+
+            // Populate select options if empty
+            if (respSelect.options.length === 0) {
+                let opts = window.allEmployees.map(emp => `<option value="${emp.id_compte}">${emp.nom} ${emp.prenom} (${emp.poste})</option>`).join('');
+                respSelect.innerHTML = opts;
+                temSelect.innerHTML = opts;
+            }
+
+            // Reset
+            document.getElementById('rapport-id').value = '';
+            document.getElementById('rapport-titre').value = '';
+            document.getElementById('rapport-content').value = '';
+            document.getElementById('rapport-file').value = '';
+            Array.from(respSelect.options).forEach(o => o.selected = false);
+            Array.from(temSelect.options).forEach(o => o.selected = false);
+
+            if (idToEdit) {
+                const rap = rapportsArray.find(r => r.id_rapport === idToEdit);
+                if (rap) {
+                    document.getElementById('rapport-id').value = rap.id_rapport;
+                    document.getElementById('rapport-titre').value = rap.titre;
+                    document.getElementById('rapport-content').value = rap.contenu;
+                    Array.from(respSelect.options).forEach(o => o.selected = rap.responsables?.includes(parseInt(o.value)));
+                    Array.from(temSelect.options).forEach(o => o.selected = rap.temoins?.includes(parseInt(o.value)));
+                }
+            }
+
+            document.getElementById('rapport-popup').classList.remove('hidden');
+        };
+
+        window.closeRapportPopup = () => document.getElementById('rapport-popup').classList.add('hidden');
+
+        window.submitRapport = async () => {
+            const rid = document.getElementById('rapport-id').value;
+            const titre = document.getElementById('rapport-titre').value;
+            let contenu = document.getElementById('rapport-content').value;
+            const fileInput = document.getElementById('rapport-file');
+
+            const reqResp = Array.from(document.getElementById('rapport-responsables').selectedOptions).map(o => parseInt(o.value));
+            const reqTem = Array.from(document.getElementById('rapport-temoins').selectedOptions).map(o => parseInt(o.value));
+
+            if (!titre.trim()) return alert("Titre obligatoire");
+
+            if (fileInput.files.length > 0) {
+                try { contenu = await readFileContent(fileInput.files[0]); }
+                catch (e) { return alert("Erreur de lecture du fichier."); }
+            }
+            if (!contenu.trim()) return alert("Le contenu est obligatoire");
+
+            const btn = document.getElementById('rapport-submit-btn'); btn.textContent = '...';
+
+            const payload = {
+                titre: titre,
+                contenu: contenu,
+                responsables: reqResp,
+                temoins: reqTem,
+                statut: 'en_attente',
+                id_redacteur: currentUser.id_compte
+            };
+
+            if (rid) {
+                // Update
+                await fromAgence('inf_rh_rapports').update(payload).eq('id_rapport', rid);
+            } else {
+                // Insert
+                await insertAgence('inf_rh_rapports', [payload]);
+            }
+
+            btn.textContent = 'Soumettre pour Validation';
+            closeRapportPopup();
+            loadRapports();
+        };
+
+        window.viewRapport = (id) => {
+            const rap = rapportsArray.find(d => d.id_rapport === id);
+            if (!rap) return;
+            document.getElementById('view-doc-title').textContent = "RAPPORT : " + rap.titre;
+
+            let htmlContent = '';
+            const val = rap.contenu.trim();
+            if (val.startsWith('data:image/') || (val.startsWith('http') && val.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i))) {
+                htmlContent = `<img src="${val}" style="max-width: 100%; margin: auto; display: block; border-radius: 8px;">`;
+            } else {
+                let rendered = val;
+                if (!val.startsWith('<')) {
+                    rendered = customMarkdownRender(val);
+                }
+                htmlContent = `<div class="prose prose-invert max-w-none text-white prose-sm prose-a:text-blue-400">${rendered}</div>`;
+            }
+
+            // Generate header context
+            const getNames = (ids) => ids.map(id => {
+                const u = window.allEmployees.find(e => e.id_compte === id);
+                return u ? `${u.nom} ${u.prenom}` : `Agent #${id}`;
+            }).join(', ');
+
+            const redacteur = getNames([rap.id_redacteur]);
+            const responsables = getNames(rap.responsables || []);
+            const temoins = getNames(rap.temoins || []);
+            const validateurs = getNames(rap.validateurs || []);
+
+            const contextualHeader = `
+                <div class="bg-black/40 border border-white/10 rounded-lg p-4 mb-6 font-mono text-[10px] space-y-2">
+                    <div class="flex justify-between border-b border-white/5 pb-2 mb-2">
+                        <span class="text-neutral-500">RÉDACTEUR:</span> <span class="text-blue-400 font-bold">${redacteur}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-neutral-500">RESPONSABLE(S):</span> <span class="text-red-400">${responsables || 'Aucun'}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-neutral-500">TÉMOIN(S):</span> <span class="text-neutral-300">${temoins || 'Aucun'}</span>
+                    </div>
+                    ${validateurs ? `<div class="flex justify-between mt-2 pt-2 border-t border-white/5"><span class="text-neutral-500 font-bold">VALIDÉ PAR RH:</span> <span class="text-green-500">${validateurs}</span></div>` : ''}
+                </div>
+            `;
+
+            document.getElementById('view-doc-content').innerHTML = contextualHeader + htmlContent;
+            document.getElementById('doc-view-popup').classList.remove('hidden');
+        };
+
+
+        // Popups DOB
+        window.openDobPopup = () => document.getElementById('dob-popup').classList.remove('hidden');
+        window.closeDobPopup = () => document.getElementById('dob-popup').classList.add('hidden');
+        window.submitDobChange = async () => {
+            const val = document.getElementById('dob-input').value;
+            if (!val) return;
+            const btn = document.getElementById('dob-submit-btn'); btn.textContent = '...';
+            await insertAgence('inf_rh', [{ id_employe: currentUser.id_compte, type_doc: 'date_naissance', valeur: val, statut: 'en_attente' }]);
+            btn.textContent = 'Soumettre';
+            closeDobPopup();
+            loadDossierRH();
+        };
+
+        // Docs Viewer Modal
+        function customMarkdownRender(md) {
+            if (!md) return "";
+
+            const escapeHtml = (text) => {
+                return text
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            };
+
+            function inlineReplacements(text) {
+                text = text.replace(/`([^`\n]+)`/g, '<code class="bg-neutral-800 rounded px-1 font-mono text-xs text-white">$1</code>');
+                text = text.replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold text-ha-gold">$1</strong>');
+                text = text.replace(/__(.+?)__/g, '<strong class="font-bold text-ha-gold">$1</strong>');
+                text = text.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em class="italic">$1</em>');
+                text = text.replace(/(?<!_)_(?!_)(.+?)(?<!_)_(?!_)/g, '<em class="italic">$1</em>');
+                text = text.replace(/~~(.+?)~~/g, '<s class="line-through text-neutral-500">$1</s>');
+                text = text.replace(/::(.*?)::/g, '<mark class="bg-amber-500/20 text-amber-500 rounded px-1">$1</mark>');
+                text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="text-blue-400 underline hover:text-blue-300">$1</a>');
+                text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="max-w-full my-4 rounded-xl shadow-lg border border-white/10"/>');
+                return text;
+            }
+
+            function generateTableHTML(rows) {
+                if (rows.length < 3) return rows.join('<br>');
+                const parseRow = (row) => row.replace(/^\||\ |$/g, '').split('|').map(c => c.trim());
+                const headerRow = parseRow(rows[0]);
+                const bodyRows = rows.slice(2);
+                let html = '<div class="overflow-x-auto my-4 rounded-xl border border-white/10 shadow-lg"><table class="min-w-full divide-y divide-white/10 bg-black/30 text-sm">';
+                html += '<thead class="bg-black/50"><tr>';
+                headerRow.forEach(cell => {
+                    html += `<th class="px-4 py-3 text-left font-mono font-bold text-neutral-300 uppercase tracking-widest text-[10px]">${inlineReplacements(cell)}</th>`;
+                });
+                html += '</tr></thead><tbody class="divide-y divide-white/5">';
+                bodyRows.forEach(rowString => {
+                    if (!rowString.trim()) return;
+                    const cells = parseRow(rowString);
+                    html += '<tr class="hover:bg-white/5 transition-colors">';
+                    cells.forEach(cell => {
+                        html += `<td class="px-4 py-3 text-neutral-300">${inlineReplacements(cell)}</td>`;
+                    });
+                    html += '</tr>';
+                });
+                html += '</tbody></table></div>';
+                return html;
+            }
+
+            const lines = md.split(/\r?\n/);
+            let htmlBuffer = "";
+            let inCodeBlock = false;
+            let inList = false;
+            let listType = null;
+            let listBuffer = [];
+
+            function flushList() {
+                if (!inList) return;
+                htmlBuffer += `<${listType} class="pl-6 mb-4 list-${listType === "ul" ? "disc" : "decimal"} space-y-1 text-neutral-300">`;
+                listBuffer.forEach(item => htmlBuffer += `<li>${item}</li>`);
+                htmlBuffer += `</${listType}>`;
+                listBuffer = [];
+                inList = false;
+                listType = null;
+            }
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+                const trimmedLine = line.trim();
+
+                if (/^```/.test(line)) {
+                    if (!inCodeBlock) {
+                        flushList();
+                        inCodeBlock = true;
+                        htmlBuffer += '<pre class="bg-neutral-900 border border-white/10 text-neutral-300 p-4 rounded-xl mb-4 overflow-x-auto font-mono text-xs"><code>';
+                    } else {
+                        inCodeBlock = false;
+                        htmlBuffer += '</code></pre>';
+                    }
+                    continue;
+                }
+                if (inCodeBlock) {
+                    htmlBuffer += escapeHtml(line) + "\n";
+                    continue;
+                }
+
+                let headerMatch = line.match(/^(\#{1,6})\s+(.*)$/);
+                if (headerMatch) {
+                    flushList();
+                    const level = headerMatch[1].length;
+                    const content = inlineReplacements(headerMatch[2]);
+                    const sizeClasses = ['text-3xl', 'text-2xl', 'text-xl', 'text-lg', 'text-base', 'text-sm'];
+                    htmlBuffer += `<h${level} class="font-display font-bold ${sizeClasses[level - 1]} mt-8 mb-4 text-ha-gold uppercase tracking-widest border-b border-white/10 pb-2">${content}</h${level}>`;
+                    continue;
+                }
+
+                if (/^(\*\s*){3,}$/.test(line) || /^(-\s*){3,}$/.test(line)) {
+                    flushList();
+                    htmlBuffer += '<hr class="my-6 border-white/10">';
+                    continue;
+                }
+
+                if (trimmedLine.startsWith('|') && trimmedLine.includes('|', 1)) {
+                    let tableRows = [line];
+                    let separatorFound = false;
+                    let tempIndex = i + 1;
+                    while (tempIndex < lines.length) {
+                        const nextLine = lines[tempIndex];
+                        const trimmedNext = nextLine.trim();
+                        if (trimmedNext === '') { tempIndex++; continue; }
+                        if (/^\s*\|.*[:\-]+.*\|/i.test(trimmedNext) && !/[a-zA-Z]/.test(trimmedNext)) {
+                            tableRows.push(nextLine);
+                            separatorFound = true;
+                            tempIndex++;
+                            break;
+                        }
+                        break;
+                    }
+                    if (separatorFound) {
+                        while (tempIndex < lines.length) {
+                            const nextLine = lines[tempIndex];
+                            const trimmedNext = nextLine.trim();
+                            if (trimmedNext === '') { tempIndex++; continue; }
+                            if (trimmedNext.startsWith('|') && trimmedNext.includes('|', 1)) {
+                                tableRows.push(nextLine);
+                                tempIndex++;
+                                continue;
+                            }
+                            break;
+                        }
+                        if (tableRows.length > 2) {
+                            flushList();
+                            htmlBuffer += generateTableHTML(tableRows);
+                            i = tempIndex - 1;
+                            continue;
+                        }
+                    }
+                }
+
+                let ulMatch = line.match(/^\s*([-*+])\s+(.*)$/);
+                let olMatch = line.match(/^\s*(\d+)\.\s+(.*)$/);
+                if (ulMatch || olMatch) {
+                    const match = ulMatch || olMatch;
+                    const type = ulMatch ? "ul" : "ol";
+                    const content = inlineReplacements(match[2].trim());
+                    if (!inList) {
+                        inList = true;
+                        listType = type;
+                        listBuffer.push(content);
+                    } else if (listType === type) {
+                        listBuffer.push(content);
+                    } else {
+                        flushList();
+                        inList = true;
+                        listType = type;
+                        listBuffer.push(content);
+                    }
+                    const nextLine = lines[i + 1] || '';
+                    const continuesList = (type === "ul" && /^\s*([-*+])\s+/.test(nextLine)) ||
+                        (type === "ol" && /^\s*\d+\.\s+/.test(nextLine));
+                    if (i + 1 >= lines.length || (!continuesList && nextLine.trim() !== '')) {
+                        flushList();
+                    }
+                    continue;
+                }
+                flushList();
+
+                if (/^\s*$/.test(line)) {
+                    if (i > 0 && !/^\s*$/.test(lines[i - 1])) {
+                        htmlBuffer += '<br>';
+                    }
+                    continue;
+                }
+
+                const inline = inlineReplacements(line.trim());
+                htmlBuffer += `<p class="mb-3 leading-relaxed text-neutral-300 font-sans">${inline}</p>`;
+            }
+            flushList();
+            return htmlBuffer;
+        }
+
+        window.viewDoc = (id) => {
+            const doc = rhDocumentsArray.find(d => d.id_rh === id);
+            if (!doc) return;
+            document.getElementById('view-doc-title').textContent = getTypeLabel(doc.type_doc);
+
+            let htmlContent = '';
+            const val = doc.valeur.trim();
+            if (val.startsWith('data:image/') || (val.startsWith('http') && val.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i))) {
+                htmlContent = `<img src="${val}" style="max-width: 100%; margin: auto; display: block; border-radius: 8px;">`;
+            } else {
+                let rendered = val;
+                if (!val.startsWith('<')) {
+                    rendered = customMarkdownRender(val);
+                }
+                htmlContent = `
+                    <div class="prose prose-invert max-w-none text-white prose-sm prose-a:text-blue-400">
+                        ${rendered}
+                    </div>
+                `;
+            }
+
+            document.getElementById('view-doc-content').innerHTML = htmlContent;
+            document.getElementById('doc-view-popup').classList.remove('hidden');
+        };
+        window.closeDocView = () => document.getElementById('doc-view-popup').classList.add('hidden');
+
+        // Popups Docs
+        window.openDocPopup = () => document.getElementById('doc-popup').classList.remove('hidden');
+        window.closeDocPopup = () => {
+            document.getElementById('doc-popup').classList.add('hidden');
+            document.getElementById('doc-file').value = '';
+            document.getElementById('doc-content').value = '';
+            document.getElementById('doc-comment').value = '';
+        };
+
+        const readFileContent = (file) => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = e => resolve(e.target.result);
+            reader.onerror = e => reject(e);
+            if (file.type.startsWith('image/')) {
+                reader.readAsDataURL(file);
+            } else {
+                reader.readAsText(file);
+            }
+        });
+
+        window.submitDocument = async () => {
+            const type = document.getElementById('doc-type').value;
+            const fileInput = document.getElementById('doc-file');
+            let contentText = document.getElementById('doc-content').value;
+            const comment = document.getElementById('doc-comment').value;
+
+            if (fileInput.files.length > 0) {
+                try { contentText = await readFileContent(fileInput.files[0]); }
+                catch (e) { return alert("Erreur de lecture du fichier."); }
+            }
+
+            if (!contentText.trim()) return alert('Le contenu du document est requis (Fichier importé ou text).');
+
+            const btn = document.getElementById('doc-submit-btn'); btn.textContent = '...';
+            await insertAgence('inf_rh', [{ id_employe: currentUser.id_compte, type_doc: type, valeur: contentText, commentaire: comment, statut: 'en_attente' }]);
+            btn.textContent = 'Soumettre';
+            closeDocPopup();
+            loadDossierRH();
+        };
+
+        // --- DOCUMENTS AVANCES (MULTI-PARTITES) ---
+        let advDocumentsArray = [];
+
+        window.loadAdvDocs = async () => {
+            if (!currentUser) return;
+            try {
+                const meId = currentUser.id_compte;
+                // Docs I created, docs public, or docs I am allowed to see
+                const { data, error } = await fromAgence('inf_documents')
+                    .select('*')
+                    .or(`id_createur.eq.${meId},visibilite_public.eq.true,acces_specifique.cs.[{"${meId}": null}]`)
+                    // Supabase JSONB contains integer? Actually the syntax is .cs.[meId] for simple array, let's just fetch all and filter in JS if complex, but .cs.[1] is usually text or ints? 
+                    // To be safe and since query can error with raw ints in JSON array: Let's fetch all where I am involved.
+                    .order('cree_le', { ascending: false });
+
+                // Wait, if acces_specifique is just JSON array like [1, 2], Supabase `.cs.[1]` might fail if not properly formatted.
+                // It's safer to use `.contains('acces_specifique', [meId])`. Let's correct it below.
+
+            } catch (e) { console.error("Load Adv Docs:", e); }
+        };
+
+        // Wait, let's rewrite loadAdvDocs for safer querying and fallback client side filtering.
+        window.loadAdvDocs = async () => {
+            if (!currentUser) return;
+            try {
+                const meId = currentUser.id_compte;
+                const { data, error } = await fromAgence('inf_documents').select('*').order('cree_le', { ascending: false });
+
+                if (error) { console.error("Erreur Adv Docs:", error); return; }
+
+                advDocumentsArray = (data || []).filter(d =>
+                    d.id_createur === meId ||
+                    d.visibilite_public === true ||
+                    (d.acces_specifique && d.acces_specifique.includes(meId)) ||
+                    (d.signatures_requises && d.signatures_requises.includes(meId))
+                );
+
+                const rListMe = document.getElementById('adv-docs-list-me');
+                const rListOthers = document.getElementById('adv-docs-list-others');
+                rListMe.innerHTML = '';
+                rListOthers.innerHTML = '';
+
+                const getNames = (ids) => ids.map(id => {
+                    const u = window.allEmployees.find(e => e.id_compte === id);
+                    return u ? `${u.nom} ${u.prenom}` : (id === 0 ? "Direction RH" : `Agent #${id}`);
+                }).join(', ');
+
+                advDocumentsArray.forEach(doc => {
+                    const dateStr = new Date(doc.cree_le).toLocaleDateString('fr-FR');
+                    let isCreator = doc.id_createur === meId;
+
+                    let reqSigs = doc.signatures_requises || [];
+                    let doneSigsObj = doc.signatures_effectuees || [];
+                    let doneSigs = doneSigsObj.map(s => s.id_compte);
+
+                    let rhNeedsSign = doc.rh_signature_requise;
+                    let rhHasSigned = !!doc.rh_signataire_id;
+
+                    let mySignStatus = 'none';
+                    if (reqSigs.includes(meId)) {
+                        mySignStatus = doneSigs.includes(meId) ? 'done' : 'pending';
+                    }
+
+                    // Progress
+                    let totalReq = reqSigs.length + (rhNeedsSign ? 1 : 0);
+                    let totalDone = doneSigs.length + (rhHasSigned ? 1 : 0);
+                    let progressStr = totalReq > 0 ? `${totalDone}/${totalReq} Sign.` : 'L/R';
+
+                    let statusBadge = (totalReq > 0 && totalDone >= totalReq)
+                        ? '<span class="text-[9px] font-mono font-bold uppercase text-green-500 bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20"><i class="fas fa-check-circle mr-1"></i>Complété</span>'
+                        : (totalReq > 0) ? '<span class="text-[9px] font-mono font-bold uppercase text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20"><i class="fas fa-clock mr-1"></i>En attente</span>'
+                            : '<span class="text-[9px] font-mono font-bold uppercase text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20"><i class="fas fa-eye mr-1"></i>Consultation</span>';
+
+                    let actions = `<button onclick="viewAdvDoc('${doc.id_doc}')" class="text-[10px] uppercase font-mono tracking-widest border border-white/10 hover:bg-white/5 px-2 py-1 rounded inline-block transition-colors"><i class="fas fa-eye mr-1"></i>Ouvrir</button>`;
+
+                    if (isCreator) {
+                        actions += `<button onclick="editAdvDoc('${doc.id_doc}')" class="text-[10px] text-amber-500 uppercase font-mono tracking-widest border border-amber-500/20 hover:bg-amber-500/10 px-2 py-1 rounded inline-block transition-colors ml-2"><i class="fas fa-pen mr-1"></i>Edit.</button>`;
+                    }
+
+                    if (mySignStatus === 'pending') {
+                        actions += `<button onclick="signAdvDoc('${doc.id_doc}')" class="text-[10px] uppercase font-mono font-bold bg-blue-500 text-white hover:bg-blue-400 px-3 py-1 rounded transition-colors ml-2 shadow-[0_0_10px_rgba(59,130,246,0.3)]"><i class="fas fa-pen-nib mr-1"></i>Signer</button>`;
+                    }
+
+                    const createurName = getNames([doc.id_createur]);
+
+                    const cardHtml = `
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-black/40 border border-white/5 rounded-xl p-3 gap-3">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h4 class="text-sm font-bold font-mono text-white truncate max-w-sm"><button onclick="viewAdvDoc('${doc.id_doc}')" class="hover:underline">${doc.titre}</button></h4>
+                                    ${statusBadge}
+                                </div>
+                                <div class="text-[10px] font-mono text-neutral-500 flex items-center gap-2">
+                                    <span>${dateStr}</span>
+                                    <span>|</span>
+                                    <span>${progressStr}</span>
+                                    <span class="text-blue-400">| Auteur: ${createurName}</span>
+                                </div>
+                            </div>
+                            <div class="shrink-0 flex gap-2">
+                                ${actions}
+                            </div>
+                        </div>`;
+
+                    if (isCreator) {
+                        rListMe.innerHTML += cardHtml;
+                    } else {
+                        rListOthers.innerHTML += cardHtml;
+                    }
+                });
+
+                if (rListMe.innerHTML === '') rListMe.innerHTML = '<p class="text-xs font-mono text-neutral-600/50 uppercase">Aucune création.</p>';
+                if (rListOthers.innerHTML === '') rListOthers.innerHTML = '<p class="text-xs font-mono text-neutral-600/50 uppercase">Aucun document entrant.</p>';
+
+            } catch (e) { console.error("Load Adv Docs:", e); }
+        };
+
+        window.openDocAdvancedPopup = () => {
+            const accSelect = document.getElementById('advdoc-acces');
+            const sigSelect = document.getElementById('advdoc-signatures');
+
+            if (accSelect.options.length === 0) {
+                let opts = window.allEmployees.map(emp => `<option value="${emp.id_compte}">${emp.nom} ${emp.prenom} (${emp.poste})</option>`).join('');
+                accSelect.innerHTML = opts;
+                sigSelect.innerHTML = opts;
+            }
+
+            document.getElementById('advdoc-id').value = '';
+            document.getElementById('advdoc-titre').value = '';
+            document.getElementById('advdoc-content').value = '';
+            document.getElementById('advdoc-file').value = '';
+            document.getElementById('advdoc-visibilite').value = 'prive';
+            document.getElementById('advdoc-acces-container').className = 'hidden';
+            document.getElementById('advdoc-rh-sign').checked = false;
+
+            Array.from(accSelect.options).forEach(o => o.selected = false);
+            Array.from(sigSelect.options).forEach(o => o.selected = false);
+
+            document.getElementById('doc-advanced-popup').classList.remove('hidden');
+        };
+
+        window.editAdvDoc = (id) => {
+            const doc = advDocumentsArray.find(d => d.id_doc === id);
+            if (!doc) return;
+            openDocAdvancedPopup();
+
+            document.getElementById('advdoc-id').value = doc.id_doc;
+            document.getElementById('advdoc-titre').value = doc.titre;
+            document.getElementById('advdoc-content').value = doc.contenu;
+
+            if (doc.visibilite_public) {
+                document.getElementById('advdoc-visibilite').value = 'public';
+                document.getElementById('advdoc-acces-container').className = 'hidden';
+            } else if (doc.acces_specifique && doc.acces_specifique.length > 0) {
+                document.getElementById('advdoc-visibilite').value = 'specifique';
+                document.getElementById('advdoc-acces-container').className = 'block';
+                Array.from(document.getElementById('advdoc-acces').options).forEach(o => {
+                    o.selected = doc.acces_specifique.includes(parseInt(o.value));
+                });
+            } else {
+                document.getElementById('advdoc-visibilite').value = 'prive';
+                document.getElementById('advdoc-acces-container').className = 'hidden';
+            }
+
+            document.getElementById('advdoc-rh-sign').checked = doc.rh_signature_requise;
+
+            Array.from(document.getElementById('advdoc-signatures').options).forEach(o => {
+                o.selected = (doc.signatures_requises || []).includes(parseInt(o.value));
+            });
+
+            document.getElementById('advdoc-submit-btn').textContent = 'Mettre à jour le Document';
+        };
+
+        window.closeDocAdvancedPopup = () => document.getElementById('doc-advanced-popup').classList.add('hidden');
+
+        window.submitDocAdvanced = async () => {
+            const titre = document.getElementById('advdoc-titre').value;
+            let contenu = document.getElementById('advdoc-content').value;
+            const fileInput = document.getElementById('advdoc-file');
+
+            const vis = document.getElementById('advdoc-visibilite').value;
+            const isPublic = vis === 'public';
+            let acces = [];
+            if (vis === 'specifique') {
+                acces = Array.from(document.getElementById('advdoc-acces').selectedOptions).map(o => parseInt(o.value));
+            }
+
+            const rhSign = document.getElementById('advdoc-rh-sign').checked;
+            const employesSigs = Array.from(document.getElementById('advdoc-signatures').selectedOptions).map(o => parseInt(o.value));
+
+            if (!titre.trim()) return alert("Titre obligatoire.");
+
+            if (fileInput.files.length > 0) {
+                try { contenu = await readFileContent(fileInput.files[0]); }
+                catch (e) { return alert("Erreur de lecture du fichier."); }
+            }
+            if (!contenu.trim()) return alert("Le contenu est obligatoire.");
+
+            const btn = document.getElementById('advdoc-submit-btn'); btn.textContent = '...';
+
+            const docId = document.getElementById('advdoc-id').value;
+
+            const payload = {
+                titre: titre,
+                contenu: contenu,
+                id_createur: currentUser.id_compte,
+                visibilite_public: isPublic,
+                acces_specifique: acces,
+                rh_signature_requise: rhSign,
+                signatures_requises: employesSigs
+            };
+
+            if (docId) {
+                await fromAgence('inf_documents').update(payload).eq('id_doc', docId);
+            } else {
+                await insertAgence('inf_documents', [payload]);
+            }
+
+            btn.textContent = 'Créer le Document';
+            closeDocAdvancedPopup();
+            loadAdvDocs();
+        };
+
+        window.viewAdvDoc = (id) => {
+            const doc = advDocumentsArray.find(d => d.id_doc === id);
+            if (!doc) return;
+            document.getElementById('view-doc-title').textContent = doc.titre;
+
+            let htmlContent = '';
+            const val = doc.contenu.trim();
+            if (val.startsWith('data:image/') || (val.startsWith('http') && val.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i))) {
+                htmlContent = `<img src="${val}" style="max-width: 100%; margin: auto; display: block; border-radius: 8px;">`;
+            } else {
+                let rendered = val;
+                if (!val.startsWith('<')) {
+                    rendered = customMarkdownRender(val);
+                }
+                htmlContent = `<div class="prose prose-invert max-w-none text-white prose-sm prose-a:text-blue-400">${rendered}</div>`;
+            }
+
+            // Headers metadata
+            const getNames = (ids) => ids.map(id => {
+                const u = window.allEmployees.find(e => e.id_compte === id);
+                return u ? `${u.nom} ${u.prenom}` : `Agent #${id}`;
+            }).join(', ') || 'Aucun';
+
+            let rhSigStr = doc.rh_signature_requise
+                ? (doc.rh_signataire_id ? (doc.rh_signature_physique ? `<div class="flex items-center gap-2"><span class="text-green-400">Signé par RH (${new Date(doc.rh_signature_date).toLocaleDateString()})</span><img src="${doc.rh_signature_physique}" class="h-6 bg-white/90 rounded border border-white/50"></div>` : `<span class="text-green-400">Signé par RH (${new Date(doc.rh_signature_date).toLocaleDateString()})</span>`) : `<span class="text-amber-500">Validation RH en attente</span>`)
+                : `<span class="text-neutral-500">Non requise</span>`;
+
+            let reqSigsObj = doc.signatures_requises || [];
+            let doneSigsObj = doc.signatures_effectuees || [];
+
+            let empSigList = reqSigsObj.map(uid => {
+                const isDone = doneSigsObj.find(s => s.id_compte === uid);
+                const name = getNames([uid]);
+                if (isDone) {
+                    return isDone.signature_physique ? `<div class="flex items-center gap-2"><span class="text-green-400"><i class="fas fa-check mr-1"></i>${name}</span><img src="${isDone.signature_physique}" class="h-6 bg-white/90 rounded border border-white/50"></div>` : `<span class="text-green-400"><i class="fas fa-check mr-1"></i>${name}</span>`;
+                } else {
+                    return `<span class="text-amber-500"><i class="fas fa-clock mr-1"></i>${name}</span>`;
+                }
+            }).join(' | ');
+            if (reqSigsObj.length === 0) empSigList = '<span class="text-neutral-500">Non requise</span>';
+
+            const contextualHeader = `
+                <div class="bg-black/40 border border-white/10 rounded-lg p-4 mb-6 font-mono text-[10px] space-y-2 relative">
+                    <div class="absolute right-4 top-4 text-xs font-bold font-mono text-neutral-500 uppercase tracking-widest"><i class="fas fa-shield-alt mr-1"></i>Certification HA</div>
+                    <div class="flex justify-between border-b border-white/5 pb-2 mb-2 w-3/4">
+                        <span class="text-neutral-500">CRÉATEUR:</span> <span class="text-blue-400 font-bold">${getNames([doc.id_createur])}</span>
+                    </div>
+                    <div class="flex justify-between w-3/4">
+                        <span class="text-neutral-500">SIGNATURE(S) RH:</span> <span>${rhSigStr}</span>
+                    </div>
+                    <div class="flex justify-between w-3/4">
+                        <span class="text-neutral-500">SIGNATURE(S) EMPLOYÉS:</span> <span>${empSigList}</span>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('view-doc-content').innerHTML = contextualHeader + htmlContent;
+            document.getElementById('doc-view-popup').classList.remove('hidden');
+        };
+
+        window.signAdvDoc = async (id) => {
+            const doc = advDocumentsArray.find(d => d.id_doc === id);
+            if (!doc) return;
+            const sigDataUrl = await window.openSignaturePopup("Apposer votre signature physique");
+            if (!sigDataUrl) return;
+
+            let currentSigs = doc.signatures_effectuees || [];
+            currentSigs.push({
+                id_compte: currentUser.id_compte,
+                date: new Date().toISOString(),
+                signature_physique: sigDataUrl
+            });
+
+            await fromAgence('inf_documents').update({ signatures_effectuees: currentSigs }).eq('id_doc', id);
+            loadAdvDocs();
+            viewAdvDoc(id);
+        };
+
+        // ==========================================
+        // SIGNATURE PAD LOGIC
+        // ==========================================
+        let sigCanvas = document.getElementById('signature-pad');
+        let sigCtx = sigCanvas ? sigCanvas.getContext('2d') : null;
+        let isDrawingMode = false;
+        let sigResolve = null;
+        let isSigPadInitialized = false;
+
+        window.clearSignature = () => {
+            if (!sigCtx) return;
+            sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+            sigCtx.beginPath();
+        };
+
+        window.openSignaturePopup = (title = "Apposer votre signature") => {
+            return new Promise((resolve) => {
+                document.getElementById('signature-title').innerHTML = `<i class="fas fa-pen-nib mr-2 text-ha-gold"></i>${title}`;
+                document.getElementById('signature-popup').classList.remove('hidden');
+                
+                setTimeout(() => {
+                    sigCanvas.width = sigCanvas.offsetWidth;
+                    sigCanvas.height = sigCanvas.offsetHeight;
+                    sigCtx.lineWidth = 2.5;
+                    sigCtx.lineCap = 'round';
+                    sigCtx.strokeStyle = '#000000';
+                    if (!isSigPadInitialized) {
+                        const startPosition = (e) => { isDrawingMode = true; drawSignature(e); };
+                        const endPosition = () => { isDrawingMode = false; sigCtx.beginPath(); };
+                        const drawSignature = (e) => {
+                            if (!isDrawingMode) return;
+                            e.preventDefault();
+                            const rect = sigCanvas.getBoundingClientRect();
+                            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                            const scaleX = sigCanvas.width / rect.width;
+                            const scaleY = sigCanvas.height / rect.height;
+                            sigCtx.lineTo((clientX - rect.left) * scaleX, (clientY - rect.top) * scaleY);
+                            sigCtx.stroke();
+                            sigCtx.beginPath();
+                            sigCtx.moveTo((clientX - rect.left) * scaleX, (clientY - rect.top) * scaleY);
+                        };
+                        sigCanvas.addEventListener('mousedown', startPosition);
+                        sigCanvas.addEventListener('mouseup', endPosition);
+                        sigCanvas.addEventListener('mousemove', drawSignature);
+                        sigCanvas.addEventListener('touchstart', startPosition, { passive: false });
+                        sigCanvas.addEventListener('touchend', endPosition);
+                        sigCanvas.addEventListener('touchmove', drawSignature, { passive: false });
+                        isSigPadInitialized = true;
+                    }
+                    clearSignature();
+                }, 50);
+
+                sigResolve = resolve;
+            });
+        };
+
+        window.closeSignaturePopup = () => {
+            document.getElementById('signature-popup').classList.add('hidden');
+            if (sigResolve) sigResolve(null);
+            sigResolve = null;
+        };
+
+        window.submitSignature = () => {
+            const blank = document.createElement('canvas');
+            blank.width = sigCanvas.width;
+            blank.height = sigCanvas.height;
+            if (sigCanvas.toDataURL() === blank.toDataURL()) {
+                alert("Veuillez dessiner la signature avant de valider.");
+                return;
+            }
+            const dataUrl = sigCanvas.toDataURL('image/png');
+            document.getElementById('signature-popup').classList.add('hidden');
+            if (sigResolve) sigResolve(dataUrl);
+            sigResolve = null;
+        };
+
+        document.addEventListener('DOMContentLoaded', initProfil);
+    </script>
+</body>
+
+</html>

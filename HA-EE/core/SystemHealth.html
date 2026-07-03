@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+    <title>Howard Armory — État du Système</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode:'class', theme:{ extend:{ fontFamily:{ sans:['Inter','sans-serif'], display:['Outfit','sans-serif'], mono:['Share Tech Mono','monospace'] }, colors:{ neutral:{ 850:'#1a1a1a', 900:'#111111', 950:'#070707' }, ha:{ red:'#E63946', gold:'#D4AF37' } } } } }
+    </script>
+    <style>
+        body { font-family:'Inter',sans-serif; background-color:#070707; }
+        .glass-card { background:rgba(20,20,20,0.6); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.05); transition:all 0.3s ease; }
+        .status-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:8px; box-shadow:0 0 10px currentColor; }
+        .dark-scrollbar::-webkit-scrollbar{width:6px;} .dark-scrollbar::-webkit-scrollbar-track{background:transparent;} .dark-scrollbar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:4px;}
+        .terminal-text { font-family:'Share Tech Mono',monospace; font-size:0.8rem; line-height:1.6; }
+    </style>
+</head>
+<body class="text-white selection:bg-ha-red/30 overflow-y-auto dark-scrollbar min-h-screen" perms.pages="EUPD">
+    <div id="session/howard"></div>
+    <script src="/HA-EE/src/javascript/menu.js"></script>
+    <div id="menu"></div>
+
+    <main class="max-w-4xl mx-auto p-4 lg:p-8 space-y-8 mt-4 pb-24">
+        <!-- HEADER -->
+        <div class="border-b border-white/10 pb-6">
+            <h1 class="text-3xl md:text-4xl font-display font-black uppercase tracking-tight">Diagnostics <span class="text-ha-red">Système</span></h1>
+            <p class="text-xs font-mono text-neutral-500 mt-2 tracking-widest uppercase"><i class="fas fa-satellite-dish mr-2"></i>État du réseau et intégrité des données</p>
+        </div>
+
+        <!-- CONNECTIVITY CARDS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- SUPABASE -->
+            <div class="glass-card rounded-2xl p-6 relative overflow-hidden group">
+                <i class="fas fa-database absolute -right-4 -bottom-4 text-6xl text-white/5 opacity-40 group-hover:text-ha-red transition-all duration-500"></i>
+                <h3 class="text-xs font-mono uppercase tracking-widest text-neutral-500 mb-4">Base de Données</h3>
+                <div class="flex items-center gap-2 mb-2">
+                    <span id="supabase-dot" class="status-dot text-neutral-600"></span>
+                    <span id="supabase-status" class="text-sm font-bold uppercase tracking-tight">Vérification...</span>
+                </div>
+                <div id="supabase-latency" class="text-[10px] font-mono text-neutral-600">Latence: -- ms</div>
+            </div>
+
+            <!-- GITHUB -->
+            <div class="glass-card rounded-2xl p-6 relative overflow-hidden group">
+                <i class="fab fa-github absolute -right-4 -bottom-4 text-6xl text-white/5 opacity-40 group-hover:text-ha-red transition-all duration-500"></i>
+                <h3 class="text-xs font-mono uppercase tracking-widest text-neutral-500 mb-4">Stockage Fichiers</h3>
+                <div class="flex items-center gap-2 mb-2">
+                    <span id="github-dot" class="status-dot text-neutral-600"></span>
+                    <span id="github-status" class="text-sm font-bold uppercase tracking-tight">Vérification...</span>
+                </div>
+                <div id="github-api" class="text-[10px] font-mono text-neutral-600">Source: GitHub API V3</div>
+            </div>
+
+            <!-- SESSION -->
+            <div class="glass-card rounded-2xl p-6 relative overflow-hidden group">
+                <i class="fas fa-fingerprint absolute -right-4 -bottom-4 text-6xl text-white/5 opacity-40 group-hover:text-ha-red transition-all duration-500"></i>
+                <h3 class="text-xs font-mono uppercase tracking-widest text-neutral-500 mb-4">Empreinte Session</h3>
+                <div class="flex items-center gap-2 mb-2">
+                    <span id="session-dot" class="status-dot text-green-500"></span>
+                    <span class="text-sm font-bold uppercase tracking-tight">Sécurisée</span>
+                </div>
+                <div id="session-hash" class="text-[10px] font-mono text-neutral-600 truncate">SHA-256 Validated</div>
+            </div>
+        </div>
+
+        <!-- TERMINAL INFO -->
+        <div class="glass-card rounded-2xl p-8 border-l-2 border-ha-red/40 bg-neutral-950/80">
+            <h2 class="text-sm font-mono uppercase tracking-widest text-ha-red mb-6 leading-none"><i class="fas fa-terminal mr-2"></i>Détails du terminal client</h2>
+            <div id="browser-info" class="terminal-text grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
+                <!-- Info will be injected here -->
+            </div>
+        </div>
+
+        <!-- FINGERPRINT DISPLAY -->
+        <div class="glass-card rounded-2xl p-6 text-center border-dashed border-white/10 group cursor-pointer" id="copy-fingerprint">
+            <h3 class="text-[10px] font-mono uppercase tracking-widest text-neutral-600 mb-2">Identifiant de session unique (Fingerprint)</h3>
+            <code id="user-token" class="text-xs font-mono text-neutral-400 group-hover:text-white transition-all">Non disponible</code>
+            <p class="text-[8px] text-neutral-700 mt-2 uppercase tracking-widest font-mono">Cliquer pour copier l'identifiant technique</p>
+        </div>
+    </main>
+
+    <script src="/HA-EE/src/javascript/footer.js"></script>
+    <div id="footer"></div>
+
+    <script type="module">
+        import { supabase, fromAgence, insertAgence, withAgence } from '/HA-EE/src/javascript/sp.js';
+
+        async function testSupabase() {
+            const start = performance.now();
+            const { error } = await fromAgence('employes').select('id').limit(1);
+            const end = performance.now();
+            const dot = document.getElementById('supabase-dot');
+            const status = document.getElementById('supabase-status');
+            const latency = document.getElementById('supabase-latency');
+
+            if (error) {
+                dot.className = 'status-dot text-ha-red';
+                status.innerText = 'Hors Ligne';
+                status.className = 'text-sm font-bold uppercase tracking-tight text-ha-red';
+            } else {
+                dot.className = 'status-dot text-green-500';
+                status.innerText = 'Opérationnel';
+                status.className = 'text-sm font-bold uppercase tracking-tight text-green-500';
+                latency.innerText = `Latence: ${Math.round(end - start)} ms`;
+            }
+        }
+
+        async function testGitHub() {
+            const dot = document.getElementById('github-dot');
+            const status = document.getElementById('github-status');
+            try {
+                const res = await fetch('https://api.github.com/zen');
+                if (res.ok) {
+                    dot.className = 'status-dot text-green-500';
+                    status.innerText = 'Liaison Active';
+                    status.className = 'text-sm font-bold uppercase tracking-tight text-green-500';
+                } else { throw new Error(); }
+            } catch {
+                dot.className = 'status-dot text-ha-red';
+                status.innerText = 'Inaccessible';
+                status.className = 'text-sm font-bold uppercase tracking-tight text-ha-red';
+            }
+        }
+
+        function loadBrowserInfo() {
+            const info = document.getElementById('browser-info');
+            const data = {
+                "Utilisateur actuel": JSON.parse(localStorage.getItem('compte'))?.email || "Inconnu",
+                "Plateforme": navigator.platform,
+                "Navigateur": navigator.userAgent.split(' ').pop(),
+                "Résolution": `${window.screen.width}x${window.screen.height}`,
+                "Langue": navigator.language.toUpperCase(),
+                "Cœurs CPU": navigator.hardwareConcurrency || "N/A",
+                "Mémoire Locale": Math.round(navigator.deviceMemory || 0) + " GB (approx)",
+                "Statut réseau": navigator.onLine ? "ONLINE" : "OFFLINE"
+            };
+
+            info.innerHTML = Object.entries(data).map(([k, v]) => `
+                <div class="flex justify-between border-b border-white/5 pb-2">
+                    <span class="text-neutral-500 uppercase tracking-widest font-bold">${k}</span>
+                    <span class="text-neutral-300">${v}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('user-token').innerText = sessionStorage.getItem('session_token') || "AUCUN JETON TROUVÉ";
+        }
+
+        document.getElementById('copy-fingerprint').onclick = () => {
+            const token = document.getElementById('user-token').innerText;
+            navigator.clipboard.writeText(token);
+            alert("Fingerprint copié dans le presse-papiers.");
+        };
+
+        testSupabase();
+        testGitHub();
+        loadBrowserInfo();
+    </script>
+</body>
+</html>

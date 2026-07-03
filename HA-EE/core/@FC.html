@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HA - PERSONAL SYSTEM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Style ID grisé avec barres diagonales */
+        .id-striped {
+            background: repeating-linear-gradient(45deg, #262626, #262626 10px, #2d2d2d 10px, #2d2d2d 20px);
+            color: rgba(255, 255, 255, 0.4);
+            font-family: monospace;
+            border: 1px solid #404040;
+        }
+        /* Style Editeur de code (VS Code Vibes) */
+        .code-editor {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Consolas', 'Monaco', monospace;
+            tab-size: 4;
+            line-height: 1.5;
+        }
+        .tag { color: #569cd6; }    /* Bleu balise */
+        .attr { color: #9cdcfe; }   /* Cyan attribut */
+        .val { color: #ce9178; }    /* Orange valeur */
+        
+        .slip-paper {
+            background: white;
+            color: black;
+            box-shadow: 10px 10px 0px #000;
+        }
+    </style>
+</head>
+
+<body class="bg-neutral-900 text-white pb-20">
+  <script type="module">
+      import { supabase, fromAgence, insertAgence, withAgence } from '/HA-EE/src/javascript/sp.js';
+      window.supabaseClient = supabase; 
+  </script>
+      <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+    <script type="module">
+        import { supabase, fromAgence, insertAgence, withAgence } from '/HA-EE/src/javascript/sp.js';
+        window.supabaseClient = supabase;
+        // Initialisation de la page une fois Supabase chargé
+        window.dispatchEvent(new Event('supabaseReady'));
+    </script>
+
+    <div id="menu" class="sticky top-0 z-50 w-full text-sm bg-black p-2 border-b border-yellow-500">
+        <div class="max-w-6xl mx-auto flex justify-between items-center text-yellow-500 font-mono">
+            <span><i class="fas fa-shield-halved mr-2"></i> HA - SYSTEME PERSONNEL (MOLDERSON UNIT)</span>
+            <span><i class="fas fa-satellite-dish animate-pulse text-green-500"></i> EN LIGNE - DB: modeles_personnels</span>
+        </div>
+    </div>
+
+    <main class="max-w-6xl mx-auto pt-10 px-4">
+        
+        <header class="flex flex-col md:flex-row justify-between items-end mb-10 border-b-2 border-yellow-500 pb-4 gap-4">
+            <div>
+                <h1 class="text-4xl font-black uppercase tracking-tighter italic text-white">HA <span class="text-yellow-500 text-5xl">PERSONAL</span></h1>
+                <p class="text-neutral-400 font-mono text-xs mt-2">/// SECURED DATA MANAGEMENT - MOLDERSON V.1 ///</p>
+            </div>
+            <div class="flex gap-4 items-center">
+                <button onclick="createNewModel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-xs font-black uppercase transition">
+                    <i class="fas fa-plus mr-2"></i> Nouveau Modèle
+                </button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <div class="lg:col-span-3 space-y-2">
+                <h2 class="text-yellow-500 font-black text-xs uppercase mb-4 tracking-widest">Archives Privées</h2>
+                <div id="models-list" class="space-y-2 max-h-[600px] overflow-y-auto pr-2">
+                    <div class="animate-pulse text-neutral-500">Scan de la DB en cours...</div>
+                </div>
+            </div>
+
+            <div id="editor-zone" class="lg:col-span-9 hidden">
+                <div class="bg-neutral-800 border border-neutral-700 rounded-xl overflow-hidden shadow-2xl">
+                    
+                    <div class="bg-neutral-700 p-4 flex justify-between items-center border-b border-neutral-600">
+                        <div class="flex gap-4 items-center">
+                            <div id="edit-id" class="id-striped px-3 py-1 rounded text-xs font-bold">ID: --</div>
+                            <input type="text" id="edit-name" class="bg-transparent border-b border-yellow-500 text-white font-bold outline-none focus:text-yellow-400 transition" placeholder="Nom du format...">
+                        </div>
+                        <div id="edit-date" class="text-[10px] font-mono text-neutral-400 uppercase">Créé le : --/--/----</div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2">
+                        <div class="border-r border-neutral-700">
+                            <div class="bg-black/50 p-2 text-[10px] font-mono text-neutral-500 flex justify-between">
+                                <span>CODE EDITOR (HTML)</span>
+                                <span class="text-blue-400 italic">visual_studio_molderson.css</span>
+                            </div>
+                            <textarea id="edit-html" oninput="updatePreview()" 
+                                class="w-full h-[400px] p-4 code-editor outline-none resize-none text-sm"
+                                spellcheck="false"></textarea>
+                        </div>
+
+                        <div>
+                            <div class="bg-black/50 p-2 text-[10px] font-mono text-neutral-500">PREVIEW RENDU</div>
+                            <div id="preview-container" class="w-full h-[400px] bg-neutral-200 overflow-y-auto p-4 shadow-inner">
+                                </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-neutral-900/50 flex justify-between items-center">
+                        <button onclick="deleteModel()" class="text-red-500 hover:text-red-400 text-xs font-mono uppercase">
+                            <i class="fas fa-trash-alt mr-1"></i> Détruire le modèle
+                        </button>
+                        <div class="flex gap-3">
+                            <button onclick="closeEditor()" class="bg-neutral-700 px-6 py-2 rounded text-xs font-bold uppercase">Annuler</button>
+                            <button onclick="saveChanges()" class="bg-yellow-500 text-black px-8 py-2 rounded text-xs font-black uppercase hover:bg-yellow-400 transition">
+                                <i class="fas fa-save mr-2"></i> Enregistrer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="empty-state" class="lg:col-span-9 flex flex-col items-center justify-center h-[500px] border-2 border-dashed border-neutral-800 rounded-xl">
+                <i class="fas fa-folder-open text-6xl text-neutral-800 mb-4"></i>
+                <p class="text-neutral-500 font-mono text-sm">Sélectionnez un modèle ou créez-en un nouveau, Chief.</p>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        let currentModelId = null;
+
+        // Attendre que Supabase soit prêt
+        window.addEventListener('supabaseReady', () => {
+            fetchModels();
+        });
+
+        async function fetchModels() {
+            const { data, error } = await window.supabaseClient
+                .from('modeles_personnels')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) { console.error(error); return; }
+
+            const listContainer = document.getElementById('models-list');
+            listContainer.innerHTML = '';
+            
+            data.forEach(model => {
+                const btn = document.createElement('div');
+                btn.className = "group bg-neutral-800 border border-neutral-700 p-3 rounded cursor-pointer hover:border-yellow-500 transition relative overflow-hidden";
+                btn.onclick = () => openEditor(model);
+                btn.innerHTML = `
+                    <div class="text-[10px] text-neutral-500 font-mono mb-1 italic">#${model.id}</div>
+                    <div class="text-sm font-bold text-neutral-200 group-hover:text-yellow-500 truncate">${model.nom}</div>
+                    <div class="text-[9px] text-neutral-600 mt-2">${new Date(model.created_at).toLocaleDateString()}</div>
+                `;
+                listContainer.appendChild(btn);
+            });
+        }
+
+        function openEditor(model) {
+            currentModelId = model.id;
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('editor-zone').classList.remove('hidden');
+            
+            document.getElementById('edit-id').innerText = `ID: ${model.id}`;
+            document.getElementById('edit-name').value = model.nom;
+            document.getElementById('edit-html').value = model.html_content;
+            document.getElementById('edit-date').innerText = `Créé le : ${new Date(model.created_at).toLocaleString()}`;
+            
+            updatePreview();
+        }
+
+        function updatePreview() {
+            const html = document.getElementById('edit-html').value;
+            const preview = document.getElementById('preview-container');
+            preview.innerHTML = html;
+        }
+
+        async function createNewModel() {
+            const { data, error } = await window.supabaseClient
+                .from('modeles_contrats')
+                .insert([{ nom: 'Nouveau Modèle', html_content: '<div>Tapez votre HTML ici...</div>' }])
+                .select();
+
+            if (error) alert("Erreur de création");
+            else {
+                fetchModels();
+                openEditor(data[0]);
+            }
+        }
+
+        async function saveChanges() {
+            const nom = document.getElementById('edit-name').value;
+            const html = document.getElementById('edit-html').value;
+
+            const { error } = await window.supabaseClient
+                .from('modeles_personnels')
+                .update({ nom: nom, html_content: html })
+                .eq('id', currentModelId);
+
+            if (error) alert("Echec de la sauvegarde");
+            else {
+                alert("Modèle mis à jour, Chief !");
+                fetchModels();
+            }
+        }
+
+        async function deleteModel() {
+            if (!confirm("Confirmation tactique : Supprimer définitivement ce modèle ?")) return;
+            
+            const { error } = await window.supabaseClient
+                .from('modeles_personnels')
+                .delete()
+                .eq('id', currentModelId);
+
+            if (error) alert("Erreur lors de la suppression");
+            else {
+                closeEditor();
+                fetchModels();
+            }
+        }
+
+        function closeEditor() {
+            currentModelId = null;
+            document.getElementById('editor-zone').classList.add('hidden');
+            document.getElementById('empty-state').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

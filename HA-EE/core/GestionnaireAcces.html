@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <meta name="description" content="Panneau de gestion des permissions — Accès strictement réservé au personnel autorisé Howard Armory.">
+    <title>Howard Armory — Gestionnaire des Accès</title>
+
+    <!-- E-CDE Security -->
+    <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace']
+                    },
+                    colors: {
+                        neutral: { 850: '#1a1a1a', 900: '#111111', 950: '#070707' },
+                        ha: { red: '#E63946', gold: '#D4AF37' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #070707; }
+
+        .glass-card {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover { border-color: rgba(230, 57, 70, 0.25); }
+
+        .field {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 0.6rem 0.9rem;
+            color: #d4d4d4;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8125rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .field:focus { border-color: #E63946; }
+
+        .btn-red {
+            background: rgba(230, 57, 70, 0.1);
+            border: 1px solid rgba(230, 57, 70, 0.4);
+            color: #E63946;
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.75rem;
+            font-size: 0.7rem;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .btn-red:hover { background: #E63946; color: #fff; }
+
+        .btn-green {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.75rem;
+            font-size: 0.7rem;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .btn-green:hover { background: #22c55e; color: #fff; }
+
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #737373;
+            padding: 0.45rem 0.9rem;
+            border-radius: 0.6rem;
+            font-size: 0.65rem;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .btn-ghost:hover { color: #fff; border-color: rgba(255, 255, 255, 0.2); }
+
+        .type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.6rem;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            padding: 0.2rem 0.5rem;
+            border-radius: 999px;
+        }
+
+        select.field option { background: #111; }
+
+        .dark-scrollbar::-webkit-scrollbar { width: 6px; }
+        .dark-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .dark-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+    </style>
+</head>
+
+<div id="session/howard"></div>
+
+<body class="text-white selection:bg-ha-red/30 overflow-y-auto dark-scrollbar min-h-screen">
+
+    <!-- MENU -->
+    <script src="/HA-EE/src/javascript/menu.js"></script>
+    <div id="menu"></div>
+
+    <main class="max-w-5xl mx-auto p-4 lg:p-8 space-y-8 mt-4 pb-24" perms.pages="EUPD">
+
+        <!-- HEADER -->
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-6">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-display font-black uppercase tracking-tight">
+                    Gestionnaire <span class="text-ha-red">Accès</span>
+                </h1>
+                <p class="text-xs font-mono text-neutral-500 mt-2 tracking-widest uppercase">
+                    <span class="inline-block w-2 h-2 rounded-full bg-ha-red animate-pulse mr-2"></span>
+                    Panel de gestion des permissions — Zone Restreinte
+                </p>
+            </div>
+            <button id="addUserBtn" class="btn-green shrink-0">
+                <i class="fas fa-user-plus"></i>Ajouter un utilisateur
+            </button>
+        </div>
+
+        <!-- AVERTISSEMENT -->
+        <div class="glass-card rounded-xl p-4 border-ha-red/20 flex items-start gap-3">
+            <i class="fas fa-shield-halved text-ha-red mt-0.5 shrink-0"></i>
+            <div class="text-xs font-mono text-neutral-400 leading-relaxed">
+                <span class="text-ha-red uppercase tracking-widest font-bold">Zone critique —</span>
+                Les modifications de permissions prennent effet immédiatement. Toute action est irréversible et sera journalisée.
+                Un email non présent dans la table <code class="text-neutral-300">employes</code> sera automatiquement reclassé en <code class="text-ha-red">unauthorized</code>.
+            </div>
+        </div>
+
+        <!-- STATS RAPIDES -->
+        <div id="stats-bar" class="grid grid-cols-3 gap-3"></div>
+
+        <!-- USER LIST -->
+        <div>
+            <h2 class="text-sm font-mono uppercase tracking-widest text-neutral-500 mb-4">
+                <i class="fas fa-users-gear mr-2"></i>Registre des accès
+                <span id="user-count" class="ml-2 text-neutral-700 text-[10px]"></span>
+            </h2>
+            <div id="userList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <script src="/HA-EE/src/javascript/footer.js"></script>
+    <div id="footer"></div>
+
+    <script type="module">
+        import { supabase, fromAgence, insertAgence, withAgence } from '/HA-EE/src/javascript/sp.js';
+
+        const userListContainer = document.getElementById('userList');
+        const addUserBtn = document.getElementById('addUserBtn');
+        const statsBar = document.getElementById('stats-bar');
+        const userCount = document.getElementById('user-count');
+
+        // ─── TYPE CONFIG ────────────────────────────────────────────
+        const typeConfig = {
+            'unauthorized': { label: 'Non autorisé', color: 'text-ha-red', bg: 'bg-ha-red/10 border-ha-red/30', dot: 'bg-ha-red' },
+            'attente': { label: 'En attente', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/30', dot: 'bg-amber-400' },
+            'accepter': { label: 'Autorisé', color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/30', dot: 'bg-green-400' }
+        };
+
+        function getBadge(type) {
+            const cfg = typeConfig[type] || typeConfig['unauthorized'];
+            return `<span class="type-badge border ${cfg.bg} ${cfg.color}"><span class="w-1.5 h-1.5 rounded-full ${cfg.dot}"></span>${cfg.label}</span>`;
+        }
+
+        // ─── FETCH ───────────────────────────────────────────────────
+        async function fetchUsers() {
+            const { data: users, error } = await supabase
+                .from('acces.perms.key')
+                .select('*')
+                .order('id');
+            if (error) {
+                userListContainer.innerHTML = `<div class="col-span-2 text-center text-ha-red font-mono text-sm py-8">${error.message}</div>`;
+                return;
+            }
+            renderStats(users || []);
+            renderUserList(users || []);
+        }
+
+        // ─── STATS ───────────────────────────────────────────────────
+        function renderStats(users) {
+            const total = users.length;
+            const authorized = users.filter(u => u.type === 'accepter').length;
+            const pending = users.filter(u => u.type === 'attente').length;
+            const blocked = users.filter(u => u.type === 'unauthorized').length;
+
+            statsBar.innerHTML = `
+                <div class="glass-card rounded-xl p-4 text-center">
+                    <div class="text-2xl font-display font-black text-white">${total}</div>
+                    <div class="text-[9px] font-mono uppercase tracking-widest text-neutral-500 mt-1">Total</div>
+                </div>
+                <div class="glass-card rounded-xl p-4 text-center border-green-500/20">
+                    <div class="text-2xl font-display font-black text-green-400">${authorized}</div>
+                    <div class="text-[9px] font-mono uppercase tracking-widest text-neutral-500 mt-1">Autorisés</div>
+                </div>
+                <div class="glass-card rounded-xl p-4 text-center border-amber-500/20">
+                    <div class="text-2xl font-display font-black text-amber-400">${pending}</div>
+                    <div class="text-[9px] font-mono uppercase tracking-widest text-neutral-500 mt-1">En attente</div>
+                </div>
+            `;
+            userCount.textContent = `(${total} entrée${total > 1 ? 's' : ''})`;
+        }
+
+        // ─── RENDER LIST ─────────────────────────────────────────────
+        function renderUserList(users) {
+            userListContainer.innerHTML = '';
+
+            if (!users.length) {
+                userListContainer.innerHTML = `<div class="col-span-2 text-center py-12 border border-dashed border-white/10 rounded-2xl text-neutral-600 font-mono text-sm uppercase tracking-widest">
+                    <i class="fas fa-ghost text-2xl mb-3 block opacity-40"></i>Aucun utilisateur enregistré.
+                </div>`;
+                return;
+            }
+
+            users.forEach(user => {
+                const card = document.createElement('div');
+                card.className = 'glass-card rounded-xl p-5 flex flex-col gap-4';
+
+                card.innerHTML = `
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex-1 overflow-hidden">
+                            <div class="text-[9px] font-mono uppercase tracking-widest text-neutral-600 mb-1">ID #${user.id}</div>
+                            <h3 class="font-mono text-sm text-white truncate">${user.email}</h3>
+                        </div>
+                        ${getBadge(user.type)}
+                    </div>
+
+                    <div>
+                        <label class="text-[9px] font-mono uppercase tracking-widest text-neutral-600 block mb-1.5">Statut du compte</label>
+                        <select class="typeSelect field">
+                            <option value="unauthorized" ${user.type === 'unauthorized' ? 'selected' : ''}>⛔ Unauthorized</option>
+                            <option value="attente"      ${user.type === 'attente'      ? 'selected' : ''}>⏳ En attente</option>
+                            <option value="accepter"     ${user.type === 'accepter'     ? 'selected' : ''}>✅ Accepter</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-[9px] font-mono uppercase tracking-widest text-neutral-600 block mb-1.5">Permissions <span class="text-neutral-700">(séparées par ;)</span></label>
+                        <input type="text" class="permsInput field" placeholder="ex: rh;vendeur;2;50" value="${user.perms || ''}">
+                    </div>
+
+                    <div class="flex gap-2 border-t border-white/5 pt-3">
+                        <button class="saveBtn btn-ghost flex-1 justify-center"><i class="fas fa-save"></i>Enregistrer</button>
+                        <button class="deleteBtn btn-red" style="padding:0.45rem 0.7rem"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+
+                const saveBtn    = card.querySelector('.saveBtn');
+                const deleteBtn  = card.querySelector('.deleteBtn');
+                const permsInput = card.querySelector('.permsInput');
+                const typeSelect = card.querySelector('.typeSelect');
+
+                // Save
+                saveBtn.addEventListener('click', async () => {
+                    const newPerms = permsInput.value.trim();
+                    const newType  = typeSelect.value;
+
+                    saveBtn.innerHTML = '<i class="fas fa-spinner animate-spin"></i>Vérification...';
+
+                    const { data: emp } = await supabase
+                        .from('employes').select('*').eq('email', user.email).single();
+
+                    if (!emp) alert('⚠️ Email non présent dans la table employes ! Le compte sera mis en unauthorized.');
+
+                    const { error } = await supabase
+                        .from('acces.perms.key')
+                        .update({ perms: newPerms, type: emp ? newType : 'unauthorized' })
+                        .eq('id', user.id);
+
+                    if (error) {
+                        console.error(error);
+                        saveBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i>Erreur';
+                        setTimeout(() => { saveBtn.innerHTML = '<i class="fas fa-save"></i>Enregistrer'; }, 2000);
+                    } else {
+                        fetchUsers();
+                    }
+                });
+
+                // Delete
+                deleteBtn.addEventListener('click', async () => {
+                    if (!confirm(`Supprimer l'accès de ${user.email} ?`)) return;
+                    const { error } = await supabase
+                        .from('acces.perms.key').delete().eq('id', user.id);
+                    if (error) { console.error(error); alert('Erreur suppression'); }
+                    else fetchUsers();
+                });
+
+                userListContainer.appendChild(card);
+            });
+        }
+
+        // ─── AJOUTER ─────────────────────────────────────────────────
+        addUserBtn.addEventListener('click', async () => {
+            const emailRaw = prompt("Email de l'utilisateur à ajouter :");
+            if (!emailRaw) return;
+            const email = emailRaw.trim().toLowerCase();
+
+            const { data: existing } = await supabase
+                .from('acces.perms.key').select('*').eq('email', email).single();
+            if (existing) { alert('Utilisateur déjà présent dans le registre.'); return; }
+
+            const { data: emp } = await supabase
+                .from('employes').select('*').eq('email', email).single();
+            const type = emp ? 'attente' : 'unauthorized';
+
+            const { error } = await supabase
+                .from('acces.perms.key').insert([{ email, perms: '', type }]);
+            if (error) { console.error(error); alert('Erreur lors de l\'ajout.'); }
+            else fetchUsers();
+        });
+
+        // ─── INIT ─────────────────────────────────────────────────────
+        fetchUsers();
+    </script>
+</body>
+</html>

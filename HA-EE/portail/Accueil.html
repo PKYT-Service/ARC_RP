@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Howard Armory - Panel Admin</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace'],
+                    },
+                    colors: {
+                        ha: {
+                            gold: '#c5a059',
+                            darkgold: '#8c6f3c',
+                            glow: 'rgba(197, 160, 89, 0.08)',
+                        },
+                        ui: {
+                            900: '#050505',
+                            800: '#080808',
+                            700: '#121212',
+                            border: 'rgba(255, 255, 255, 0.05)'
+                        }
+                    },
+                    animation: {
+                        'spin-slow': 'spin 3s linear infinite',
+                        'blob': 'blob 10s infinite alternate',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '100%': { transform: 'translate(20px, -30px) scale(1.05)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #050505; }
+        
+        .glass-panel {
+            background: rgba(8, 8, 8, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid theme('colors.ui.border');
+        }
+
+        .menu-item {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .menu-item:hover {
+            background: rgba(197, 160, 89, 0.03);
+            transform: translateX(4px);
+            border-left-color: theme('colors.ha.gold');
+        }
+
+        .sub-btn {
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .sub-btn::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%) scaleY(0);
+            width: 2px;
+            height: 0%;
+            background-color: theme('colors.ha.gold');
+            transition: all 0.2s ease;
+            border-radius: 4px;
+        }
+        
+        .sub-btn:hover::before { height: 60%; transform: translateY(-50%) scaleY(1); }
+        .sub-btn:hover { color: #fff; padding-left: 1.5rem; background: rgba(255, 255, 255, 0.01); }
+
+        /* Premium Scrollbar */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(197, 160, 89, 0.4); }
+
+        iframe { transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; }
+        iframe.loaded { opacity: 1; }
+
+        .loader-ring {
+            width: 48px; height: 48px;
+            border: 2px solid rgba(197, 160, 89, 0.1);
+            border-left-color: theme('colors.ha.gold');
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+        }
+
+        .ambient-glow {
+            position: fixed; width: 40vw; height: 40vw;
+            background: radial-gradient(circle, theme('colors.ha.glow') 0%, transparent 60%);
+            border-radius: 50%; z-index: 0; filter: blur(80px); opacity: 0.5; pointer-events: none;
+        }
+    </style>
+</head>
+
+<body perms.pages="1;2;50;rh" class="h-screen w-screen overflow-hidden flex text-neutral-400 selection:bg-ha-gold selection:text-black relative font-sans antialiased">
+
+    <!-- Ambient Background Blur -->
+    <div class="ambient-glow top-[-10%] left-[-10%] animate-blob"></div>
+    <div class="ambient-glow bottom-[-20%] right-[-10%]" style="animation-delay: 2s; opacity: 0.3;"></div>
+
+    <!-- Mobile Overlay -->
+    <div id="mobile-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-30 hidden lg:hidden transition-opacity duration-300 opacity-0"></div>
+
+    <!-- SIDEBAR -->
+<aside id="sidebar" class="fixed inset-y-0 left-0 lg:static lg:translate-x-0 -translate-x-full transition-transform duration-500 cubic-bezier(0.2, 0.8, 0.2, 1) w-[280px] flex flex-col z-40 glass-panel shadow-2xl">
+        
+    <!-- Brand Header -->
+    <div class="h-20 flex items-center px-6 border-b border-ui-border relative z-10 shrink-0">
+        <div class="flex items-center gap-4 w-full">
+            <div class="w-10 h-10 border border-ha-gold/30 flex items-center justify-center bg-ui-800 shadow-[0_0_15px_rgba(197,160,89,0.1)]">
+                <i class="fa-solid fa-location-crosshairs text-ha-gold text-xs"></i>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-lg font-display font-black tracking-tighter text-white leading-none italic">A.R.C</span>
+                <span class="text-[9px] font-mono text-ha-gold tracking-[0.4em] uppercase font-bold mt-1.5">Dashboard</span>
+            </div>
+        </div>
+        <button onclick="toggleSidebar()" class="lg:hidden text-neutral-500 hover:text-white transition-colors">
+            <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-8 relative z-10">
+        
+        <!-- Général -->
+        <div>
+            <p class="px-3 text-[9px] font-black text-neutral-600 uppercase tracking-[0.3em] mb-4 font-display">Général</p>
+            <div class="space-y-1">
+                <a class="block" href="/HA-EE/portail/Accueil.html">
+                    <button class="group flex items-center px-4 py-2.5 text-xs font-black uppercase tracking-widest text-neutral-400 rounded-sm menu-item border-l border-transparent transition-all">
+                        <i class="fa-solid fa-layer-group w-5 text-neutral-600 group-hover:text-ha-gold transition-colors"></i>
+                        <span class="ml-3 font-display">Accueil</span>
+                    </button>
+                </a>
+                <a class="block">
+                     <button onclick="loadPage('/HA-EE/publique/SL-AS_Stats.html', 'Statistiques')" class="group flex items-center px-4 py-2.5 text-xs font-black uppercase tracking-widest text-neutral-400 rounded-sm menu-item border-l border-transparent transition-all">
+                        <i class="fa-solid fa-chart-line w-5 text-neutral-600 group-hover:text-[#c5a059] transition-colors"></i>
+                        <span class="ml-3 font-display">Statistiques</span>
+                    </button>
+                </a>
+                <a class="block">
+                    <button onclick="loadPage('/HA-EE/publique/about.html', 'À Propos')" class="group flex items-center px-4 py-2.5 text-xs font-black uppercase tracking-widest text-neutral-400 rounded-sm menu-item border-l border-transparent transition-all">
+                        <i class="fa-solid fa-circle-info w-5 text-neutral-600 group-hover:text-[#c5a059] transition-colors"></i>
+                        <span class="ml-3 font-display">À Propos</span>
+                    </button>
+                </a>
+                <a class="block">
+                    <button onclick="loadPage('/HA-EE/management/config_agence.html', 'Configuration')" class="group flex items-center px-4 py-2.5 text-xs font-black uppercase tracking-widest text-neutral-400 rounded-sm menu-item border-l border-transparent transition-all">
+                        <i class="fa-regular fa-pen-to-square w-5 text-neutral-600 group-hover:text-[#c5a059] transition-colors"></i>
+                        <span perms="ssCEO" class="ml-3 font-display">Entreprise Config</span>
+                    </button>
+                </a>
+
+            </div>
+        </div>
+
+        <!-- Agents (Espace Perso) -->
+        <div perms="DG;1">
+            <p class="px-3 text-[9px] font-black text-neutral-600 uppercase tracking-[0.3em] mb-4 font-display">Espace Agents</p>
+            <div class="space-y-3">
+                <!-- Principal -->
+                <div class="bg-ui-800/40 border border-ui-border overflow-hidden">
+                    <button onclick="toggleDropdown('MN_accueil_ag')" class="w-full flex items-center justify-between px-4 py-3 text-xs font-black uppercase tracking-widest text-neutral-300 hover:text-white hover:bg-white/[0.01] transition-colors group">
+                        <div perms="DG;1" class="flex items-center">
+                            <i class="fa-solid fa-house w-5 text-neutral-500 group-hover:text-ha-gold transition-colors"></i>
+                            <span class="ml-3 font-display">Principal</span>
+                        </div>
+                        <i id="arrow-docs-menu" class="fa-solid fa-chevron-down text-[9px] text-neutral-600 transition-transform duration-300"></i>
+                    </button>
+                    <div id="MN_accueil_ag" class="hidden pb-2 px-4 ml-4 border-l border-white/5 space-y-1 mt-1">
+                        <button perms="DG;1" onclick="loadPage('/HA-EE/portail/Documentation.html', 'Documentation')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Documentation</button>
+                        <button perms="DG;1" onclick="loadPage('/HA-EE/portail/Organigramme.html', 'Organigramme')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Membre de l'entreprise</button>
+                    </div>
+                </div>
+
+                <!-- Dossier RH -->
+                <div class="bg-ui-800/40 border border-ui-border overflow-hidden">
+                    <button onclick="toggleDropdown('MN_dossier_rh')" class="w-full flex items-center justify-between px-4 py-3 text-xs font-black uppercase tracking-widest text-neutral-300 hover:text-white hover:bg-white/[0.01] transition-colors group">
+                        <div perms="DG;1" class="flex items-center">
+                            <i class="fa-solid fa-id-card-clip w-5 text-neutral-500 group-hover:text-ha-gold transition-colors"></i>
+                            <span class="ml-3 font-display">Dossier RH</span>
+                        </div>
+                        <i id="arrow-docs-menu" class="fa-solid fa-chevron-down text-[9px] text-neutral-600 transition-transform duration-300"></i>
+                    </button>
+                    <div id="MN_dossier_rh" class="hidden pb-2 px-4 ml-4 border-l border-white/5 space-y-1 mt-1">
+                        <button perms="DG;1" onclick="loadPage('/HA-EE/portail/MonDossier.html', 'Mon dossier')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Mon dossier</button>
+                        <button perms="DG;1" onclick="loadPage('/HA-EE/portail/AssuranceSanté.html', 'Déclaration de santé')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Déclaration de santé</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Opérations RH & Finances -->
+        <div perms="DG;RH;COS;COSR;CAD">
+            <p class="px-3 text-[9px] font-black text-neutral-600 uppercase tracking-[0.3em] mb-4 font-display">Opérations RH & Finances</p>
+            <div class="space-y-3">
+                <!-- Gestion Personnel -->
+                <div class="bg-ui-800/40 border border-ui-border overflow-hidden">
+                    <button onclick="toggleDropdown('MN_ASP_gs_rh')" class="w-full flex items-center justify-between px-4 py-3 text-xs font-black uppercase tracking-widest text-neutral-300 hover:text-white hover:bg-white/[0.01] transition-colors group">
+                        <div perms="DG;RH;COS;COSR;CAD" class="flex items-center">
+                            <i class="fa-solid fa-users w-5 text-neutral-500 group-hover:text-ha-gold transition-colors"></i>
+                            <span class="ml-3 font-display">Salariés & Contrats</span>
+                        </div>
+                        <i id="arrow-docs-menu" class="fa-solid fa-chevron-down text-[9px] text-neutral-600 transition-transform duration-300"></i>
+                    </button>
+                    <div id="MN_ASP_gs_rh" class="hidden pb-2 px-4 ml-4 border-l border-white/5 space-y-1 mt-1">
+                        <button perms="DG;RH" onclick="loadPage('/HA-EE/management/@employers.html', 'Salariés')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Gestion des salariés</button>
+                        <button perms="DG;RH;COS;COSR;CAD" onclick="loadPage('/HA-EE/management/@fiche_contrat.html', 'Nouveau Contrat')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Créer un contrat</button>
+                        <button perms="DG;RH;COS;COSR;CAD" onclick="loadPage('/HA-EE/management/@fichier_engagement.html', 'Nouvel Engagement')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Autres documents</button>
+                        <button perms="DG;RH;COS;COSR;CAD" onclick="loadPage('/HA-EE/management/@candidat-panel.html', 'Candidat Sécu')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Candidatures</button>
+                        <button perms="DG;RH" onclick="loadPage('/HA-EE/management/@personnel.html', 'Personnel')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Personnel</button>
+                    </div>
+                </div>
+                
+                <!-- Finances & Paies -->
+                <div class="bg-ui-800/40 border border-ui-border overflow-hidden">
+                    <button onclick="toggleDropdown('MN_GP&F_gs_rh')" class="w-full flex items-center justify-between px-4 py-3 text-xs font-black uppercase tracking-widest text-neutral-300 hover:text-white hover:bg-white/[0.01] transition-colors group">
+                        <div perms="DG;RH;COS;COSR;CAD;1" class="flex items-center">
+                            <i class="fa-solid fa-file-invoice-dollar w-5 text-neutral-500 group-hover:text-ha-gold transition-colors"></i>
+                            <span class="ml-3 font-display">Finances & Paies</span>
+                        </div>
+                        <i id="arrow-outils-menu" class="fa-solid fa-chevron-down text-[9px] text-neutral-600 transition-transform duration-300"></i>
+                    </button>
+                    <div id="MN_GP&F_gs_rh" class="hidden pb-2 px-4 ml-4 border-l border-white/5 space-y-1 mt-1">
+                        <button perms="DG;1" onclick="loadPage('/HA-EE/management/@S&AS-Accueil.html', 'S&AS - Accueil')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Tableau de bord</button>
+                        <button perms="DG;RH" onclick="loadPage('/HA-EE/management/@S&AS-Validation_decl.html', 'S&AS - Validation')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Valider déclarations</button>
+                        <button perms="DG;RH" onclick="loadPage('/HA-EE/management/@S&AS-Creer_decl.html', 'S&AS - Création')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Créer déclaration</button>
+                        <button perms="DG;RH;COS;COSR;CAD" onclick="loadPage('/HA-EE/management/@S&AS-RRI.html', 'S&AS&P - RRI')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Regi. Rémunérations</button>
+                        <button perms="DG;RH" onclick="loadPage('/HA-EE/management/@S&AS-Creation_de_fiche_de_paie.html', 'S&AS - Fiche Paie')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Générer Paie</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Outils & Métiers (Faq, Stories, Catalogues fusionnés sans doublons) -->
+        <div perms="DG;RH;COS;COSR;CAD;ArmsDealer;ShootingRange;PhysicalSecurity;WB">
+            <p class="px-3 text-[9px] font-black text-neutral-600 uppercase tracking-[0.3em] mb-4 font-display">Pôles Métiers & Outils</p>
+            <div class="space-y-3">
+                <div class="bg-ui-800/40 border border-ui-border overflow-hidden">
+                    <button onclick="toggleDropdown('MN_Outils_Metiers')" class="w-full flex items-center justify-between px-4 py-3 text-xs font-black uppercase tracking-widest text-neutral-300 hover:text-white hover:bg-white/[0.01] transition-colors group">
+                        <div class="flex items-center">
+                            <i class="fa-solid fa-cubes w-5 text-neutral-500 group-hover:text-ha-gold transition-colors"></i>
+                            <span class="ml-3 font-display">Ressources & Clients</span>
+                        </div>
+                        <i id="arrow-docs-menu" class="fa-solid fa-chevron-down text-[9px] text-neutral-600 transition-transform duration-300"></i>
+                    </button>
+                    <div id="MN_Outils_Metiers" class="hidden pb-2 px-4 ml-4 border-l border-white/5 space-y-1 mt-1">
+                        <!-- Outils communs -->
+                        <button perms="DG;RH;COS;COSR;CAD" onclick="loadPage('/HA-EE/management/@calendrier.html', 'Emploi du temps')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Calendrier</button>
+                        <button perms="DG;RH;COS;COSR;CAD" onclick="loadPage('/HA-EE/management/@faq.html', 'FAQ')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">FAQ</button>
+                        <button perms="DG;RH;COS;COSR;CAD" onclick="loadPage('/HA-EE/management/@stories.html', 'Stories')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Story</button>
+                        <button perms="DG;WB" onclick="loadPage('/HA-EE/management/@includes.html', 'IntegrationsWeb')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">IntegrationsWeb</button>
+                        
+                        <!-- Spécifiques Métiers -->
+                        <button perms="DG;CAD;COSR" onclick="loadPage('/HA-EE/management/@weapons.html', 'Catalogue')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Catalogue Armes</button>
+                        <button perms="DG;RH;COS;COSR;CAD;ShootingRange" onclick="loadPage('/HA-EE/management/@cert_sr.html', 'Certifications')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Certifications (SR)</button>
+                        <button perms="DG;RH;CAD" onclick="loadPage('/HA-EE/management/@credits.html', 'Credits')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Crédits</button> 
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coeur Systeme -->
+        <div perms="EUPD">
+            <p class="px-3 text-[9px] font-black text-neutral-600 uppercase tracking-[0.3em] mb-4 font-display">Cœur Système</p>
+            <div class="space-y-2">
+                <div class="bg-ui-800/40 border border-ui-border overflow-hidden">
+                    <button onclick="toggleDropdown('suivis-menu')" class="w-full flex items-center justify-between px-4 py-3 text-xs font-black uppercase tracking-widest text-neutral-300 hover:text-white hover:bg-white/[0.01] transition-colors group">
+                        <div class="flex items-center">
+                            <i class="fa-solid fa-server w-5 text-neutral-500 group-hover:text-ha-gold transition-colors"></i>
+                            <span class="ml-3 font-display">Suivis & GC&CIS</span>
+                        </div>
+                        <i id="arrow-suivis-menu" class="fa-solid fa-chevron-down text-[9px] text-neutral-600 transition-transform duration-300"></i>
+                    </button>
+                    <div id="suivis-menu" class="hidden pb-2 px-4 ml-4 border-l border-white/5 space-y-1 mt-1">
+                        <button onclick="loadPage('/HA-EE/core/GestionnaireAcces.html', 'Gestionnaire Accès')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Gestionnaire d'accès</button>
+                        <button onclick="loadPage('/HA-EE/core/GestionnaireAccesPages.html', 'Gestionnaire Accès Pages')" class="block w-full text-left px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-neutral-500 sub-btn">Gestionnaire d'accès Pages</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </nav>
+
+    <!-- Identity Block -->
+    <div class="h-20 p-4 border-t border-ui-border bg-ui-800/50 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="relative group cursor-pointer">
+                <div id="user_avatar" class="w-10 h-10 border border-ui-border flex items-center justify-center text-white font-display text-xs font-black tracking-tighter uppercase transition-all group-hover:border-ha-gold group-hover:shadow-[0_0_15px_rgba(197,160,89,0.15)]">
+                    <i class="fa-solid fa-user text-neutral-600"></i>
+                </div>
+                <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-ha-gold rounded-full"></span>
+            </div>
+            <div class="flex flex-col">
+                <span id="user_full_name" class="text-xs font-black uppercase tracking-widest text-white truncate max-w-[130px]">Scanning...</span>
+                <span id="user_grade_display" class="text-[9px] font-mono text-neutral-500 mt-0.5 uppercase tracking-wider truncate">--</span>
+            </div>
+        </div>
+    </div>
+</aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col min-w-0 relative z-10">
+
+        <!-- HEADER -->
+        <header class="h-20 flex items-center justify-between px-6 lg:px-8 shrink-0 z-20">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 -ml-2 text-neutral-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                <div class="flex flex-col">
+                    <h2 id="page-title" class="text-xl text-white font-black uppercase tracking-tighter italic">Terminal Central</h2>
+                    <div class="flex items-center text-[9px] font-mono text-neutral-500 space-x-2 mt-1 uppercase tracking-[0.2em]">
+                        <span class="text-ha-gold font-bold"><i class="fa-solid fa-circle-nodes mr-1.5"></i>SYS.CORE</span>
+                        <span>/</span>
+                        <span id="current-section" class="text-neutral-400">INITIALIZATION</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Widget -->
+            <div class="hidden sm:flex items-center gap-3 px-4 py-2 bg-ui-800/80 rounded-none border border-ui-border">
+                <div class="w-1.5 h-1.5 bg-ha-gold shadow-[0_0_8px_rgba(197,160,89,0.6)] animate-pulse"></div>
+                <span class="text-[9px] font-mono text-ha-gold uppercase tracking-[0.3em] font-bold">Secured Connection</span>
+            </div>
+        </header>
+
+        <!-- IFRAME CONTAINER -->
+        <div class="flex-1 p-4 lg:p-6 lg:pt-0 overflow-hidden flex flex-col relative z-0">
+            <div class="flex-1 glass-panel overflow-hidden relative shadow-2xl flex border border-ui-border">
+                
+                <!-- LOADER -->
+                <div id="loader" class="absolute inset-0 bg-[#050505]/95 backdrop-blur-md z-20 flex items-center justify-center transition-all duration-500">
+                    <div class="flex flex-col items-center">
+                        <div class="loader-ring mb-6"></div>
+                        <div class="text-[9px] font-mono text-ha-gold uppercase tracking-[0.4em] font-bold">Chargement Module</div>
+                        <div id="loader-module-name" class="text-xs font-black text-white mt-2 uppercase tracking-widest italic">EXT</div>
+                    </div>
+                </div>
+
+                <iframe id="main-frame" src="about:blank" class="w-full h-full border-none bg-transparent" title="Contenu principal" onload="hideLoader()"></iframe>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+    <script>
+        function loadPage(url, title = "Navigation") {
+            const frame = document.getElementById('main-frame');
+            const loader = document.getElementById('loader');
+            
+            frame.classList.remove('loaded');
+            loader.style.opacity = '1';
+            loader.style.visibility = 'visible';
+
+            const moduleName = url.split('/').pop().replace('.html', '').replace(/[@%-_]/g, ' ').toUpperCase() || 'SYS';
+            document.getElementById('loader-module-name').innerText = moduleName;
+
+            setTimeout(() => {
+                frame.src = url;
+                document.getElementById('page-title').innerText = title;
+                document.getElementById('current-section').innerText = moduleName;
+            }, 50);
+
+            if (window.innerWidth < 1024) {
+                const sidebar = document.getElementById('sidebar');
+                if (!sidebar.classList.contains('-translate-x-full')) toggleSidebar();
+            }
+        }
+
+        function hideLoader() {
+            const loader = document.getElementById('loader');
+            const frame = document.getElementById('main-frame');
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.visibility = 'hidden';
+                    frame.classList.add('loaded');
+                }, 500);
+            }, 300);
+        }
+
+        function toggleDropdown(id) {
+            const menu = document.getElementById(id);
+            const arrow = document.getElementById('arrow-' + id);
+            menu.classList.toggle('hidden');
+            arrow.classList.toggle('rotate-180');
+            arrow.classList.toggle('text-ha-gold');
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            
+            sidebar.classList.toggle('-translate-x-full');
+            if (overlay.classList.contains('hidden')) {
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.style.opacity = '1', 10);
+            } else {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        window.onload = () => loadPage('/HA-EE/portail/dashboard.html', 'Dashboard Standby');
+    </script>
+
+    <!-- Supabase Auth Logic -->
+    <script type="module">
+        import { supabase, setAgenceSession, hashEmail } from '/HA-EE/src/javascript/sp.js';
+
+        async function getHash(text) {
+            return hashEmail(text);
+        }
+
+        async function updateIdentityBlock() {
+            const nameEl = document.getElementById('user_full_name');
+            const gradeEl = document.getElementById('user_grade_display');
+            const avatarEl = document.getElementById('user_avatar');
+            const token = sessionStorage.getItem('session_token');
+            const isAuth = sessionStorage.getItem('isAuth');
+
+            if (!token || !isAuth) { nameEl.textContent = "Non identifié"; return; }
+
+            try {
+                const { data: employes, error: empError } = await supabase.from('employes').select('email, nom, prenom, poste, echelon, id_agence');
+                if (empError || !employes) throw empError;
+
+                let userData = null;
+                for (const emp of employes) {
+                    if (await getHash(emp.email) === token) { userData = emp; break; }
+                }
+
+                if (!userData) { nameEl.textContent = "Empreinte inconnue"; return; }
+
+                if (userData.id_agence) setAgenceSession(userData.id_agence, userData.email);
+
+                nameEl.textContent = `${userData.nom.toUpperCase()} ${userData.prenom.charAt(0).toUpperCase() + userData.prenom.slice(1).toLowerCase()}`;
+                gradeEl.innerHTML = `<span class="text-ha-gold font-bold tracking-wide">${userData.poste || "S.Staff"}</span> <span class="bg-white/5 border border-white/5 px-1 rounded-sm ml-1 text-[8px] text-neutral-400">E.${userData.echelon || "0"}</span>`;
+                avatarEl.innerHTML = (userData.nom.charAt(0) + userData.prenom.charAt(0)).toUpperCase();
+            } catch (err) {
+                console.error("🚨 Erreur synchronisation :", err);
+                nameEl.textContent = "Erreur Flux";
+            }
+        }
+        document.addEventListener('DOMContentLoaded', updateIdentityBlock);
+
+        document.addEventListener("DOMContentLoaded", () => {
+    const iframe = document.getElementById("main-frame");
+
+    if (iframe) {
+        iframe.addEventListener("load", () => {
+            try {
+                // 1. On récupère l'URL interne de l'iframe
+                const currentIframeUrl = iframe.contentWindow.location.href;
+
+                // 2. Si l'utilisateur est déco et tombe sur la page d'erreur OAuth
+                if (currentIframeUrl.includes("/HA-EE/src/err/oauth")) {
+                    
+                    // 3. Boum ! Redirection de l'onglet principal complet
+                    window.location.href = "/HA-EE";
+                }
+            } catch (error) {
+                // Sécurité CORS : Si l'iframe navigue temporairement sur un autre domaine 
+                // (ex: l'écran de login brut de Supabase/Google), le navigateur bloque la lecture.
+                // On attrape l'erreur ici pour éviter que le reste du site ne plante.
+            }
+        });
+    }
+});
+    </script>
+</body>
+</html>

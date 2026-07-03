@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+    <title>Howard Armory — Journal d'Audit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode:'class', theme:{ extend:{ fontFamily:{ sans:['Inter','sans-serif'], display:['Outfit','sans-serif'], mono:['Share Tech Mono','monospace'] }, colors:{ neutral:{ 850:'#1a1a1a', 900:'#111111', 950:'#070707' }, ha:{ red:'#E63946', gold:'#D4AF37' } } } } }
+    </script>
+    <style>
+        body { font-family:'Inter',sans-serif; background-color:#070707; }
+        .glass-card { background:rgba(20,20,20,0.6); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.05); transition:all 0.3s ease; }
+        .field { width:100%; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.08); border-radius:0.75rem; padding:0.6rem 0.9rem; color:#d4d4d4; font-family:'Share Tech Mono',monospace; font-size:0.75rem; outline:none; transition:border-color 0.3s; }
+        .field:focus { border-color:#E63946; }
+        .dark-scrollbar::-webkit-scrollbar{width:6px;} .dark-scrollbar::-webkit-scrollbar-track{background:transparent;} .dark-scrollbar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:4px;}
+        tr { transition: background 0.2s; }
+        tr:hover { background: rgba(255,255,255,0.02); }
+    </style>
+</head>
+<body class="text-white selection:bg-ha-red/30 overflow-y-auto dark-scrollbar min-h-screen" perms.pages="EUPD">
+    <div id="session/howard"></div>
+    <script src="/HA-EE/src/javascript/menu.js"></script>
+    <div id="menu"></div>
+
+    <main class="max-w-6xl mx-auto p-4 lg:p-8 space-y-6 mt-4 pb-24">
+        <!-- HEADER -->
+        <div class="border-b border-white/10 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-display font-black uppercase tracking-tight">Journal <span class="text-ha-red">d'Audit</span></h1>
+                <p class="text-xs font-mono text-neutral-500 mt-2 tracking-widest uppercase"><i class="fas fa-fingerprint mr-2"></i>Traçabilité des actions administratives</p>
+            </div>
+            <div class="flex gap-2">
+                <input type="text" id="filter-user" placeholder="Filtrer par email..." class="field md:w-64">
+                <button id="refresh-logs" class="bg-neutral-900 border border-white/10 hover:border-ha-red/40 px-4 py-2 rounded-xl transition-all"><i class="fas fa-sync-alt"></i></button>
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="glass-card rounded-2xl overflow-hidden border border-white/5">
+            <div class="overflow-x-auto dark-scrollbar">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-black/40 border-b border-white/10 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
+                        <tr>
+                            <th class="px-6 py-4 font-normal">Horodatage</th>
+                            <th class="px-6 py-4 font-normal">Utilisateur</th>
+                            <th class="px-6 py-4 font-normal">Action</th>
+                            <th class="px-6 py-4 font-normal">Module / Page</th>
+                            <th class="px-6 py-4 font-normal">Détails</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-body" class="text-xs font-mono text-neutral-400 divide-y divide-white/5">
+                        <!-- Logs here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="/HA-EE/src/javascript/footer.js"></script>
+    <div id="footer"></div>
+
+    <script type="module">
+        import { supabase, fromAgence, insertAgence, withAgence } from '/HA-EE/src/javascript/sp.js';
+        
+        async function loadLogs() {
+            const body = document.getElementById('logs-body');
+            body.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center animate-pulse">Récupération des empreintes système...</td></tr>';
+            
+            let query = fromAgence('system_audit').select('*').order('created_at', { ascending: false }).limit(100);
+            const userFilter = document.getElementById('filter-user').value.trim();
+            if(userFilter) query = query.ilike('email', `%${userFilter}%`);
+
+            const { data, error } = await query;
+            if(error) {
+                body.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-ha-red font-mono">Erreur BDD: ${error.message}</td></tr>`;
+                return;
+            }
+
+            if(!data || data.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-neutral-600 italic">Aucune activité enregistrée.</td></tr>';
+                return;
+            }
+
+            body.innerHTML = data.map(log => {
+                const date = new Date(log.created_at);
+                const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                return `
+                    <tr>
+                        <td class="px-6 py-4 text-neutral-600 border-r border-white/5 whitespace-nowrap">${dateStr}</td>
+                        <td class="px-6 py-4 text-white font-bold">${log.email}</td>
+                        <td class="px-6 py-4 text-ha-red uppercase tracking-tighter font-black">${log.action}</td>
+                        <td class="px-6 py-4 text-neutral-500 italic">${log.page || '—'}</td>
+                        <td class="px-6 py-4 text-[10px] text-neutral-600 max-w-xs truncate" title="${log.details || ''}">${log.details || '—'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('refresh-logs').addEventListener('click', loadLogs);
+        document.getElementById('filter-user').addEventListener('input', () => {
+            clearTimeout(window.auditSearchTimer);
+            window.auditSearchTimer = setTimeout(loadLogs, 500);
+        });
+
+        loadLogs();
+    </script>
+</body>
+</html>

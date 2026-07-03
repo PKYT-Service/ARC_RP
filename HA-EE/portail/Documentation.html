@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Howard Armory - Drive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        neutral: {
+                            850: '#1f1f1f',
+                            900: '#171717',
+                            950: '#0a0a0a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        /* Typography & Scrollbar */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .dark-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dark-scrollbar::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        .dark-scrollbar::-webkit-scrollbar-thumb {
+            background: #404040;
+            border-radius: 3px;
+        }
+
+        .dark-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #525252;
+        }
+
+        /* Markdown Content Styles */
+        .prose {
+            max-width: none;
+        }
+
+        .prose h1,
+        .prose h2,
+        .prose h3 {
+            color: inherit;
+        }
+
+        .prose strong {
+            color: inherit;
+        }
+
+        .prose a {
+            color: #3b82f6;
+            text-decoration: underline;
+        }
+
+        .math-block {
+            background: #1f2937;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+            margin: 1em 0;
+        }
+
+        /* Transitions */
+        .transition-width {
+            transition: width 0.3s ease;
+        }
+        .glass-card {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body class="bg-[#070707] text-neutral-200 h-screen w-screen overflow-hidden flex selection:bg-ha-gold/30 selection:text-white">
+    <!-- Background Texture -->
+    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none z-[-1]"></div>
+    <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-ha-gold/5 via-transparent to-transparent pointer-events-none z-[-1]"></div>
+
+    <!-- Mobile Overlay -->
+    <div id="mobile-overlay" onclick="toggleSidebar()"
+        class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar"
+        class="fixed inset-y-0 left-0 lg:static lg:translate-x-0 -translate-x-full transition-transform duration-300 ease-in-out bg-black/60 backdrop-blur-xl w-72 flex flex-col border-r border-white/5 z-50 shadow-2xl glass-card">
+
+        <div class="h-16 flex items-center justify-between px-6 border-b border-neutral-800 bg-neutral-950">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-red-900 rounded flex items-center justify-center text-white font-bold text-xs">HA
+                </div>
+                <span class="text-lg font-bold tracking-wider text-white">SYSTEM</span>
+            </div>
+            <button onclick="toggleSidebar()" class="lg:hidden text-neutral-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto p-4 space-y-1 dark-scrollbar">
+            <p class="px-3 text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2 mt-2">Navigation</p>
+            <a href="#" class="block">
+                <button
+                    class="w-full flex items-center px-3 py-2.5 text-sm font-medium text-white bg-neutral-800 rounded-lg transition-colors group">
+                    <i class="fas fa-hdd w-5 mr-3 text-neutral-400 group-hover:text-white"></i>
+                    Drive
+                </button>
+            </a>
+            <a href="/HA-EE/portail/Accueil.html" class="block">
+                <button
+                    class="w-full flex items-center px-3 py-2.5 text-sm font-medium text-neutral-400 rounded-lg hover:bg-neutral-800 hover:text-white transition-colors group">
+                    <svg class="w-5 h-5 mr-3 text-neutral-500 group-hover:text-white transition-colors" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                        </path>
+                    </svg>
+                    Tableau de bord
+                </button>
+            </a>
+            <!-- Added more placeholder items if needed -->
+        </nav>
+
+        <!-- User Profile (Populated by script) -->
+        <div class="p-4 bg-neutral-950 border-t border-neutral-800">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <div id="user_avatar"
+                        class="w-10 h-10 rounded-full bg-neutral-700 flex items-center justify-center text-white font-bold border border-neutral-800 shadow-inner">
+                        ??</div>
+                    <span
+                        class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-neutral-900 rounded-full"></span>
+                </div>
+                <div class="flex flex-col">
+                    <span id="user_full_name"
+                        class="text-sm font-semibold text-white tracking-tight">Chargement...</span>
+                    <!-- Email added here for Auth check visibility -->
+                    <span id="user_email_display" class="text-xs text-neutral-500 font-medium truncate w-32">--</span>
+                </div>
+            </div>
+            <div class="mt-3 text-[10px] text-neutral-600 text-center uppercase tracking-[0.2em] font-bold">
+                Howard Armory © 2026
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0 bg-transparent relative z-10">
+
+        <header
+            class="h-16 bg-black/40 backdrop-blur-md flex items-center justify-between px-6 border-b border-white/5 flex-shrink-0 z-30">
+            <button onclick="toggleSidebar()" class="lg:hidden p-2 -ml-2 text-neutral-400 hover:text-white mr-4">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="flex flex-col">
+                <h2 class="text-white font-semibold tracking-wide">Drive</h2>
+                <div class="flex items-center text-xs text-neutral-500 space-x-2">
+                    <span>HA-System</span>
+                    <span>/</span>
+                    <span class="text-neutral-400">Stockage</span>
+                </div>
+            </div>
+
+            <!-- Login / Actions -->
+            <div class="hidden md:flex items-center space-x-4">
+                <div id="auth-actions"></div> <!-- Filled by drive.js -->
+                <div class="px-3 py-1 bg-neutral-800 rounded border border-neutral-700 flex items-center gap-2">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <span class="text-xs font-mono text-neutral-300">ONLINE</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Drive Interface Container -->
+        <div class="flex-1 overflow-hidden flex flex-row relative">
+
+            <section id="content-list-section"
+                class="flex-1 flex flex-col bg-transparent min-w-[250px] transition-all duration-300">
+                <!-- Toolbar -->
+                <div
+                    class="p-3 border-b border-white/5 flex items-center justify-between bg-black/50 backdrop-blur-md">
+                    <h3 id="current-folder-name" class="font-medium text-neutral-300 truncate max-w-[200px]">/</h3>
+                    <div class="flex gap-2 text-neutral-400">
+                        <button id="btn-create-folder" class="hover:text-white p-1" title="Nouveau dossier" disabled><i
+                                class="fas fa-folder-plus"></i></button>
+                        <button id="btn-create-file" class="hover:text-white p-1" title="Nouveau fichier" disabled><i
+                                class="fas fa-file-circle-plus"></i></button>
+                        <div class="w-px h-5 bg-neutral-700 mx-1"></div>
+                        <button id="btn-back-folder" class="hover:text-white p-1 disabled:opacity-30" disabled><i
+                                class="fas fa-arrow-up"></i></button>
+                    </div>
+                    <!-- Hidden inputs for file ops -->
+                    <input type="file" id="file-input" class="hidden" />
+                    <button id="btn-import" class="hidden"></button> <!-- Kept for JS ref compatibility -->
+                </div>
+
+                <!-- List -->
+                <ul id="content-ul" class="flex-1 overflow-y-auto p-2">
+                    <!-- Javascript populates this -->
+                    <li class="p-4 text-neutral-500 text-center text-sm animate-pulse">Initialisation du système...</li>
+                </ul>
+            </section>
+
+            <!-- Resizer -->
+            <div id="resizer"
+                class="w-1 bg-neutral-800 hover:bg-blue-600 cursor-col-resize z-20 flex-shrink-0 transition-colors hidden">
+            </div>
+
+            <!-- Preview Panel -->
+            <section id="file-view-section"
+                class="w-[500px] flex flex-col glass-card border-l border-white/5 hidden absolute md:static right-0 h-full shadow-2xl z-10">
+                <header class="h-12 border-b border-white/5 flex items-center justify-between px-4 bg-black/60">
+                    <span id="file-view-title" class="font-semibold text-sm truncate text-neutral-300">Fichier</span>
+                    <div class="flex items-center gap-3 text-neutral-400">
+                        <button id="btn-toggle-view" class="hover:text-white" title="Editer"><i
+                                class="fas fa-pen"></i></button>
+                        <button id="btn-share" class="hover:text-blue-400" title="Partager"><i
+                                class="fas fa-share-alt"></i></button>
+                        <button id="btn-close-view" class="hover:text-red-400" title="Fermer"><i
+                                class="fas fa-times"></i></button>
+                    </div>
+                </header>
+
+                <div class="flex-1 relative overflow-hidden group">
+                    <!-- Markdown View -->
+                    <div id="file-rendered-content"
+                        class="absolute inset-0 overflow-y-auto p-6 prose prose-invert prose-sm"></div>
+                    <!-- Editor View -->
+                    <textarea id="file-content"
+                        class="absolute inset-0 w-full h-full bg-neutral-900 p-4 font-mono text-sm text-neutral-300 resize-none outline-none hidden border-none focus:ring-0"></textarea>
+                </div>
+
+                <footer class="p-3 border-t border-neutral-800 flex justify-end">
+                    <button id="btn-save"
+                        class="bg-green-700 hover:bg-green-600 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center gap-2 hidden disabled:opacity-50">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </footer>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Injection points for logic -->
+    <div id="repo/A.R.C/" class="hidden"></div>
+    <div id="drive/adm" class="hidden"></div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            const overlay = document.getElementById('mobile-overlay');
+            overlay.classList.toggle('hidden');
+        }
+    </script>
+
+    <!-- Modal: Create/Edit File/Folder -->
+    <div id="crud-modal"
+        class="hidden fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center backdrop-blur-sm">
+        <div class="glass-card rounded-lg shadow-2xl w-[500px] max-w-[90vw]">
+            <div class="p-6 border-b border-white/5 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white" id="modal-title">Créer un fichier</h3>
+                <button onclick="window.closeModal()" class="text-neutral-400 hover:text-white transition">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Nom</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="crud-name"
+                            class="flex-1 bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
+                            placeholder="document">
+                        <span id="crud-extension"
+                            class="bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-neutral-400">.md</span>
+                    </div>
+                </div>
+                <div id="perm-section">
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Permissions</label>
+                    <div class="space-y-2">
+                        <div class="flex gap-2">
+                            <input type="text" id="custom-perm-input"
+                                class="flex-1 bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-white text-sm"
+                                placeholder="Permissions (ex: 1;2 ou 1;rh)">
+                        </div>
+                        <p class="text-xs text-neutral-500">Par défaut: '1' (lecture). Utilisez ';' pour séparer.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t border-neutral-800 flex justify-end gap-3">
+                <button onclick="window.closeModal()"
+                    class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded transition">
+                    Annuler
+                </button>
+                <button id="modal-delete-btn" onclick="window.confirmDelete()"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition hidden">
+                    Supprimer
+                </button>
+                <button id="modal-confirm-btn" onclick="window.confirmCreate()"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition">
+                    Créer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Share File/Folder -->
+    <div id="share-modal"
+        class="hidden fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center backdrop-blur-sm">
+        <div class="glass-card rounded-lg shadow-2xl w-[550px] max-w-[90vw]">
+            <div class="p-6 border-b border-white/5 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white">📤 Partager</h3>
+                <button onclick="window.closeShareModal()" class="text-neutral-400 hover:text-white transition">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <!-- Item info -->
+                <div class="bg-neutral-800 p-3 rounded">
+                    <p class="text-sm text-neutral-400">Partage de :</p>
+                    <p class="text-white font-medium" id="share-item-name">document.md</p>
+                </div>
+
+                <!-- Access type -->
+                <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Type d'accès</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2 cursor-pointer p-2 hover:bg-neutral-800 rounded">
+                            <input type="radio" name="share-access" value="guest" checked class="text-blue-600">
+                            <div>
+                                <p class="text-white">Invité (code d'accès)</p>
+                                <p class="text-xs text-neutral-400">Partage avec code pour personnes non authentifiées
+                                </p>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer p-2 hover:bg-neutral-800 rounded">
+                            <input type="radio" name="share-access" value="auth" class="text-blue-600">
+                            <div>
+                                <p class="text-white">Authentifié uniquement</p>
+                                <p class="text-xs text-neutral-400">Seulement pour utilisateurs connectés</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Expiration -->
+                <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Expiration</label>
+                    <select id="share-expires"
+                        class="w-full bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-white">
+                        <option value="">Jamais</option>
+                        <option value="1">1 jour</option>
+                        <option value="7">7 jours</option>
+                        <option value="30">30 jours</option>
+                        <option value="90">90 jours</option>
+                    </select>
+                </div>
+
+                <!-- Share link (shown after creation) -->
+                <div id="share-link-container" class="hidden">
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Lien de partage</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="share-link-input" readonly
+                            class="flex-1 bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-white text-sm">
+                        <button onclick="window.copyShareLink()"
+                            class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-green-400 mt-2">✅ Lien généré ! Copiez-le pour le partager.</p>
+                </div>
+            </div>
+            <div class="p-6 border-t border-neutral-800 flex justify-end gap-3">
+                <button onclick="window.closeShareModal()"
+                    class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded transition">
+                    Annuler
+                </button>
+                <button id="share-generate-btn" onclick="window.generateShareLink()"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition">
+                    Générer le lien
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Drive Logic (Module) -->
+    <script src="/HA-EE/src/javascript/drive_modal.js"></script>
+    <script src="/HA-EE/src/javascript/drive_share.js"></script>
+    <script src="/HA-EE/src/javascript/drive.js" type="module"></script>
+
+
+
+</body>
+
+</html>
+
+

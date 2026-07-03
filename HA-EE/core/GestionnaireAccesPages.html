@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <link rel="stylesheet" href="/HA-EE/src/css/arc-theme.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <meta name="description" content="Panneau de configuration des routes et règles — Accès strictement réservé Howard Armory.">
+    <title>Howard Armory — Gestionnaire des Pages</title>
+
+    <script src="/HA-EE/src/javascript/systeme.js" type="module"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace']
+                    },
+                    colors: {
+                        ha: {
+                            gold: '#c5a059',
+                            darkgold: '#8c6f3c',
+                            glow: 'rgba(197, 160, 89, 0.08)',
+                            red: '#E63946'
+                        },
+                        ui: {
+                            900: '#050505',
+                            800: '#080808',
+                            700: '#121212',
+                            border: 'rgba(255, 255, 255, 0.05)'
+                        }
+                    },
+                    animation: {
+                        'blob': 'blob 10s infinite alternate',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '100%': { transform: 'translate(20px, -30px) scale(1.05)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #050505; font-family: 'Inter', sans-serif; }
+
+        .glass-panel {
+            background: rgba(8, 8, 8, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid theme('colors.ui.border');
+            transition: all 0.3s ease;
+        }
+        .glass-panel:hover { border-color: rgba(197, 160, 89, 0.2); }
+
+        .ambient-glow {
+            position: fixed; width: 40vw; height: 40vw;
+            background: radial-gradient(circle, theme('colors.ha.glow') 0%, transparent 60%);
+            border-radius: 50%; z-index: 0; filter: blur(80px); opacity: 0.5; pointer-events: none;
+        }
+
+        .field {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 0.5rem;
+            padding: 0.6rem 0.9rem;
+            color: #d4d4d4;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8125rem;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .field:focus { 
+            border-color: theme('colors.ha.gold'); 
+            box-shadow: 0 0 10px rgba(197, 160, 89, 0.15);
+        }
+
+        .btn-gold {
+            background: rgba(197, 160, 89, 0.1);
+            border: 1px solid rgba(197, 160, 89, 0.4);
+            color: #c5a059;
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.7rem;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .btn-gold:hover { background: #c5a059; color: #000; font-weight: bold; }
+
+        .btn-red {
+            background: rgba(230, 57, 70, 0.05);
+            border: 1px solid rgba(230, 57, 70, 0.3);
+            color: #E63946;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.7rem;
+            font-family: 'Share Tech Mono', monospace;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-red:hover { background: #E63946; color: #fff; }
+
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: #a3a3a3;
+            padding: 0.45rem 0.9rem;
+            border-radius: 0.5rem;
+            font-size: 0.65rem;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .btn-ghost:hover { color: #fff; border-color: rgba(197, 160, 89, 0.3); background: rgba(197, 160, 89, 0.02); }
+
+        .category-header {
+            font-family: 'Outfit', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-size: 0.75rem;
+            color: #c5a059;
+            border-left: 2px solid #c5a059;
+            padding-left: 0.75rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(197, 160, 89, 0.4); }
+    </style>
+</head>
+
+<body class="text-neutral-400 selection:bg-ha-gold selection:text-black min-h-screen relative overflow-y-auto">
+
+    <div class="ambient-glow top-[-10%] left-[-10%] animate-blob"></div>
+    <div class="ambient-glow bottom-[-20%] right-[-10%]" style="animation-delay: 2s; opacity: 0.3;"></div>
+
+    <script src="/HA-EE/src/javascript/menu.js"></script>
+    <div id="menu"></div>
+
+    <main class="max-w-6xl mx-auto p-4 lg:p-8 space-y-8 mt-4 pb-24 relative z-10" perms.pages="EUPD">
+
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/5 pb-6">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-display font-black uppercase tracking-tight text-white italic">
+                    Gestionnaire <span class="text-ha-gold">Pages & Rôles</span>
+                </h1>
+                <p class="text-[9px] font-mono text-ha-gold tracking-[0.3em] mt-2 uppercase font-bold">
+                    <span class="inline-block w-1.5 h-1.5 bg-ha-gold rounded-full animate-ping mr-2"></span>
+                    Configuration de la table d'accès dynamique pages_rules
+                </p>
+            </div>
+            <button id="addPageBtn" class="btn-gold shrink-0">
+                <i class="fa-solid fa-plus-circle"></i>Ajouter une route
+            </button>
+        </div>
+
+        <div class="glass-panel rounded-xl p-4 border-ha-gold/10 flex items-start gap-3">
+            <i class="fa-solid fa-triangle-exclamation text-ha-gold mt-0.5 shrink-0"></i>
+            <div class="text-xs font-mono text-neutral-500 leading-relaxed">
+                <span class="text-ha-gold uppercase tracking-widest font-bold">Avis de sécurité —</span>
+                Ce panneau régit l'accès structurel des composants. Toute modification change instantanément les droits de filtrage appliqués par <code class="text-neutral-300">systeme.js</code>. Utilisez le token <code class="text-ha-gold font-bold">OFFLINE</code> pour condamner complètement une route.
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-2">
+                <input type="text" id="searchBar" class="field !py-3" placeholder="Filtrer par URL ou par permission requis (ex: /core , DG)...">
+            </div>
+            <div class="glass-panel rounded-lg px-4 flex items-center justify-between text-xs font-mono text-neutral-500">
+                <span>Règles actives :</span>
+                <span id="rulesCount" class="text-white font-bold font-mono">0</span>
+            </div>
+        </div>
+
+        <div id="categoriesContainer" class="space-y-6">
+            </div>
+
+    </main>
+
+    <script src="/HA-EE/src/javascript/footer.js"></script>
+    <div id="footer"></div>
+
+    <script type="module">
+        import { supabase, fromAgence, insertAgence, withAgence } from '/HA-EE/src/javascript/sp.js';
+
+        const categoriesContainer = document.getElementById('categoriesContainer');
+        const addPageBtn = document.getElementById('addPageBtn');
+        const searchBar = document.getElementById('searchBar');
+        const rulesCount = document.getElementById('rulesCount');
+
+        let allRules = [];
+
+        // ─── EXTRACTEUR DE CATEGORIES D'URL ──────────────────────────
+        function getCategoryFromPath(path) {
+            if (!path) return "AUTRES";
+            const segments = path.split('/').filter(p => p);
+            if (segments.length >= 2) {
+                return segments[1].toUpperCase(); // Donne MANAGEMENT, PORTAIL, CORE...
+            }
+            return "RACINE";
+        }
+
+        // ─── FETCH DES DONNÉES ───────────────────────────────────────
+        async function fetchRules() {
+            const { data: rules, error } = await supabase
+                .from('pages_rules')
+                .select('*')
+                .order('url_path');
+
+            if (error) {
+                categoriesContainer.innerHTML = `<div class="text-center text-ha-red font-mono text-sm py-8">${error.message}</div>`;
+                return;
+            }
+
+            allRules = rules || [];
+            filterAndRender();
+        }
+
+        // ─── FILTRE ET RENDU ─────────────────────────────────────────
+        function filterAndRender() {
+            const query = searchBar.value.trim().toLowerCase();
+            const filtered = allRules.filter(r => 
+                r.url_path.toLowerCase().includes(query) || 
+                r.required_perms.toLowerCase().includes(query)
+            );
+
+            rulesCount.textContent = filtered.length;
+            
+            // Regrouper par catégorie
+            const groups = {};
+            filtered.forEach(rule => {
+                const cat = getCategoryFromPath(rule.url_path);
+                if (!groups[cat]) groups[cat] = [];
+                groups[cat].push(rule);
+            });
+
+            categoriesContainer.innerHTML = '';
+
+            if (Object.keys(groups).length === 0) {
+                categoriesContainer.innerHTML = `
+                    <div class="text-center py-12 border border-dashed border-white/5 rounded-xl text-neutral-600 font-mono text-sm uppercase tracking-widest">
+                        <i class="fa-solid fa-folder-open text-2xl mb-3 block opacity-30"></i>Aucune route trouvée.
+                    </div>`;
+                return;
+            }
+
+            // Génération du DOM par catégorie
+            for (const [category, rules] of Object.entries(groups)) {
+                const catSection = document.createElement('div');
+                catSection.innerHTML = `<div class="category-header">${category} (${rules.length})</div>`;
+                
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
+
+                rules.forEach(rule => {
+                    const card = document.createElement('div');
+                    card.className = 'glass-panel rounded-xl p-5 flex flex-col gap-4 relative overflow-hidden';
+                    
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex-1 overflow-hidden">
+                                <div class="text-[9px] font-mono text-neutral-600 uppercase tracking-widest">Route ID #${rule.id}</div>
+                                <h3 class="font-mono text-xs text-white mt-1 select-all truncate" title="${rule.url_path}">${rule.url_path}</h3>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-[9px] font-mono uppercase tracking-widest text-neutral-500 block mb-1.5">Permissions requises <span class="text-neutral-700">(Sép. par des ;)</span></label>
+                            <input type="text" class="permsInput field" placeholder="ex: DG;RH;1" value="${rule.required_perms || ''}">
+                        </div>
+
+                        <div class="flex gap-2 border-t border-white/5 pt-3 mt-auto">
+                            <button class="saveBtn btn-ghost flex-1 justify-center"><i class="fa-solid fa-floppy-disk"></i> Mettre à jour</button>
+                            <button class="deleteBtn btn-red flex items-center justify-center"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    `;
+
+                    // Liens événements
+                    const saveBtn = card.querySelector('.saveBtn');
+                    const deleteBtn = card.querySelector('.deleteBtn');
+                    const permsInput = card.querySelector('.permsInput');
+
+                    // Bouton Update
+                    saveBtn.addEventListener('click', async () => {
+                        const updatedPerms = permsInput.value.trim();
+                        saveBtn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Traitement...';
+
+                        const { error } = await supabase
+                            .from('pages_rules')
+                            .update({ required_perms: updatedPerms })
+                            .eq('id', rule.id);
+
+                        if (error) {
+                            console.error(error);
+                            saveBtn.innerHTML = '<i class="fa-solid fa-circle-xmark text-ha-red"></i> Échec';
+                            setTimeout(() => { saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Mettre à jour'; }, 2000);
+                        } else {
+                            fetchRules();
+                        }
+                    });
+
+                    // Bouton Delete
+                    deleteBtn.addEventListener('click', async () => {
+                        if (!confirm(`Supprimer définitivement les restrictions de la route :\n${rule.url_path} ?`)) return;
+                        
+                        const { error } = await supabase
+                            .from('pages_rules')
+                            .delete()
+                            .eq('id', rule.id);
+
+                        if (error) {
+                            console.error(error);
+                            alert('Erreur lors de la suppression de la route.');
+                        } else {
+                            fetchRules();
+                        }
+                    });
+
+                    grid.appendChild(card);
+                });
+
+                catSection.appendChild(grid);
+                categoriesContainer.appendChild(catSection);
+            }
+        }
+
+        // ─── AJOUTER UNE ROUTE ───────────────────────────────────────
+        addPageBtn.addEventListener('click', async () => {
+            const urlRaw = prompt("Saisissez le chemin complet de la route (ex: /HA-EE/management/NouvellePage) :");
+            if (!urlRaw) return;
+            const urlPath = urlRaw.trim();
+
+            const permsRaw = prompt("Saisissez les permissions d'accès initiales (ex: DG;RH) :", "DG;1");
+            if (permsRaw === null) return;
+            const requiredPerms = permsRaw.trim();
+
+            // Vérification doublon local
+            const exist = allRules.some(r => r.url_path.toLowerCase() === urlPath.toLowerCase());
+            if (exist) {
+                alert("Erreur : Cette route possède déjà des règles d'accès.");
+                return;
+            }
+
+            const { error } = await supabase
+                .from('pages_rules')
+                .insert([{ url_path: urlPath, required_perms: requiredPerms }]);
+
+            if (error) {
+                console.error(error);
+                alert("Erreur d'insertion dans la base de données.");
+            } else {
+                fetchRules();
+            }
+        });
+
+        // Écouteur de recherche adaptatif
+        searchBar.addEventListener('input', filterAndRender);
+
+        // ─── INITIALISATION ──────────────────────────────────────────
+        fetchRules();
+    </script>
+</body>
+</html>
