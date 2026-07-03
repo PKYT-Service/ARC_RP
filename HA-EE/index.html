@@ -230,7 +230,7 @@
                 sessionStorage.setItem('session_token', token);
                 sessionStorage.setItem('isAuth', 'true');
                 if(!window.location.href.includes('complete-profile')) {
-                    window.location.href = "./portail/";
+                    window.location.href = "/HA-EE/portail/";
                 }
             }
         });
@@ -259,7 +259,7 @@
                 const { data: emp } = await supabase.from('employes').select('id_agence, email').eq('email', email).maybeSingle();
                 if (emp?.id_agence) setAgenceSession(emp.id_agence, emp.email);
 
-                window.location.href = "./portail/";
+                window.location.href = "/HA-EE/portail/";
             } catch (err) {
                 console.error(err);
             }
